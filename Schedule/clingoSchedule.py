@@ -12,7 +12,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     store_minimum_employees = '2'
     store_minimum_supervisors = '1'
     # max_total_weekly_hours = 
-    total_weekly_hours_weight = 15
+    
     truck_day = truck_day_i
     overtime_allowed = False
     weekend_rotation = True
@@ -122,19 +122,31 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         for emp in Employee.employees.values():
             emp.skills = employee_skill_levels_dict[emp.employee_id]
         
+    def extract_and_format_schedule_blocks(schedule_info):
+        schedule_blocks = [[],[],[],[],[],[],[]]
+        for i in range(len(schedule_info)):
+            schedule_blocks[i % 7].append(schedule_info[i])
+    
+        return schedule_blocks
+
     def load_business_info(connection):
         cur = connection.cursor()
         cur.execute(sql.SQL("SELECT * FROM {} ").format(sql.Identifier('business_info')))
         business_info = [i for i in cur.fetchall()[0]]
         
-        schedule_blocks = [[],[],[],[],[],[],[]]
-        for i in range(len(business_info[1])):
-            schedule_blocks[i % 7].append(business_info[1][i])
-        business_info[1] = schedule_blocks
+        business_info[1] = extract_and_format_schedule_blocks(business_info[1])
         
         return business_info
         
-
+    def load_availability(connection):
+        cur = connection.cursor()
+        cur.execute(sql.SQL("SELECT * FROM {} ").format(sql.Identifier('availability')))
+        emp_availabilities = [i for i in cur.fetchall()]
+        for emp in emp_availabilities:
+            info = [i for i in emp]
+            start_times = info[1][:7]
+            end_times = info[1][7:]
+            Employee.employees[info[0]].set_availability(start_times,end_times,0,0)
         
 
 
@@ -147,7 +159,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
 
         def __init__(self,employee_id,first_name,last_name, role, wage, min_shift,max_shift,min_weekly,max_weekly,min_days,max_days):
             self.employee_id = employee_id
-            self.shift_preferences = {w:{i:[0 for j in range(schedule_blocks[i][0],schedule_blocks[i][1])] for i in range(days_in_week)} for w in range(weeks_scheduled,weeks_to_schedule)}
+            self.shift_preferences = {w:{i:[-20 for j in range(schedule_blocks[i][0],schedule_blocks[i][1])] for i in range(days_in_week)} for w in range(weeks_scheduled,weeks_to_schedule)}
             self.role = role
             self.skills = {}
             self.wage = wage//2
@@ -159,6 +171,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             self.maximum_shift_length = max_shift * 2
             self.max_days = max_days
             self.meal_break = False
+            
             Employee.increment_emp_count(self)
 
         def __repr__(self):
@@ -178,15 +191,20 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
 
             return clingo_add
         
-        def set_unavailable(self, start_time, end_time,week,days = [0,1,2,3,4,5,6]):
-            self.set_shift_preferences(days,start_time,end_time,[-20 for day in days],weeks = [week])
-
-        def set_shift_preferences(self, days, start_time, end_time, preference_lvls, weeks = [wk for wk in range(weeks_scheduled,weeks_to_schedule)]):
-            # print(self.shift_preferences)
+        def set_availability(self, start_times, end_times, week, available, days = [0,1,2,3,4,5,6]):
+            self.set_shift_preferences(days,start_times,end_times,[available for day in days],weeks = [week])
+        
+           
+        def set_shift_preferences(self, days, start_times, end_times, preference_lvls, weeks = [wk for wk in range(weeks_scheduled,weeks_to_schedule)]):
+           
             for week in weeks:
                 for i in range(len(days)):
+                    start_time = max(start_times[i] - schedule_blocks[i][0],0)
+                    end_time = min(((end_times[i] - schedule_blocks[i][0]) * 2), schedule_blocks[i][1]- schedule_blocks[i][0])
                     for j in range(start_time,end_time):
                         self.shift_preferences[week][days[i]][j] = preference_lvls[i]
+            print(self.first_name, self.shift_preferences)
+            
 
         def add_employee(self):
             clingo_addition = 'employee({},{},{}).'.format(self.first_name, self.role,self.wage)
@@ -242,15 +260,15 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     business_info = load_business_info(conn)
     business_name, schedule_blocks, store_minimum_employees, store_minimum_supervisors,otExemptRole, max_total_weekly_hours, total_weekly_hours_weight = business_info
     
-    # max_total_weekly_hours *= 2
-    max_total_weekly_hours = 438
+    max_total_weekly_hours *= 2
+    # max_total_weekly_hours = 438
     for i in range(len(schedule_blocks)):
         schedule_blocks[i][1] = ((schedule_blocks[i][1] - schedule_blocks[i][0]) * 2) + schedule_blocks[i][0]
     # print(schedule_blocks)
 
     load_employees(conn)
     employee_skill_levels_dict = {emp:{} for emp in Employee.employees.keys()}
-    
+    load_availability(conn)
     clingo_code = load_req_skills(conn,weeks_scheduled,weeks_to_schedule,clingo_code)
     load_skill_levels(conn, employee_skill_levels_dict)
     
@@ -260,7 +278,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     for i in range(weeks_scheduled,weeks_to_schedule):
         str_i = str(i)
         # str_next_week = str(i + 1)
-        Employee.employees[3].set_unavailable(20,28,i)
+        
 
         #TODO: Refactor the below code into a function.
         
@@ -268,8 +286,8 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         # clingo_code += '1{total_weekly_hrs('+ str_i + ',X)} :- X = #count{TOD,D,' + str_i + ',EID : assign(TOD,D,' + str_i + ',EID), not meal_break(TOD,D,' + str_i + ',EID)}.'
         clingo_code += '1{total_weekly_hrs('+ str_i + ',X)} :- X = #count{TOD,D,EID : week' + str_i + '(assign(TOD,D,' + str_i + ',EID)), not meal_break(TOD,D,' + str_i + ',EID)}.'
         clingo_code += '1{days_count(EID,'+ str_i + ',X)} :- X = #count{D : assign(TOD,D,'+ str_i + ',EID)}, employee(EID,_,_).  '
-        clingo_code += ':~ total_weekly_hrs('+ str_i + ',Y),Y > {}, Value = Y - {}, Weight = Value * {}.[Weight] '.format(425,
-                                                                                        425,15)
+        clingo_code += ':~ total_weekly_hrs('+ str_i + ',Y),Y > {}, Value = Y - {}, Weight = Value * {}.[Weight] '.format(max_total_weekly_hours,
+                                                                        max_total_weekly_hours,total_weekly_hours_weight)
         # clingo_code += ':- total_weekly_hrs('+ str_i + ',Y), Y > {}.'.format(425)
         
 
@@ -389,7 +407,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
                     schedule_dict[int(block[3])][block[-1]][int(block[2])%7].append(int(block[1]))
                 except:
                     continue
-            elif 'hours' or 'total_weekly_hrs' in block:
+            elif 'hours' in block or 'total_weekly_hrs' in block:
                 print(block)
                 continue
             else:
@@ -428,7 +446,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         parts = []
         parts.append(("base", []))
         control.ground(parts)
-        # print(control.symbolic_atoms.signatures)
+
         ret, step = None, 1
         while step <= max_step:
             parts = []
@@ -439,9 +457,10 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             control.assign_external(clingo.Function("query", [clingo.Number(step)]), True)
             # solution = control.solve(on_model=on_model)
             with control.solve(on_model=on_model,async_=True) as ret:
-                if not ret.wait(120):
+                if not ret.wait(60):
                     print('cancelling')
                     ret.cancel()
+            
                 
                 
                 
