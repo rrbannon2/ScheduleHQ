@@ -1,0 +1,6 @@
+(1, 'General', 'Manager', 1, 20)
+(3, 'Manager', 'Two', 1, 15)
+(2, 'Supervisor', 'One', 1, 9)
+(7, 'Parttime', 'Cashier', 0, 7)
+(4, 'Second', 'Supervisor', 1, 8)
+(6, 'Third', 'Supervisor', 1, 9)
