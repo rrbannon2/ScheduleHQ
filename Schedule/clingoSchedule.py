@@ -18,7 +18,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     weekend_rotation = True
     store_manager_name = "general"
     otExemptRole = 2
-    num_models = 14
+    num_models = 0
     
     
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
@@ -88,7 +88,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         cur.execute(sql.SQL("SELECT * FROM employees JOIN extremes USING (id)"))
         
         for emp in cur.fetchall():
-            print(emp)
+            # print(emp)
             Employee(*emp)
 
     def load_req_skills(connection,weeks_scheduled, weeks_to_schedule,clingo_code):
@@ -378,22 +378,24 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         with open('Schedule/clingoSolution.txt','w') as file:
             file.write(solution2)
         
-        solution = solution.replace('assign(','')
+        solution = solution.replace('(',',')
         solution = solution.replace(')','')
         solution = solution.split(' ')
         
         for block in solution:
-            if 'days' in block or 'max' in block or 'meal' in block or 'instances' in block or 'same' in block or 'hours_count' in block or 'total' in block or 'scheduled' in block or 'truck' in block or 'count' in block or 'pull' in block:
+            if 'assign' in block:
+                block = block.split(',')
+                try:
+                    schedule_dict[int(block[3])][block[-1]][int(block[2])%7].append(int(block[1]))
+                except:
+                    continue
+            elif 'hours' or 'total_weekly_hrs' in block:
                 print(block)
                 continue
-            elif 'employee' in block or 'time' in block:
+            else:
                 continue
-
-            block = block.split(',')
-            try:
-                schedule_dict[int(block[2])][block[-1]][int(block[1])%7].append(int(block[0]))
-            except:
-                continue
+            
+            
         with open('Schedule/scheduleFile.txt','w') as file2:
             schedule = []
 
@@ -408,6 +410,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
                         else:
                             schedule_block = formatted_emp + ':' + 'Off,'
                             schedule.append(schedule_block)
+            
             file2.writelines(schedule)
         return solution
             
@@ -436,7 +439,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             control.assign_external(clingo.Function("query", [clingo.Number(step)]), True)
             # solution = control.solve(on_model=on_model)
             with control.solve(on_model=on_model,async_=True) as ret:
-                if not ret.wait(600):
+                if not ret.wait(120):
                     print('cancelling')
                     ret.cancel()
                 
