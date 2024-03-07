@@ -375,6 +375,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     #show hours_count/3.
 
 
+
     """
     # print(clingo_code)
     solution = None
@@ -446,18 +447,13 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         parts = []
         parts.append(("base", []))
         control.ground(parts)
-
+        
         ret, step = None, 1
         while step <= max_step:
-            parts = []
-            control.release_external(clingo.Function("query", [clingo.Number(step - 1)]))
             
-            control.cleanup() 
-            control.ground(parts)
-            control.assign_external(clingo.Function("query", [clingo.Number(step)]), True)
             # solution = control.solve(on_model=on_model)
             with control.solve(on_model=on_model,async_=True) as ret:
-                if not ret.wait(60):
+                if not ret.wait(180):
                     print('cancelling')
                     ret.cancel()
             
