@@ -3,12 +3,12 @@ function goToHome() {
 };
 
 function submitFunction(){
-    var skillCells = ['skillName','role','importance','sunday_1','monday_1','tuesday_1','wednesday_1','thursday_1','friday_1','saturday_1','sunday_2','monday_2','tuesday_2','wednesday_2','thursday_2','friday_2','saturday_2'];
-    var skillJsonDict = {};
-    for (let skillCell of skillCells) {
-        cell = document.getElementById(skillCell).value;
+    var shiftCells = ['shiftName','importance','maxHours','sunday_1','monday_1','tuesday_1','wednesday_1','thursday_1','friday_1','saturday_1','sunday_2','monday_2','tuesday_2','wednesday_2','thursday_2','friday_2','saturday_2'];
+    var shiftJsonDict = {};
+    for (let shiftCell of shiftCells) {
+        cell = document.getElementById(shiftCell).value;
         if(cell != ''){
-            skillJsonDict[skillCell] = cell;
+            shiftJsonDict[shiftCell] = cell;
         };
     };
     fetch('/addShift', {
@@ -16,7 +16,7 @@ function submitFunction(){
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(skillJsonDict),
+        body: JSON.stringify(shiftJsonDict),
     })
     .then(response => {
         if (!response.ok) {

@@ -284,6 +284,20 @@ def add_skill():
     
     return jsonify('Skill added')
 
+@app.route('/addShift',methods = ["POST"])
+def add_shift():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    shift_info = request.get_json()
+    shift_time_vals = list(shift_info.values())[3:]
+    shift_time_vals = [int(i) for i in shift_time_vals]
+    
+    shift_name = shift_info['shiftName']
+    importance = shift_info['importance']
+    max_hours = shift_info['maxHours']
+    cursor.execute(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)").format(sql.Identifier('shifts')),[shift_name, importance, max_hours,shift_time_vals])
+    conn.commit()
+    return jsonify('Shift added')
 
 if __name__ == '__main__':
     app.run(debug=True) 

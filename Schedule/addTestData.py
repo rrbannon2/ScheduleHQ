@@ -26,7 +26,6 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # print(cur.fetchall())
 # cur.execute("CREATE TABLE variables(varName varchar(255), varVal varchar(255))")
 # cur.execute("INSERT INTO variables VALUES('skill_to_edit', 'none')")
-# cur.execute("UPDATE employees SET last_name = 'Dalbik' WHERE first_name = 'Ameer'")
 # cur.execute("ALTER TABLE employees ADD CONSTRAINT emp_id PRIMARY KEY (id)")
 # cur.execute("ALTER TABLE availability ADD CONSTRAINT avail_id PRIMARY KEY (id)")
 # cur.execute("ALTER TABLE extremes ADD CONSTRAINT extremes_id PRIMARY KEY (id)")
@@ -36,6 +35,8 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # cur.execute("INSERT INTO skills VALUES ('Sign Audit', 1, 1)")
 # cur.execute("INSERT INTO skills VALUES ('Count Drawers', 1, 0)")
 # cur.execute("CREATE TABLE business_info(business_name varchar(255), hours_of_op integer ARRAY[28], min_employees int, min_managers int, exempt_role int,max_total_hours int, max_hours_importance int)")
+
+cur.execute("CREATE TABLE shifts(shiftName varchar(255), importance int, maxHours int, shiftTimes integer ARRAY[14])")
 conn.commit()
 cur.close()
 conn.close()
