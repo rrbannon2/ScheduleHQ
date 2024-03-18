@@ -24,7 +24,8 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
 
     #TODO: make weeks_scheduled and weeks_to_schedule parameters instead of relying on global
-    def set_important_shift(name, start_time, end_time, day, wk, importance, clingo_code, maximum_shift_hours = None):
+    #TODO: update function to format more similar to set_required_skill_for_shift so it works with call from load_shifts
+    def set_important_shift(name, start_time, end_time, wk, importance, clingo_code, maximum_shift_hours = None):
         if wk == -1:
             for week in range(weeks_scheduled,weeks_to_schedule):
                 for tyme in range(start_time,end_time):
@@ -41,22 +42,23 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
                     clingo_code += ':- {}_hours(X,W), X > {}. '.format(name, maximum_shift_hours)
             return clingo_code
         elif wk in range(weeks_scheduled,weeks_to_schedule):
-            day = day + (wk * 7)
-            wk = str(wk)
-            for tyme in range(start_time,end_time):
-                clingo_code += '{}({},{},{}). '.format(name,tyme,day,wk)
-            clingo_code += '1{'
-            clingo_code += '{}_time_of_day_emp_count(TOD,D,{},X)'.format(name,wk)
-            clingo_code += '} :- X = #count{EID : assign(TOD,D,'+ wk + ',EID)}, '
-            clingo_code += '{}(TOD,D,{}). '.format(name,wk)
-            clingo_code += '{'
-            clingo_code += '{}_hours(X,{})'.format(name,wk)
-            clingo_code += '} = 1 :- X = #sum{Hours,TOD,' + wk + ' : '
-            clingo_code += '{}_time_of_day_emp_count(TOD,Day,{},Hours)'.format(name,wk)
-            clingo_code += '}. '
-            clingo_code += ':~ {}_hours(X,{}), Value = 0-X, Weight = Value * {}.[Weight] '.format(name,wk,importance)
-            if maximum_shift_hours != None:
-                clingo_code += ':- {}_hours(X,W), X > {}. '.format(name, maximum_shift_hours)
+            for i in range(7):
+                day = i + (wk * 7)
+                wk = str(wk)
+                for tyme in range(start_time,end_time):
+                    clingo_code += '{}({},{},{}). '.format(name,tyme,day,wk)
+                clingo_code += '1{'
+                clingo_code += '{}_time_of_day_emp_count(TOD,D,{},X)'.format(name,wk)
+                clingo_code += '} :- X = #count{EID : assign(TOD,D,'+ wk + ',EID)}, '
+                clingo_code += '{}(TOD,D,{}). '.format(name,wk)
+                clingo_code += '{'
+                clingo_code += '{}_hours(X,{})'.format(name,wk)
+                clingo_code += '} = 1 :- X = #sum{Hours,TOD,' + wk + ' : '
+                clingo_code += '{}_time_of_day_emp_count(TOD,Day,{},Hours)'.format(name,wk)
+                clingo_code += '}. '
+                clingo_code += ':~ {}_hours(X,{}), Value = 0-X, Weight = Value * {}.[Weight] '.format(name,wk,importance)
+                if maximum_shift_hours != None:
+                    clingo_code += ':- {}_hours(X,W), X > {}. '.format(name, maximum_shift_hours)
 
         return clingo_code
 
@@ -95,6 +97,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         cur = connection.cursor()
         cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('required_skills_for_shift')))
         skill_info = cur.fetchall()
+        #TODO: extract for loop except function call, make it a function to be used for load_shifts as well.
         for skill in skill_info:
             start_times = skill[1][0:7]
             end_times = skill[1][7:]
@@ -118,6 +121,19 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         
         set_skill_levels(emp_skill_levels_dict)
         
+    def load_shifts(connection,clingo_code):
+        cur = connection.cursor()
+        cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('shifts')))
+        shift_info = cur.fetchall()
+        for shift in shift_info:
+            start_times = shift[-1][0:7]
+            end_times = shift[-1][7:]
+            shift_name = shift[0].lower().replace(" ", "_")
+            importance = shift[1]
+            max_hours = shift[2]
+            clingo_code = set_important_shift(shift_name,start_times,end_times,importance,clingo_code,maximum_shift_hours=max_hours)
+        return clingo_code
+
     def set_skill_levels(employee_skill_levels_dict):
         for emp in Employee.employees.values():
             emp.skills = employee_skill_levels_dict[emp.employee_id]
