@@ -215,12 +215,19 @@ def update_skill_level():
 
 @app.route('/loadSkillInfo',methods = ["GET"])
 def load_skill_info():
-    requested_skill = request.args.get('skill')
+    return load_selected_item_details(request.args.get('skill'),"required_skills_for_shift",'skill')
+
+@app.route('/loadShiftInfo', methods = ["GET"])
+def load_shift_info():
+    return load_selected_item_details(request.args.get('shift'),"shifts","shiftname")
+
+def load_selected_item_details(selected_item,table,name_column):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute(sql.SQL("SELECT * FROM {} WHERE skill = %s").format(sql.Identifier('required_skills_for_shift')),[requested_skill])
-    skill_info = cursor.fetchall()
-    return jsonify(skill_info)
+    cursor.execute(sql.SQL("SELECT * FROM {} WHERE {} = %s").format(sql.Identifier(table),sql.Identifier(name_column)),[selected_item])
+    item_info = cursor.fetchall()
+    return jsonify(item_info)
+
 
 
 @app.route('/editSelectedSkillPage', methods = ["GET"])
@@ -233,15 +240,22 @@ def edit_skills_home():
 
 @app.route('/loadSkills', methods = ["GET"])
 def load_skills():
+    return load_drop_down_info("skill","required_skills_for_shift")
+
+@app.route('/loadShifts', methods = ["GET"])
+def load_shifts():
+    return load_drop_down_info("shiftname","shifts")
+
+def load_drop_down_info(column_to_select,table):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute(sql.SQL("SELECT skill FROM {}").format(sql.Identifier('required_skills_for_shift')))
-    skills_data = cursor.fetchall()
+    cursor.execute(sql.SQL("SELECT {} FROM {}").format(sql.Identifier(column_to_select),sql.Identifier(table)))
+    drop_down_data = cursor.fetchall()
         
     cursor.close()
     conn.close()
-    return jsonify(skills_data)
+    return jsonify(drop_down_data)
 
 @app.route('/updateSkill',methods = ["POST"])
 def update_skill():
@@ -263,7 +277,7 @@ def use_info(info,which_function = None,table = None):
         info3 = info['role']
         importance = info['importance']
         role_or_max_hrs = 'role'
-
+        name_column = "skill"
     elif table == "shifts":
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -274,14 +288,15 @@ def use_info(info,which_function = None,table = None):
         name = info['shiftName']
         info3 = info['maxHours']
         importance = info['importance']
-        role_or_max_hrs = "maxHours"
+        role_or_max_hrs = "maxhours"
+        name_column = "shiftname"
     else:
         return jsonify("Operation failed")
 
     if which_function == "insert":
         cursor.execute(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)").format(sql.Identifier(table)),[name, time_vals, importance, info3])
     elif which_function == "update":
-        cursor.execute(sql.SQL("UPDATE {} SET (schedule_blocks,importance,{}) = (%s,%s,%s) WHERE skill = %s").format(sql.Identifier(table),sql.Identifier(role_or_max_hrs)),[time_vals,importance,info3,name])
+        cursor.execute(sql.SQL("UPDATE {} SET (schedule_blocks,importance,{}) = (%s,%s,%s) WHERE {} = %s").format(sql.Identifier(table),sql.Identifier(role_or_max_hrs),sql.Identifier(name_column)),[time_vals,importance,info3,name])
 
     conn.commit()
     cursor.close()
@@ -295,6 +310,11 @@ def add_shift():
 @app.route('/updateShift',methods = ["POST"])
 def update_shift():
     return use_info(request.get_json(),which_function="update",table="shifts")
+
+@app.route('/selectShiftToEdit',methods = ["GET"])
+def select_shift_to_edit():
+    shift_name = request.args.get('shift')
+    return render_template('editSelectedShift.html',shift = str(shift_name))
 
 if __name__ == '__main__':
     app.run(debug=True) 
