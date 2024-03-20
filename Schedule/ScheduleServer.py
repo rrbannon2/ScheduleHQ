@@ -242,62 +242,59 @@ def load_skills():
     cursor.close()
     conn.close()
     return jsonify(skills_data)
-    # return jsonify('test')
 
 @app.route('/updateSkill',methods = ["POST"])
 def update_skill():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    skill_info = request.get_json()
-    skill_time_vals = list(skill_info.values())[3:]
-    skill_time_vals = [int(i) for i in skill_time_vals]
-    
-    skill_name = skill_info['skillName']
-    role = skill_info['role']
-    importance = skill_info['importance']
+    return use_info(request.get_json(),which_function="update",table="required_skills_for_shift")
 
-    cursor.execute(sql.SQL("UPDATE {} SET (schedule_blocks,role,importance) = (%s,%s,%s) WHERE skill = %s").format(sql.Identifier('required_skills_for_shift')),[skill_time_vals,role,importance,skill_name])
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return jsonify('Skill updated')
 @app.route('/addSkill', methods = ["POST"])
 def add_skill():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    skill_info = request.get_json()
-    skill_time_vals = list(skill_info.values())[3:]
-    skill_time_vals = [int(i) for i in skill_time_vals]
-    
-    skill_name = skill_info['skillName']
-    role = skill_info['role']
-    importance = skill_info['importance']
+    return use_info(request.get_json(),which_function="insert",table="required_skills_for_shift")
 
+def use_info(info,which_function = None,table = None):
+    if table == "required_skills_for_shift":
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    cursor.execute(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)").format(sql.Identifier('required_skills_for_shift')),[skill_name, zero_val_array, role, importance])
-    cursor.execute(sql.SQL("UPDATE {} SET schedule_blocks = %s WHERE skill = %s").format(sql.Identifier('required_skills_for_shift')),[skill_time_vals,skill_name])
-    
+        time_vals = list(info.values())[3:]
+        time_vals = [int(i) for i in time_vals]
+        
+        name = info['skillName']
+        info3 = info['role']
+        importance = info['importance']
+        role_or_max_hrs = 'role'
+
+    elif table == "shifts":
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        time_vals = list(info.values())[3:]
+        time_vals = [int(i) for i in time_vals]
+        
+        name = info['shiftName']
+        info3 = info['maxHours']
+        importance = info['importance']
+        role_or_max_hrs = "maxHours"
+    else:
+        return jsonify("Operation failed")
+
+    if which_function == "insert":
+        cursor.execute(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)").format(sql.Identifier(table)),[name, time_vals, importance, info3])
+    elif which_function == "update":
+        cursor.execute(sql.SQL("UPDATE {} SET (schedule_blocks,importance,{}) = (%s,%s,%s) WHERE skill = %s").format(sql.Identifier(table),sql.Identifier(role_or_max_hrs)),[time_vals,importance,info3,name])
+
     conn.commit()
     cursor.close()
     conn.close()
-    
-    return jsonify('Skill added')
+    return jsonify("Operation successful")
 
 @app.route('/addShift',methods = ["POST"])
 def add_shift():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    shift_info = request.get_json()
-    shift_time_vals = list(shift_info.values())[3:]
-    shift_time_vals = [int(i) for i in shift_time_vals]
-    
-    shift_name = shift_info['shiftName']
-    importance = shift_info['importance']
-    max_hours = shift_info['maxHours']
-    cursor.execute(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)").format(sql.Identifier('shifts')),[shift_name, importance, max_hours,shift_time_vals])
-    conn.commit()
-    return jsonify('Shift added')
+    return use_info(request.get_json(),which_function="insert",table="shifts")
+
+@app.route('/updateShift',methods = ["POST"])
+def update_shift():
+    return use_info(request.get_json(),which_function="update",table="shifts")
 
 if __name__ == '__main__':
     app.run(debug=True) 

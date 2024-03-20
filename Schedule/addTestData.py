@@ -35,8 +35,8 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # cur.execute("INSERT INTO skills VALUES ('Sign Audit', 1, 1)")
 # cur.execute("INSERT INTO skills VALUES ('Count Drawers', 1, 0)")
 # cur.execute("CREATE TABLE business_info(business_name varchar(255), hours_of_op integer ARRAY[28], min_employees int, min_managers int, exempt_role int,max_total_hours int, max_hours_importance int)")
-
-cur.execute("CREATE TABLE shifts(shiftName varchar(255), importance int, maxHours int, shiftTimes integer ARRAY[14])")
+cur.execute("DROP TABLE shifts")
+cur.execute("CREATE TABLE shifts(shiftName varchar(255), scheduleBlocks integer ARRAY[14], importance int, maxHours int)")
 conn.commit()
 cur.close()
 conn.close()
