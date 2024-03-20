@@ -17,7 +17,7 @@ def load_table_data(table_file_name,table_name):
                 line[1] = line[1].replace("])","").replace("\n","").replace(" ","").split(",")
                 line[1] = [int(i) for i in line[1]]
                 update_table_data(table_name, line)
-        elif table_name == 'business_info' or table_name == 'required_skills_for_shift':
+        elif table_name in ['business_info','required_skills_for_shift','shifts']:
             for line in table_file.readlines():
                 line = line.split('[')
                 line[0] = line[0].replace("(","").replace(", ","").replace("'","")
@@ -46,26 +46,17 @@ def check_table_data(table_name):
     cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('{}'.format(table_name))))
     print(cur.fetchall())
 
-delete_existing_table('employees')
-load_table_data('schedule/dbTableBackups/employees.sql','employees')
-check_table_data('employees')
+def update_local_db(table,file):
+    delete_existing_table(table)
+    load_table_data(file,table)
+    check_table_data(table)
 
-delete_existing_table('availability')
-load_table_data('schedule/dbTableBackups/availability.sql','availability')
-check_table_data('availability')
+update_local_db('employees','schedule/dbTableBackups/employees.sql')
+update_local_db('availability','schedule/dbTableBackups/availability.sql')
+update_local_db('extremes','schedule/dbTableBackups/extremes.sql')
+update_local_db('required_skills_for_shift','schedule/dbTableBackups/required_skills_for_shift.sql')
+update_local_db('business_info','schedule/dbTableBackups/business_info.sql')
+update_local_db('skills','schedule/dbTableBackups/skills.sql')
+update_local_db('shifts','Schedule/dbTableBackups/shifts.sql')
 
-delete_existing_table('extremes')
-load_table_data('schedule/dbTableBackups/extremes.sql','extremes')
-check_table_data('extremes')
 
-delete_existing_table('required_skills_for_shift')
-load_table_data('schedule/dbTableBackups/required_skills_for_shift.sql','required_skills_for_shift')
-check_table_data('required_skills_for_shift')
-
-delete_existing_table('business_info')
-load_table_data('schedule/dbTableBackups/business_info.sql','business_info')
-check_table_data('business_info')
-
-delete_existing_table('skills')
-load_table_data('schedule/dbTableBackups/skills.sql','skills')
-check_table_data('skills')
