@@ -34,8 +34,8 @@ function displaySkillData(data){
     var data = data[0];
     var timeArray;
     document.getElementById('skillName').value = data[0];
-    document.getElementById('role').value = data[2];
-    document.getElementById('importance').value = data[3];
+    document.getElementById('role').value = data[3];
+    document.getElementById('importance').value = data[2];
     timeArray = data[1];
     timeCells = ['sunday_1', 'monday_1', 'tuesday_1', 'wednesday_1', 'thursday_1', 'friday_1',
         'saturday_1', 'sunday_2', 'monday_2', 'tuesday_2', 'wednesday_2', 'thursday_2', 'friday_2', 'saturday_2'];

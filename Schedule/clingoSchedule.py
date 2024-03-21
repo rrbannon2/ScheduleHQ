@@ -87,8 +87,8 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             start_times = skill[1][0:7]
             end_times = skill[1][7:]
             skill_name = skill[0].lower().replace(" ", "_")
-            role = skill[2]
-            importance = skill[3]
+            role = skill[3]
+            importance = skill[2]
             clingo_code = set_required_skill_for_shift(start_times,end_times,skill_name,importance,role,clingo_code)
         return clingo_code
     
@@ -270,7 +270,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     load_employees(conn)
     employee_skill_levels_dict = {emp:{} for emp in Employee.employees.keys()}
     load_availability(conn)
-    # clingo_code = load_shifts(conn,clingo_code)
+    clingo_code = load_shifts(conn,clingo_code)
     clingo_code = load_req_skills(conn,weeks_scheduled,weeks_to_schedule,clingo_code)
     load_skill_levels(conn, employee_skill_levels_dict)
     
@@ -456,7 +456,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             
             # solution = control.solve(on_model=on_model)
             with control.solve(on_model=on_model,async_=True) as ret:
-                if not ret.wait(200):
+                if not ret.wait(120):
                     print('cancelling')
                     ret.cancel()
             
