@@ -25,41 +25,26 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
 
     #TODO: make weeks_scheduled and weeks_to_schedule parameters instead of relying on global
     #TODO: update function to format more similar to set_required_skill_for_shift so it works with call from load_shifts
-    def set_important_shift(name, start_time, end_time, wk, importance, clingo_code, maximum_shift_hours = None):
+    def set_important_shift(name, start_times, end_times, wk, importance, clingo_code, maximum_shift_hours = None):
         if wk == -1:
-            for week in range(weeks_scheduled,weeks_to_schedule):
-                for tyme in range(start_time,end_time):
-                    day = day + (week * 7)
-                    clingo_code += '{}({},{},{}). '.format(name,tyme,day,week)
-                    week = str(week)
-                clingo_code += '1{' + '{}_time_of_day_emp_count(TOD,D,{},X)'.format(name,week)
-                clingo_code += '} :- X = #count{EID : assign(TOD,D,' + week + ',EID)}, '
-                clingo_code += '{}(TOD,D,{}). '.format(name,week) + '{' +'{}_hours(X,{})'.format(name,week)
-                clingo_code += '} = 1 :- X = #sum{Hours,TOD,' + week + ' : '
-                clingo_code += '{}_time_of_day_emp_count(TOD,Day,{},Hours)'.format(name,week) + '}. '
-                clingo_code += ':~ {}_hours(X,{}), Value = 0-X, Weight = Value * {}.[Weight] '.format(name,week,importance)
-                if maximum_shift_hours != None:
-                    clingo_code += ':- {}_hours(X,W), X > {}. '.format(name, maximum_shift_hours)
-            return clingo_code
-        elif wk in range(weeks_scheduled,weeks_to_schedule):
+            weeks = range(weeks_scheduled,weeks_to_schedule)
+        else:
+            weeks = [wk]
+        for week in weeks:
             for i in range(7):
-                day = i + (wk * 7)
-                wk = str(wk)
-                for tyme in range(start_time,end_time):
-                    clingo_code += '{}({},{},{}). '.format(name,tyme,day,wk)
-                clingo_code += '1{'
-                clingo_code += '{}_time_of_day_emp_count(TOD,D,{},X)'.format(name,wk)
-                clingo_code += '} :- X = #count{EID : assign(TOD,D,'+ wk + ',EID)}, '
-                clingo_code += '{}(TOD,D,{}). '.format(name,wk)
-                clingo_code += '{'
-                clingo_code += '{}_hours(X,{})'.format(name,wk)
-                clingo_code += '} = 1 :- X = #sum{Hours,TOD,' + wk + ' : '
-                clingo_code += '{}_time_of_day_emp_count(TOD,Day,{},Hours)'.format(name,wk)
-                clingo_code += '}. '
-                clingo_code += ':~ {}_hours(X,{}), Value = 0-X, Weight = Value * {}.[Weight] '.format(name,wk,importance)
-                if maximum_shift_hours != None:
-                    clingo_code += ':- {}_hours(X,W), X > {}. '.format(name, maximum_shift_hours)
-
+                if not(start_times[i] == 0 and end_times[i] == 0):
+                    for tyme in range(start_times[i],end_times[i]):
+                        day = i + (int(week) * 7)
+                        clingo_code += '{}({},{},{}). '.format(name+str(i),tyme,day,str(week))
+                    week = str(week)
+                    clingo_code += '1{' + '{}_time_of_day_emp_count(TOD,D,{},X)'.format(name+str(i),week)
+                    clingo_code += '} :- X = #count{EID : assign(TOD,D,' + week + ',EID)}, '
+                    clingo_code += '{}(TOD,D,{}). '.format(name+str(i),week) + '{' +'{}_hours(X,{})'.format(name+str(i),week)
+                    clingo_code += '} = 1 :- X = #sum{Hours,TOD,' + week + ' : '
+                    clingo_code += '{}_time_of_day_emp_count(TOD,Day,{},Hours)'.format(name+str(i),week) + '}. '
+                    clingo_code += ':~ {}_hours(X,{}), Value = 0-X, Weight = Value * {}.[Weight] '.format(name+str(i),week,importance)
+                    if maximum_shift_hours != 0:
+                        clingo_code += ':- {}_hours(X,W), X > {}. '.format(name+str(i), maximum_shift_hours)
         return clingo_code
 
     #TODO: make weeks_scheduled and weeks_to_schedule parameters instead of relying on global
@@ -126,12 +111,12 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('shifts')))
         shift_info = cur.fetchall()
         for shift in shift_info:
-            start_times = shift[-1][0:7]
-            end_times = shift[-1][7:]
+            start_times = shift[1][0:7]
+            end_times = shift[1][7:]
             shift_name = shift[0].lower().replace(" ", "_")
-            importance = shift[1]
-            max_hours = shift[2]
-            clingo_code = set_important_shift(shift_name,start_times,end_times,importance,clingo_code,maximum_shift_hours=max_hours)
+            importance = shift[2]
+            max_hours = shift[3]
+            clingo_code = set_important_shift(shift_name,start_times,end_times,0,importance,clingo_code,maximum_shift_hours=max_hours)
         return clingo_code
 
     def set_skill_levels(employee_skill_levels_dict):
@@ -219,7 +204,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
                     end_time = min(((end_times[i] - schedule_blocks[i][0]) * 2), schedule_blocks[i][1]- schedule_blocks[i][0])
                     for j in range(start_time,end_time):
                         self.shift_preferences[week][days[i]][j] = preference_lvls[i]
-            print(self.first_name, self.shift_preferences)
+            
             
 
         def add_employee(self):
@@ -285,8 +270,10 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     load_employees(conn)
     employee_skill_levels_dict = {emp:{} for emp in Employee.employees.keys()}
     load_availability(conn)
+    # clingo_code = load_shifts(conn,clingo_code)
     clingo_code = load_req_skills(conn,weeks_scheduled,weeks_to_schedule,clingo_code)
     load_skill_levels(conn, employee_skill_levels_dict)
+    
     
     Employee.employees[1].meal_break = True
    
@@ -354,7 +341,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     clingo_code += no_breaking_up_shifts
 
 
-    clingo_code = set_important_shift('truck',19,schedule_blocks[truck_day][1],truck_day,0,7,clingo_code)
+    # clingo_code = set_important_shift('truck',19,schedule_blocks[truck_day][1],truck_day,0,7,clingo_code)
     # clingo_code = set_important_shift('truck',11,last_schedule_block,truck_day,1,7,clingo_code)
     # clingo_code = set_important_shift('truck',11,last_schedule_block,truck_day,2,7,clingo_code)
 
@@ -386,7 +373,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     #show meal_break/4.
     #show assign/4.
     #show total_weekly_hrs/2.
-    #show truck_hours/2.
+    #show truck1_hours/2.
     #show days_count/3.
     #show hours_count/3.
 
@@ -455,7 +442,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
 
         control = clingo.Control()
         control.configuration.solve.models = num_models #Control how many unique models are generated.
-        # print(clingo_code)
+        print(clingo_code)
         try:
             control.add("base", [], clingo_code)
         except:
@@ -469,7 +456,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             
             # solution = control.solve(on_model=on_model)
             with control.solve(on_model=on_model,async_=True) as ret:
-                if not ret.wait(180):
+                if not ret.wait(200):
                     print('cancelling')
                     ret.cancel()
             

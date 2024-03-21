@@ -1,6 +1,6 @@
 import clingoSchedule
 
-clingoSchedule.run_clingo(3)
+clingoSchedule.run_clingo(1)
 solution = ''
 with open('Schedule/clingoSolution.txt','r') as file:
     solution += file.read()
