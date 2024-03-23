@@ -22,10 +22,9 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     
     
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
-
-    #TODO: make weeks_scheduled and weeks_to_schedule parameters instead of relying on global
-    #TODO: update function to format more similar to set_required_skill_for_shift so it works with call from load_shifts
-    def set_important_shift(name, start_times, end_times, wk, importance, clingo_code, maximum_shift_hours = None):
+    
+    def set_important_shift(name, start_times, end_times, wk, importance, maximum_shift_hours = None):
+        clingo_code = ''
         if wk == -1:
             weeks = range(weeks_scheduled,weeks_to_schedule)
         else:
@@ -47,7 +46,6 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
                         clingo_code += ':- {}_hours(X,W), X > {}. '.format(name+str(i), maximum_shift_hours)
         return clingo_code
 
-    #TODO: make weeks_scheduled and weeks_to_schedule parameters instead of relying on global
     def set_required_skill_for_shift(start_times, end_times, skill, skill_importance, role, clingo_code, minimum_skill_level = None, days = [i for i in range(7)]):
         for wk in range(weeks_scheduled,weeks_to_schedule):
             for i in range(7):
@@ -246,12 +244,13 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
         def set_clingo_skill_levels(self,skill,skill_lvl):
             clingo_addition = 'skill_level({},{},{},{}). '.format(self.first_name,skill,skill_lvl,self.role)
             return clingo_addition
-        
+            
+        #TODO: shift length that triggers meal break should be an argument not a preset constant
         def add_meal_break(self):
             clingo_addition = '{meal_break(TOD,D,W,'
             clingo_addition += '{}) : time(TOD,D,W)'.format(self.first_name)
             clingo_addition += '} = 1'
-            clingo_addition += ' :- hours_count({},D,W,X), X > 6. '.format(self.first_name)
+            clingo_addition += ' :- hours_count({},D,W,X), X > 12. '.format(self.first_name)
             clingo_addition += 'assign(TOD,D,W,{}) :- meal_break(TOD+1,D,W,{}). '.format(self.first_name, self.first_name)
             clingo_addition += 'assign(TOD,D,W,{}) :- meal_break(TOD-1,D,W,{}). '.format(self.first_name, self.first_name)
             return clingo_addition
