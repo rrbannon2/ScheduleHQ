@@ -1,0 +1,32 @@
+.tableContainer {
+    margin: 50px 50px 0 100px;
+    height: 90vh;
+}
+.containerTitle {
+    padding: 20px 0;
+    border: 2px solid #fff;
+    border-radius: 25px;
+    height: 85vh;
+    background-color: #fff;
+}
+
+.table.table.table-striped > thead > tr > th {
+    background-color: #ADB3EF;
+    color:#fff;
+}
+
+#addEmployee {
+    background-color: #F4572F;
+    border-color: #F4572F;
+}
+
+/* 
+#4C5DDD
+#1720F5
+#BEC5FF
+#E4E6F7
+#F4572F
+#6B5962
+#ACA1A3
+#ADB3EF
+*/

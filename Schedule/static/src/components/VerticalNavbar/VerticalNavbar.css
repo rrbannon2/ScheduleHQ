@@ -1,0 +1,29 @@
+.vertical-navbar {
+    position: fixed;
+    left: 0;
+    height: 100vh;
+    width: 60px; /* Width of the collapsed navbar */
+    background-color: #4C5DDD;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: center; */
+    /* transition: width 0.3s ease; */
+  }
+  
+  /* .vertical-navbar:hover {
+    width: 200px;
+  } */
+  
+  .navbar-item {
+    padding: 10px;
+    width: 100%; /* Expand the items to full width of the navbar */
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 1px solid #555; /* Optional: Add a border between items */
+  }
+  
+  .navbar-item:last-child {
+    border-bottom: none; /* Remove border from the last item */
+  }

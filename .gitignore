@@ -5,3 +5,6 @@
 /__pycache__
 /pyvenv.cfg
 /.DS_Store
+
+Schedule/static/node_modules
+
