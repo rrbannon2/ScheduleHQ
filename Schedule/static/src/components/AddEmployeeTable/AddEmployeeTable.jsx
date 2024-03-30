@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import './AddEmployeeTable.css';
 import AddEmployeeModal from '../AddEmployeeModal/AddEmployeeModal';
@@ -40,7 +40,9 @@ const AddEmployeeTable = () => {
                             </td> */}
                         </tr>
                     </tbody>
-                    <tr><td></td></tr>
+                    <tbody>
+                    <tr></tr>
+                    </tbody>
                     <thead>
                         <tr>
                             <th>Minimum Shift Length</th>
@@ -106,7 +108,7 @@ const AddEmployeeTable = () => {
                 </Table>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='d-flex justify-content-end'>
-                        <Button id='addEmployee'>
+                        <Button id='addEmployee' onClick={() =>SubmitEmployee()}>
                             Add Employee
                         </Button>
                     </Col>
@@ -119,4 +121,49 @@ const AddEmployeeTable = () => {
     );
 };
 
+function SubmitEmployee() {
+    var basicInfoCells = ['id','firstName','lastName','role','wage','short_shift','long_shift','min_weekly_hours',
+        'max_weekly_hours', 'min_days', 'max_days', 'sunday_1', 'monday_1', 'tuesday_1', 'wednesday_1', 'thursday_1', 'friday_1',
+        'saturday_1', 'sunday_2', 'monday_2', 'tuesday_2', 'wednesday_2', 'thursday_2', 'friday_2', 'saturday_2'];
+    
+    var basicJsonDict = {};
+   
+
+    for (let basicCell of basicInfoCells) {
+        console.log(basicCell)
+        var cell = document.getElementById(basicCell).value;
+        if(cell !== ''){
+            basicJsonDict[basicCell] = cell;
+        };
+    };
+    
+
+    // Send the JSON object to the Flask backend
+    useEffect(() => {
+        fetch('/add_employee', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(basicJsonDict),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+            
+                return response.json();
+            
+            })
+            .then(data => {
+                // Handle the response from the Flask server
+                console.log(data);
+                // Perform actions based on the response
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                // Handle errors here
+            });
+    })
+};
 export default AddEmployeeTable;
