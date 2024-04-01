@@ -13,7 +13,7 @@ def get_db_connection():
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
     return conn
 
-@app.route('/add_employee',methods = ["POST"])
+@app.route('/addEmployee',methods = ["POST"])
 def add_employee():
     emp_info = list(request.get_json().values())
     

@@ -1,11 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import './AddEmployeeTable.css';
 import AddEmployeeModal from '../AddEmployeeModal/AddEmployeeModal';
+import FetchComponent from '../FetchComponent/FetchComponent';
 
 const AddEmployeeTable = () => {
-    const [showModal, setShowModal] = useState(false);
-    console.log(showModal);
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -108,21 +107,18 @@ const AddEmployeeTable = () => {
                 </Table>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='d-flex justify-content-end'>
-                        <Button id='addEmployee' onClick={() =>SubmitEmployee()}>
+                        <Button id='addEmployee' onClick={() =>PrepEmployeeData()}>
                             Add Employee
                         </Button>
                     </Col>
                 </Row>
             </div>
-            {showModal &&
-                    <AddEmployeeModal show={showModal} handleClose={() => setShowModal(false)}/>
-                }
         </div>
     );
 };
 
-function SubmitEmployee() {
-    var basicInfoCells = ['id','firstName','lastName','role','wage','short_shift','long_shift','min_weekly_hours',
+function PrepEmployeeData() {
+    var basicInfoCells = ['id', 'firstName', 'lastName', 'role', 'wage', 'short_shift', 'long_shift', 'min_weekly_hours',
         'max_weekly_hours', 'min_days', 'max_days', 'sunday_1', 'monday_1', 'tuesday_1', 'wednesday_1', 'thursday_1', 'friday_1',
         'saturday_1', 'sunday_2', 'monday_2', 'tuesday_2', 'wednesday_2', 'thursday_2', 'friday_2', 'saturday_2'];
     
@@ -132,38 +128,12 @@ function SubmitEmployee() {
     for (let basicCell of basicInfoCells) {
         console.log(basicCell)
         var cell = document.getElementById(basicCell).value;
-        if(cell !== ''){
+        if (cell !== '') {
             basicJsonDict[basicCell] = cell;
         };
     };
     
 
-    // Send the JSON object to the Flask backend
-    useEffect(() => {
-        fetch('/add_employee', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(basicJsonDict),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-            
-                return response.json();
-            
-            })
-            .then(data => {
-                // Handle the response from the Flask server
-                console.log(data);
-                // Perform actions based on the response
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                // Handle errors here
-            });
-    })
+    FetchComponent(basicJsonDict, "POST", "/addEmployee");
 };
 export default AddEmployeeTable;
