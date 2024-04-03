@@ -4,6 +4,7 @@ import VerticalNavbar from './components/VerticalNavbar/VerticalNavbar';
 import EmployeeTable from './components/EmployeeTable/EmployeeTable';
 import AddEmployeeTable from './components/AddEmployeeTable/AddEmployeeTable';
 import BaseEmployeeDataTable from './components/BaseEmployeeDataTable/BaseEmployeeDataTable';
+import EditEmployeeDataTable from './components/EditEmployeeDataTable/EditEmployeeDataTable';
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
       {/* <EmployeeTable /> */}
       <AddEmployeeTable/>
       {/* <BaseEmployeeDataTable /> */}
+      <EditEmployeeDataTable/>
     </div>
   );
 };

@@ -127,6 +127,7 @@ function PrepEmployeeData() {
     };
     
 
-    FetchComponent(basicJsonDict, "POST", "/addEmployee");
+    // FetchComponent(basicJsonDict, "POST", "/addEmployee");
+    FetchComponent("Manager","GET","/loadEmployeeInfo");
 };
 export default BaseEmployeeDataTable;
