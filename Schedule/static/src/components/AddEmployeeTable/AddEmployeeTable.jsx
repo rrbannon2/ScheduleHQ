@@ -3,7 +3,7 @@ import BaseEmployeeDataTable from '../BaseEmployeeDataTable/BaseEmployeeDataTabl
 
 const AddEmployeeTable = () => {
     return (
-        <BaseEmployeeDataTable addEmployee={true}/>
+        <BaseEmployeeDataTable addEmployee={true} employeeInfo={null} />
     );
 };
 

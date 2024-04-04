@@ -14,7 +14,7 @@ const App = () => {
       {/* <EmployeeTable /> */}
       <AddEmployeeTable/>
       {/* <BaseEmployeeDataTable /> */}
-      <EditEmployeeDataTable/>
+      <EditEmployeeDataTable employeeName={1} />
     </div>
   );
 };

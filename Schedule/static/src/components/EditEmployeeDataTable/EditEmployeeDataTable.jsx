@@ -3,9 +3,11 @@ import BaseEmployeeDataTable from '../BaseEmployeeDataTable/BaseEmployeeDataTabl
 import FetchComponent from '../FetchComponent/FetchComponent';
 
 const EditEmployeeDataTable = (employeeName) => {
-    FetchComponent(employeeName,"GET","/loadEmployeeInfo")
+
+    var empInfo = FetchComponent(employeeName, "GET", "/loadEmployeeInfo");
+    console.log(empInfo);
     return (
-        <BaseEmployeeDataTable addEmployee={false}/>
+        <BaseEmployeeDataTable addEmployee={false} employeeInfo={empInfo} />
     );
 };
 

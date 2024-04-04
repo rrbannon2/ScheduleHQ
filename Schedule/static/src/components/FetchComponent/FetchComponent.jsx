@@ -1,7 +1,8 @@
 
 export default function FetchComponent(inputData, whichMethod, where) {
-    if (whichMethod === "GET"){
-        fetch(where + new URLSearchParams({employee: inputData}), {
+    if (whichMethod === "GET") {
+        
+        fetch(where + "?" + new URLSearchParams({ employee : inputData["employeeName"] }), {
             method: whichMethod,
             headers: {
                 'Content-Type': 'application/json',
@@ -17,7 +18,8 @@ export default function FetchComponent(inputData, whichMethod, where) {
             })
             .then(data => {
                 // Handle the response from the Flask server
-                console.log(data);
+                console.log(data[0]);
+                return data;
                 // Perform actions based on the response
             })
             .catch(error => {

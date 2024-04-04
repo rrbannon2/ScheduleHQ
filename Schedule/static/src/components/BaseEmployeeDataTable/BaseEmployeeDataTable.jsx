@@ -3,7 +3,7 @@ import { Table, Button, Row, Col } from 'react-bootstrap';
 import './BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
 
-const BaseEmployeeDataTable = ({ addEmployee }) => {
+const BaseEmployeeDataTable = ({ addEmployee , employeeInfo} ) => {
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -24,7 +24,7 @@ const BaseEmployeeDataTable = ({ addEmployee }) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input id = "id"/></td>
+                            <td> {addEmployee ? <input id="id" /> : <input value={employeeInfo} id="id" />}</td>
                             <td><input id = "firstName" type = "text"/></td>
                             <td><input id = "lastName" type = "text"/></td>
                             <td><input id="role" /></td>
@@ -127,7 +127,7 @@ function PrepEmployeeData() {
     };
     
 
-    // FetchComponent(basicJsonDict, "POST", "/addEmployee");
-    FetchComponent("Manager","GET","/loadEmployeeInfo");
+    FetchComponent(basicJsonDict, "POST", "/addEmployee");
+    // FetchComponent("Manager","GET","/loadEmployeeInfo");
 };
 export default BaseEmployeeDataTable;
