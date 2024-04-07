@@ -1,9 +1,13 @@
-import React from 'react';
+import React,{useState, useEffect} from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import './BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
 
-const BaseEmployeeDataTable = ({ addEmployee , employeeInfo} ) => {
+
+const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
+    console.log(employeeInfo);
+    // const [empInfo, setEmpInfo] = useState(null);
+    
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -24,11 +28,12 @@ const BaseEmployeeDataTable = ({ addEmployee , employeeInfo} ) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td> {addEmployee ? <input id="id" /> : <input value={employeeInfo} id="id" />}</td>
-                            <td><input id = "firstName" type = "text"/></td>
-                            <td><input id = "lastName" type = "text"/></td>
-                            <td><input id="role" /></td>
-                            <td><input id = "wage"/></td>
+                            <td> {addEmployee ? <input id="id" /> : <input value={employeeInfo[0]} id="id" />}</td>
+                            <td> {addEmployee ? <input id="firstName" /> : <input value={employeeInfo[1]} id="firstName" />}</td>
+                            <td> {addEmployee ? <input id="lastName" /> : <input value={employeeInfo[2]} id="lastName" />}</td>
+                            <td> {addEmployee ? <input id="role" /> : <input value={employeeInfo[3]} id="role" />}</td>
+                            <td> {addEmployee ? <input id="wage" /> : <input value={employeeInfo[4]} id="wage" />}</td>
+
 
                         </tr>
                     </tbody>
@@ -47,12 +52,12 @@ const BaseEmployeeDataTable = ({ addEmployee , employeeInfo} ) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input id="short_shift" type="text"/></td>
-                            <td><input id="long_shift" type="text"/></td>
-                            <td><input id="min_weekly_hours" type="text"/></td>
-                            <td><input id="max_weekly_hours" type="text"/></td>
-                            <td><input id="min_days" type="text"/></td>
-                            <td><input id="max_days" type="text"/></td>
+                            <td> {addEmployee ? <input id="short_shift" /> : <input value={employeeInfo[5]} id="short_shift" />}</td>
+                            <td> {addEmployee ? <input id="long_shift" /> : <input value={employeeInfo[6]} id="long_shift" />}</td>
+                            <td> {addEmployee ? <input id="min_weekly_hours" /> : <input value={employeeInfo[7]} id="min_weekly_hours" />}</td>
+                            <td> {addEmployee ? <input id="max_weekly_hours" /> : <input value={employeeInfo[8]} id="max_weekly_hours" />}</td>
+                            <td> {addEmployee ? <input id="min_days" /> : <input value={employeeInfo[9]} id="min_days" />}</td>
+                            <td> {addEmployee ? <input id="max_days" /> : <input value={employeeInfo[10]} id="max_days" />}</td>
                         </tr>
                     </tbody>
                 </Table>
@@ -77,30 +82,32 @@ const BaseEmployeeDataTable = ({ addEmployee , employeeInfo} ) => {
                     <tbody>
                         <tr>
                             <td><text>Start Time of Availability</text></td>
-                            <td><input id="sunday_1" type="text"/></td>
-                            <td><input id="monday_1" type="text"/></td>
-                            <td><input id="tuesday_1" type="text"/></td>
-                            <td><input id="wednesday_1" type="text"/></td>
-                            <td><input id="thursday_1" type="text"/></td>
-                            <td><input id="friday_1" type="text"/></td>
-                            <td><input id="saturday_1" type="text"/></td>
+                            <td> {addEmployee ? <input id="sunday_1" /> : <input value={employeeInfo[11][0]} id="sunday_1" />}</td>
+                            <td> {addEmployee ? <input id="monday_1" /> : <input value={employeeInfo[11][1]} id="monday_1" />}</td>
+                            <td> {addEmployee ? <input id="tuesday_1" /> : <input value={employeeInfo[11][2]} id="tuesday_1" />}</td>
+                            <td> {addEmployee ? <input id="wednesday_1" /> : <input value={employeeInfo[11][3]} id="wednesday_1" />}</td>
+                            <td> {addEmployee ? <input id="thursday_1" /> : <input value={employeeInfo[11][4]} id="thursday_1" />}</td>
+                            <td> {addEmployee ? <input id="friday_1" /> : <input value={employeeInfo[11][5]} id="friday_1" />}</td>
+                            <td> {addEmployee ? <input id="saturday_1" /> : <input value={employeeInfo[11][6]} id="saturday_1" />}</td>
+
                         </tr>
 
                         <tr>
                             <td><text>End Time of Availability</text></td>
-                            <td><input id="sunday_2" type="text"/></td>
-                            <td><input id="monday_2" type="text"/></td>
-                            <td><input id="tuesday_2" type="text"/></td>
-                            <td><input id="wednesday_2" type="text"/></td>
-                            <td><input id="thursday_2" type="text"/></td>
-                            <td><input id="friday_2" type="text"/></td>
-                            <td><input id="saturday_2" type="text"/></td>
+                            <td> {addEmployee ? <input id="sunday_2" /> : <input value={employeeInfo[11][7]} id="sunday_2" />}</td>
+                            <td> {addEmployee ? <input id="monday_2" /> : <input value={employeeInfo[11][8]} id="monday_2" />}</td>
+                            <td> {addEmployee ? <input id="tuesday_2" /> : <input value={employeeInfo[11][9]} id="tuesday_2" />}</td>
+                            <td> {addEmployee ? <input id="wednesday_2" /> : <input value={employeeInfo[11][10]} id="wednesday_2" />}</td>
+                            <td> {addEmployee ? <input id="thursday_2" /> : <input value={employeeInfo[11][11]} id="thursday_2" />}</td>
+                            <td> {addEmployee ? <input id="friday_2" /> : <input value={employeeInfo[11][12]} id="friday_2" />}</td>
+                            <td> {addEmployee ? <input id="saturday_2" /> : <input value={employeeInfo[11][13]} id="saturday_2" />}</td>
+                         
                         </tr>
                     </tbody>
                 </Table>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='d-flex justify-content-end'>
-                        <Button id='addEmployee' onClick={() =>PrepEmployeeData()}>
+                        <Button id='addEmployee' onClick={() =>PrepEmployeeData(addEmployee)}>
                             {addEmployee ? "Add Employee" : "Update Employee"}
                         </Button>
                     </Col>
@@ -110,7 +117,7 @@ const BaseEmployeeDataTable = ({ addEmployee , employeeInfo} ) => {
     );
 };
 
-function PrepEmployeeData() {
+function PrepEmployeeData(addEmployee) {
     var basicInfoCells = ['id', 'firstName', 'lastName', 'role', 'wage', 'short_shift', 'long_shift', 'min_weekly_hours',
         'max_weekly_hours', 'min_days', 'max_days', 'sunday_1', 'monday_1', 'tuesday_1', 'wednesday_1', 'thursday_1', 'friday_1',
         'saturday_1', 'sunday_2', 'monday_2', 'tuesday_2', 'wednesday_2', 'thursday_2', 'friday_2', 'saturday_2'];
@@ -126,8 +133,7 @@ function PrepEmployeeData() {
         };
     };
     
-
-    FetchComponent(basicJsonDict, "POST", "/addEmployee");
+    addEmployee ? FetchComponent(basicJsonDict, "POST", "/addEmployee") : FetchComponent(basicJsonDict, "POST", "/updateEmployee");
     // FetchComponent("Manager","GET","/loadEmployeeInfo");
 };
 export default BaseEmployeeDataTable;

@@ -12,7 +12,7 @@ const App = () => {
       <StickyNavbar />
       {/* <VerticalNavbar /> */}
       {/* <EmployeeTable /> */}
-      <AddEmployeeTable/>
+      {/* <AddEmployeeTable/> */}
       {/* <BaseEmployeeDataTable /> */}
       <EditEmployeeDataTable employeeName={1} />
     </div>

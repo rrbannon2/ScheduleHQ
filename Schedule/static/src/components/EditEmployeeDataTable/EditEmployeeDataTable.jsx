@@ -1,13 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import BaseEmployeeDataTable from '../BaseEmployeeDataTable/BaseEmployeeDataTable';
 import FetchComponent from '../FetchComponent/FetchComponent';
 
-const EditEmployeeDataTable = (employeeName) => {
+const EditEmployeeDataTable = ( employeeName ) => {
+    const [empInfo, setEmpInfo] = useState(null);
 
-    var empInfo = FetchComponent(employeeName, "GET", "/loadEmployeeInfo");
-    console.log(empInfo);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await FetchComponent(employeeName, "GET", "/loadEmployeeInfo");
+                setEmpInfo(data[0]);
+            } catch (error) {
+                console.error("Error fetching employee data", error);
+                // Handle the error accordingly
+            }
+        };
+
+        fetchData();
+    }, [employeeName]);
+
+    // Render component only when empInfo is available
     return (
-        <BaseEmployeeDataTable addEmployee={false} employeeInfo={empInfo} />
+        empInfo && <BaseEmployeeDataTable addEmployee={false} employeeInfo={empInfo} />
     );
 };
 
