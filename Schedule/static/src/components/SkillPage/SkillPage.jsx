@@ -26,8 +26,8 @@ const SkillPage = ({ addNew, existingInfo }) => {
                     <tbody>
                         <tr>
                             <td> {addNew ? <input id="skillName" /> : <input defaultValue={existingInfo[0]} id="skillName" />}</td>
-                            <td> {addNew ? <input id="role" /> : <input defaultValue={existingInfo[1]} id="firstName" />}</td>
-                            <td> {addNew ? <input id="importance" /> : <input defaultValue={existingInfo[2]} id="lastName" />}</td>
+                            <td> {addNew ? <input id="role" /> : <input defaultValue={existingInfo[3]} id="role" />}</td>
+                            <td> {addNew ? <input id="importance" /> : <input defaultValue={existingInfo[2]} id="importance" />}</td>
                         </tr>
                     </tbody>
                     
@@ -52,26 +52,26 @@ const SkillPage = ({ addNew, existingInfo }) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td><text>Start Time</text></td>
-                            <td> {addNew ? <input id="sunday_1" /> : <input defaultValue={existingInfo[11][0]} id="sunday_1" />}</td>
-                            <td> {addNew ? <input id="monday_1" /> : <input defaultValue={existingInfo[11][1]} id="monday_1" />}</td>
-                            <td> {addNew ? <input id="tuesday_1" /> : <input defaultValue={existingInfo[11][2]} id="tuesday_1" />}</td>
-                            <td> {addNew ? <input id="wednesday_1" /> : <input defaultValue={existingInfo[11][3]} id="wednesday_1" />}</td>
-                            <td> {addNew ? <input id="thursday_1" /> : <input defaultValue={existingInfo[11][4]} id="thursday_1" />}</td>
-                            <td> {addNew ? <input id="friday_1" /> : <input defaultValue={existingInfo[11][5]} id="friday_1" />}</td>
-                            <td> {addNew ? <input id="saturday_1" /> : <input defaultValue={existingInfo[11][6]} id="saturday_1" />}</td>
+                            <td>Start Time</td>
+                            <td> {addNew ? <input id="sunday_1" /> : <input defaultValue={existingInfo[1][0]} id="sunday_1" />}</td>
+                            <td> {addNew ? <input id="monday_1" /> : <input defaultValue={existingInfo[1][1]} id="monday_1" />}</td>
+                            <td> {addNew ? <input id="tuesday_1" /> : <input defaultValue={existingInfo[1][2]} id="tuesday_1" />}</td>
+                            <td> {addNew ? <input id="wednesday_1" /> : <input defaultValue={existingInfo[1][3]} id="wednesday_1" />}</td>
+                            <td> {addNew ? <input id="thursday_1" /> : <input defaultValue={existingInfo[1][4]} id="thursday_1" />}</td>
+                            <td> {addNew ? <input id="friday_1" /> : <input defaultValue={existingInfo[1][5]} id="friday_1" />}</td>
+                            <td> {addNew ? <input id="saturday_1" /> : <input defaultValue={existingInfo[1][6]} id="saturday_1" />}</td>
 
                         </tr>
 
                         <tr>
-                            <td><text>End Time</text></td>
-                            <td> {addNew ? <input id="sunday_2" /> : <input defaultValue={existingInfo[11][7]} id="sunday_2" />}</td>
-                            <td> {addNew ? <input id="monday_2" /> : <input defaultValue={existingInfo[11][8]} id="monday_2" />}</td>
-                            <td> {addNew ? <input id="tuesday_2" /> : <input defaultValue={existingInfo[11][9]} id="tuesday_2" />}</td>
-                            <td> {addNew ? <input id="wednesday_2" /> : <input defaultValue={existingInfo[11][10]} id="wednesday_2" />}</td>
-                            <td> {addNew ? <input id="thursday_2" /> : <input defaultValue={existingInfo[11][11]} id="thursday_2" />}</td>
-                            <td> {addNew ? <input id="friday_2" /> : <input defaultValue={existingInfo[11][12]} id="friday_2" />}</td>
-                            <td> {addNew ? <input id="saturday_2" /> : <input defaultValue={existingInfo[11][13]} id="saturday_2" />}</td>
+                            <td>End Time</td>
+                            <td> {addNew ? <input id="sunday_2" /> : <input defaultValue={existingInfo[1][7]} id="sunday_2" />}</td>
+                            <td> {addNew ? <input id="monday_2" /> : <input defaultValue={existingInfo[1][8]} id="monday_2" />}</td>
+                            <td> {addNew ? <input id="tuesday_2" /> : <input defaultValue={existingInfo[1][9]} id="tuesday_2" />}</td>
+                            <td> {addNew ? <input id="wednesday_2" /> : <input defaultValue={existingInfo[1][10]} id="wednesday_2" />}</td>
+                            <td> {addNew ? <input id="thursday_2" /> : <input defaultValue={existingInfo[1][11]} id="thursday_2" />}</td>
+                            <td> {addNew ? <input id="friday_2" /> : <input defaultValue={existingInfo[1][12]} id="friday_2" />}</td>
+                            <td> {addNew ? <input id="saturday_2" /> : <input defaultValue={existingInfo[1][13]} id="saturday_2" />}</td>
                          
                         </tr>
                     </tbody>

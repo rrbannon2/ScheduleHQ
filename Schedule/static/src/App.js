@@ -4,8 +4,9 @@ import StickyNavbar from './components/TopNavbar/StickyNavbar';
 // import EmployeeTable from './components/EmployeeTable/EmployeeTable';
 // import AddEmployeeTable from './components/AddEmployeeTable/AddEmployeeTable';
 // import BaseEmployeeDataTable from './components/BaseEmployeeDataTable/BaseEmployeeDataTable';
-import EditEmployeeDataTable from './components/EditEmployeeDataTable/EditEmployeeDataTable';
-import AddSkillPage from './components/AddSkill/addSkill';
+// import EditEmployeeDataTable from './components/EditEmployeeDataTable/EditEmployeeDataTable';
+// import AddSkillPage from './components/AddSkill/addSkill';
+import EditSkillPage from './components/EditSkill/EditSkill';
 
 const App = () => {
   return (
@@ -16,7 +17,8 @@ const App = () => {
       {/* <AddEmployeeTable/> */}
       {/* <BaseEmployeeDataTable /> */}
       {/* <EditEmployeeDataTable employeeName={1} /> */}
-      <AddSkillPage />
+      {/* <AddSkillPage /> */}
+      <EditSkillPage dataID={"TestSkill"} />
     </div>
   );
 };
