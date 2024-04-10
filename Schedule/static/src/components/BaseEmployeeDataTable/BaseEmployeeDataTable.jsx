@@ -133,7 +133,6 @@ function PrepEmployeeData(addEmployee) {
         };
     };
     
-    addEmployee ? FetchComponent(basicJsonDict, "POST", "/addEmployee") : FetchComponent(basicJsonDict, "POST", "/updateEmployee");
-    // FetchComponent("Manager","GET","/loadEmployeeInfo");
+    addEmployee ? FetchComponent(basicJsonDict, "POST", "/addEmployee",null) : FetchComponent(basicJsonDict, "POST", "/updateEmployee",null);
 };
 export default BaseEmployeeDataTable;

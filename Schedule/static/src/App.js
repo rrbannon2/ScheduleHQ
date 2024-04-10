@@ -4,7 +4,7 @@ import StickyNavbar from './components/TopNavbar/StickyNavbar';
 // import EmployeeTable from './components/EmployeeTable/EmployeeTable';
 // import AddEmployeeTable from './components/AddEmployeeTable/AddEmployeeTable';
 // import BaseEmployeeDataTable from './components/BaseEmployeeDataTable/BaseEmployeeDataTable';
-// import EditEmployeeDataTable from './components/EditEmployeeDataTable/EditEmployeeDataTable';
+import EditEmployeeDataTable from './components/EditEmployeeDataTable/EditEmployeeDataTable';
 // import AddSkillPage from './components/AddSkill/addSkill';
 import EditSkillPage from './components/EditSkill/EditSkill';
 
@@ -16,9 +16,9 @@ const App = () => {
       {/* <EmployeeTable /> */}
       {/* <AddEmployeeTable/> */}
       {/* <BaseEmployeeDataTable /> */}
-      {/* <EditEmployeeDataTable employeeName={1} /> */}
+      <EditEmployeeDataTable dataID={2} />
       {/* <AddSkillPage /> */}
-      <EditSkillPage dataID={"TestSkill"} />
+      {/* <EditSkillPage dataID={"TestSkill"} /> */}
     </div>
   );
 };
