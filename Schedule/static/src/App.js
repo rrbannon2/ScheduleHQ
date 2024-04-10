@@ -1,10 +1,11 @@
 import React from 'react';
 import StickyNavbar from './components/TopNavbar/StickyNavbar';
-import VerticalNavbar from './components/VerticalNavbar/VerticalNavbar';
-import EmployeeTable from './components/EmployeeTable/EmployeeTable';
-import AddEmployeeTable from './components/AddEmployeeTable/AddEmployeeTable';
-import BaseEmployeeDataTable from './components/BaseEmployeeDataTable/BaseEmployeeDataTable';
+// import VerticalNavbar from './components/VerticalNavbar/VerticalNavbar';
+// import EmployeeTable from './components/EmployeeTable/EmployeeTable';
+// import AddEmployeeTable from './components/AddEmployeeTable/AddEmployeeTable';
+// import BaseEmployeeDataTable from './components/BaseEmployeeDataTable/BaseEmployeeDataTable';
 import EditEmployeeDataTable from './components/EditEmployeeDataTable/EditEmployeeDataTable';
+import AddSkillPage from './components/AddSkill/addSkill';
 
 const App = () => {
   return (
@@ -14,7 +15,8 @@ const App = () => {
       {/* <EmployeeTable /> */}
       {/* <AddEmployeeTable/> */}
       {/* <BaseEmployeeDataTable /> */}
-      <EditEmployeeDataTable employeeName={1} />
+      {/* <EditEmployeeDataTable employeeName={1} /> */}
+      <AddSkillPage />
     </div>
   );
 };
