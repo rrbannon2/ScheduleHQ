@@ -8,7 +8,9 @@ import StickyNavbar from './components/TopNavbar/StickyNavbar';
 // import AddSkillPage from './components/AddSkill/addSkill';
 // import EditSkillPage from './components/EditSkill/EditSkill';
 // import AddShiftPage from './components/AddShift/AddShift';
-import EditShiftPage from './components/EditShift/EditShift';
+// import EditShiftPage from './components/EditShift/EditShift';
+import BusinessInfoPage from './components/BusinessInfo/BusinessInfo';
+import UpdateBusinessInfo from './components/BusinessInfo/UpdateBusinessInfo';
 
 const App = () => {
   return (
@@ -22,7 +24,9 @@ const App = () => {
       {/* <AddSkillPage /> */}
       {/* <EditSkillPage dataID={"TestSkill"} /> */}
       {/* <AddShiftPage /> */}
-      <EditShiftPage dataID={"TestShift"} />
+      {/* <EditShiftPage dataID={"TestShift"} /> */}
+      {/* <BusinessInfoPage addNew={false} existingInfo={null} /> */}
+      <UpdateBusinessInfo />
     </div>
   );
 };

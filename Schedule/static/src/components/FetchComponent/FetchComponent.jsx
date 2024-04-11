@@ -2,10 +2,9 @@
 export default function FetchComponent(inputData, whichMethod, where, searchParamName) {
     return new Promise((resolve, reject) => {
         if (whichMethod === "GET") {
+            var searchURL = searchParamName ? "?" + new URLSearchParams(searchParamName + "=" + inputData["dataID"]) : "";
         
-            // fetch(where + "?" + searchParam new URLSearchParams({ searchParamName: inputData["employeeName"] }), {
-            // console.log(searchParam);
-            fetch(where + "?" + new URLSearchParams(searchParamName+"="+inputData["dataID"]), {
+            fetch(where + searchURL, {
                 method: whichMethod,
                 headers: {
                     'Content-Type': 'application/json',
