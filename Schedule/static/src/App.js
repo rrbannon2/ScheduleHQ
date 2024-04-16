@@ -11,6 +11,7 @@ import StickyNavbar from './components/TopNavbar/StickyNavbar';
 // import EditShiftPage from './components/EditShift/EditShift';
 import BusinessInfoPage from './components/BusinessInfo/BusinessInfo';
 import UpdateBusinessInfo from './components/BusinessInfo/UpdateBusinessInfo';
+import BaseDropDownMenu from './components/BaseDropDownMenu/BaseDropDownMenu';
 
 const App = () => {
   return (
@@ -26,7 +27,8 @@ const App = () => {
       {/* <AddShiftPage /> */}
       {/* <EditShiftPage dataID={"TestShift"} /> */}
       {/* <BusinessInfoPage addNew={false} existingInfo={null} /> */}
-      <UpdateBusinessInfo />
+      {/* <UpdateBusinessInfo /> */}
+      <BaseDropDownMenu URL = "/loadEmployeeNames" />
     </div>
   );
 };
