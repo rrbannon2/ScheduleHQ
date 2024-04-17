@@ -5,8 +5,6 @@ import FetchComponent from '../FetchComponent/FetchComponent';
 
 
 const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
-    console.log(employeeInfo);
-    // const [empInfo, setEmpInfo] = useState(null);
     
     return (
         <div className='tableContainer'>

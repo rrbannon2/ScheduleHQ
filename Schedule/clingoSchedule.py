@@ -16,7 +16,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     truck_day = truck_day_i
     overtime_allowed = False
     weekend_rotation = True
-    store_manager_name = "general"
+    store_manager_name = "1"
     otExemptRole = 2
     num_models = 0
     
@@ -114,7 +114,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             shift_name = shift[0].lower().replace(" ", "_")
             importance = shift[2]
             max_hours = shift[3]
-            clingo_code = set_important_shift(shift_name,start_times,end_times,0,importance,clingo_code,maximum_shift_hours=max_hours)
+            clingo_code += set_important_shift(shift_name,start_times,end_times,0,importance,maximum_shift_hours=max_hours)
         return clingo_code
 
     def set_skill_levels(employee_skill_levels_dict):
@@ -163,7 +163,8 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             self.skills = {}
             self.wage = wage//2
             self.first_name = first_name.lower() #Should be updatable.
-            self.last_name = last_name 
+            self.last_name = last_name.lower()
+            self.clingo_id = str(employee_id)
             self.minimum_weekly_hours = min_weekly * 2
             self.maximum_weekly_hours = max_weekly * 2
             self.minimum_shift_length = min_shift * 2
@@ -206,7 +207,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             
 
         def add_employee(self):
-            clingo_addition = 'employee({},{},{}).'.format(self.first_name, self.role,self.wage)
+            clingo_addition = 'employee({},{},{}).'.format(self.clingo_id, self.role,self.wage)
             return clingo_addition
         
         #TODO: minimum weekly hours rules should depend on whether emp is available for enough hours that week.
@@ -214,45 +215,45 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             self.minimum_weekly_hours = new_min_hours
             clingo_addition = ''
             for week in weeks:
-                clingo_addition += ':- hours_count({},{},X), X < {}.'.format(self.first_name, week, new_min_hours)
+                clingo_addition += ':- hours_count({},{},X), X < {}.'.format(self.clingo_id, week, new_min_hours)
             return clingo_addition
 
         def set_maximum_weekly_hours(self, new_max_hours, weeks = [wk for wk in range(weeks_scheduled,weeks_to_schedule)]):
             self.maximum_weekly_hours = new_max_hours
             clingo_addition = ''
             for week in weeks:
-                clingo_addition = ':- hours_count({},{},X), X > {}. '.format(self.first_name, week, new_max_hours)
+                clingo_addition = ':- hours_count({},{},X), X > {}. '.format(self.clingo_id, week, new_max_hours)
             return clingo_addition
 
         def set_minimum_shift_length(self, new_min_shift_length):
             self.minimum_shift_length = new_min_shift_length
-            clingo_addition = ':- hours_count({},D,W,X),X < {}, assign(_,D,W,{}). '.format(self.first_name,new_min_shift_length,self.first_name)
+            clingo_addition = ':- hours_count({},D,W,X),X < {}, assign(_,D,W,{}). '.format(self.clingo_id,new_min_shift_length,self.clingo_id)
             return clingo_addition
         
         def set_maximum_shift_length(self, new_max_shift_length):
             self.maximum_shift_length = new_max_shift_length
-            clingo_addition = ':- hours_count({},D,W,X),X > {}. '.format(self.first_name,new_max_shift_length)
+            clingo_addition = ':- hours_count({},D,W,X),X > {}. '.format(self.clingo_id,new_max_shift_length)
             return clingo_addition
         
         def set_max_days(self):
-            clingo_addition = ':- days_count({},W,X), X > {}. '.format(self.first_name, self.max_days)
+            clingo_addition = ':- days_count({},W,X), X > {}. '.format(self.clingo_id, self.max_days)
             return clingo_addition
         
         def set_skill_level(self,skill,skill_lvl):
             self.skills[skill] = skill_lvl
 
         def set_clingo_skill_levels(self,skill,skill_lvl):
-            clingo_addition = 'skill_level({},{},{},{}). '.format(self.first_name,skill,skill_lvl,self.role)
+            clingo_addition = 'skill_level({},{},{},{}). '.format(self.clingo_id,skill,skill_lvl,self.role)
             return clingo_addition
             
         #TODO: shift length that triggers meal break should be an argument not a preset constant
         def add_meal_break(self):
             clingo_addition = '{meal_break(TOD,D,W,'
-            clingo_addition += '{}) : time(TOD,D,W)'.format(self.first_name)
+            clingo_addition += '{}) : time(TOD,D,W)'.format(self.clingo_id)
             clingo_addition += '} = 1'
-            clingo_addition += ' :- hours_count({},D,W,X), X > 12. '.format(self.first_name)
-            clingo_addition += 'assign(TOD,D,W,{}) :- meal_break(TOD+1,D,W,{}). '.format(self.first_name, self.first_name)
-            clingo_addition += 'assign(TOD,D,W,{}) :- meal_break(TOD-1,D,W,{}). '.format(self.first_name, self.first_name)
+            clingo_addition += ' :- hours_count({},D,W,X), X > 12. '.format(self.clingo_id)
+            clingo_addition += 'assign(TOD,D,W,{}) :- meal_break(TOD+1,D,W,{}). '.format(self.clingo_id, self.clingo_id)
+            clingo_addition += 'assign(TOD,D,W,{}) :- meal_break(TOD-1,D,W,{}). '.format(self.clingo_id, self.clingo_id)
             return clingo_addition
 
     
@@ -319,7 +320,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
                 emp_vals = list(Employee.employees.values())
                 for k in range(len(emp_vals)):
                     if emp_vals[k].shift_preferences[L][i][j-schedule_blocks[i][0]] != 0:
-                        pref_block = 'shift_preference({},{},{},{},{}).   '.format(j,i+(L*7),L,emp_vals[k].first_name, emp_vals[k].shift_preferences[L][i][j-schedule_blocks[i][0]])
+                        pref_block = 'shift_preference({},{},{},{},{}).   '.format(j,i+(L*7),L,emp_vals[k].clingo_id, emp_vals[k].shift_preferences[L][i][j-schedule_blocks[i][0]])
                         clingo_code += pref_block
 
 
@@ -340,21 +341,13 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     clingo_code += no_breaking_up_shifts
 
 
-    # clingo_code = set_important_shift('truck',19,schedule_blocks[truck_day][1],truck_day,0,7,clingo_code)
-    # clingo_code = set_important_shift('truck',11,last_schedule_block,truck_day,1,7,clingo_code)
-    # clingo_code = set_important_shift('truck',11,last_schedule_block,truck_day,2,7,clingo_code)
-
-    # clingo_code = set_required_skill_for_shift(20,last_schedule_block,'count_drawers',5,1,clingo_code)
-    # clingo_code = set_required_skill_for_shift(0,14,'dsd',3,1,clingo_code,days=[1,2,3,4,5])
-    # clingo_code = set_required_skill_for_shift(14,last_schedule_block,'sign_audit',4,1,clingo_code,days = [0])
-
     meal_breaks_not_allowed_close_to_shift_start = ':- meal_break(TOD2,D,W,EID), not assign(TOD,D,W,EID), TOD2 = TOD + 3.'
     meal_breaks_not_allowed_close_to_shift_end = ':- meal_break(TOD,D,W,EID), not assign(TOD2,D,W,EID), TOD2 = TOD + 3.'
     clingo_code += meal_breaks_not_allowed_close_to_shift_start
     clingo_code += meal_breaks_not_allowed_close_to_shift_end
 
     if overtime_allowed == False:
-        clingo_code += ':- hours_count(EID,W,X), X>80, not EID = {}.'.format("general")
+        clingo_code += ':- hours_count(EID,W,X), X>80, not EID = {}.'.format(store_manager_name)
     else:
         clingo_code += ':~ hours_count(EID,W,X), X>80, not role = {}, Y = X - 80, Weight = Y * 3.[Weight]'
          
@@ -379,19 +372,18 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
 
 
     """
-    # print(clingo_code)
     solution = None
 
     days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
     def on_model(model):
         emp_names = []
         for emp in Employee.employees.values():
-            emp_names.append(emp.first_name)
+            emp_names.append(emp.clingo_id)
         schedule_dict = {wk:{name:{} for name in emp_names} for wk in range(weeks_to_schedule)}
         for wk in range(weeks_to_schedule):
             for emp in Employee.employees.values():
                 for i in range(7):
-                    schedule_dict[wk][emp.first_name][i] = []
+                    schedule_dict[wk][emp.clingo_id][i] = []
         
 
         solution = str(model)
@@ -423,7 +415,8 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             for wk in schedule_dict.keys():
                 for emp in schedule_dict[wk].keys():
                     for day in schedule_dict[wk][emp].keys():
-                        formatted_emp = emp.capitalize()
+                        emp_obj = Employee.employees[int(emp)]
+                        formatted_emp = emp_obj.first_name.capitalize() + " " + emp_obj.last_name.capitalize()
 
                         if schedule_dict[wk][emp][day]:
                             schedule_block = '{}:{}-{},'.format(formatted_emp,((min(schedule_dict[wk][emp][day])-8)/2)+8,((max(schedule_dict[wk][emp][day])-8)/2)+8.5)
@@ -441,7 +434,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
 
         control = clingo.Control()
         control.configuration.solve.models = num_models #Control how many unique models are generated.
-        print(clingo_code)
+
         try:
             control.add("base", [], clingo_code)
         except:

@@ -44,19 +44,7 @@ function formatScheduleData(data) {
             console.log(shiftTime);
             if (scheduleDict.hasOwnProperty(empName)) {
                 scheduleDict[empName].push(shiftTime);
-                // if (shiftTime != "Off") {
-                //     var times = shiftTime.split("-");
-                //     scheduleDict[empName].push(times);
-                // }
-                // else {
-                //     scheduleDict[empName].push("Off");
-                // };
             }
-            // else if (shiftTime != "Off"){
-            //     scheduleDict[empName] = [];
-            //     var times = shiftTime.split("-");
-            //     scheduleDict[empName].push(times);
-            // }
             else {
                 scheduleDict[empName] = [];
                 scheduleDict[empName].push(shiftTime);

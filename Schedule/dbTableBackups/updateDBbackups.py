@@ -7,7 +7,7 @@ def update_backup(table,filename,cursor):
 
     cursor.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier(table)))
     data = cursor.fetchall()
-    with open('schedule/dbTableBackups/{}'.format(filename),'w') as file:
+    with open('Schedule/dbTableBackups/{}'.format(filename),'w') as file:
         for line in data:
             file.write(str(line))
             file.write(str("\n"))

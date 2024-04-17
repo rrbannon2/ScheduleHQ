@@ -4,6 +4,8 @@ from psycopg2 import sql
 conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
 cur = conn.cursor()
 
+
+
 def load_table_data(table_file_name,table_name):
     with open(table_file_name,'r') as table_file:
         if table_name in ['employees','extremes','skills'] :
@@ -50,13 +52,14 @@ def update_local_db(table,file):
     delete_existing_table(table)
     load_table_data(file,table)
     check_table_data(table)
+    conn.commit()
 
-update_local_db('employees','schedule/dbTableBackups/employees.sql')
-update_local_db('availability','schedule/dbTableBackups/availability.sql')
-update_local_db('extremes','schedule/dbTableBackups/extremes.sql')
-update_local_db('required_skills_for_shift','schedule/dbTableBackups/required_skills_for_shift.sql')
-update_local_db('business_info','schedule/dbTableBackups/business_info.sql')
-update_local_db('skills','schedule/dbTableBackups/skills.sql')
+update_local_db('employees','Schedule/dbTableBackups/employees.sql')
+update_local_db('availability','Schedule/dbTableBackups/availability.sql')
+update_local_db('extremes','Schedule/dbTableBackups/extremes.sql')
+update_local_db('required_skills_for_shift','Schedule/dbTableBackups/required_skills_for_shift.sql')
+update_local_db('business_info','Schedule/dbTableBackups/business_info.sql')
+update_local_db('skills','Schedule/dbTableBackups/skills.sql')
 update_local_db('shifts','Schedule/dbTableBackups/shifts.sql')
 
 
