@@ -42,8 +42,10 @@ def update_table_data(table_name,line):
     cur.execute(sql.SQL("INSERT INTO {} VALUES" + values_string).format(sql.Identifier('{}'.format(table_name))),line)
     
 def delete_existing_table(table_name):
-    cur.execute(sql.SQL('DELETE FROM {}').format(sql.Identifier('{}'.format(table_name))))
-
+    try:
+        cur.execute(sql.SQL('DELETE FROM {}').format(sql.Identifier('{}'.format(table_name))))
+    except:
+        print("{} table does not exist, could not be deleted.")
 def check_table_data(table_name):
     cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('{}'.format(table_name))))
     print(cur.fetchall())
