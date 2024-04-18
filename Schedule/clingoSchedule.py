@@ -417,13 +417,30 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
                     for day in schedule_dict[wk][emp].keys():
                         emp_obj = Employee.employees[int(emp)]
                         formatted_emp = emp_obj.first_name.capitalize() + " " + emp_obj.last_name.capitalize()
-
-                        if schedule_dict[wk][emp][day]:
-                            schedule_block = '{}:{}-{},'.format(formatted_emp,((min(schedule_dict[wk][emp][day])-8)/2)+8,((max(schedule_dict[wk][emp][day])-8)/2)+8.5)
-                            schedule.append(schedule_block)
+                        if day == 0:
+                            if schedule_dict[wk][emp][day]:
+                                schedule_block = '{}:{}-{},'.format(formatted_emp,((min(schedule_dict[wk][emp][day])-8)/2)+8,((max(schedule_dict[wk][emp][day])-8)/2)+8.5)
+                                
+                            else:
+                                schedule_block = formatted_emp + ':' + 'Off,'
+                                
+                        elif day == 6:
+                            if schedule_dict[wk][emp][day]:
+                                schedule_block += '{}-{},'.format(((min(schedule_dict[wk][emp][day])-8)/2)+8,((max(schedule_dict[wk][emp][day])-8)/2)+8.5)
+                                schedule.append(schedule_block + ';')
+                            else:
+                                schedule_block += 'Off,'
+                                schedule.append(schedule_block + ';')
                         else:
-                            schedule_block = formatted_emp + ':' + 'Off,'
-                            schedule.append(schedule_block)
+                            if schedule_dict[wk][emp][day]:
+                                schedule_block += '{}-{},'.format(((min(schedule_dict[wk][emp][day])-8)/2)+8,((max(schedule_dict[wk][emp][day])-8)/2)+8.5)
+                                
+                            else:
+                                schedule_block += 'Off,'
+
+
+
+
             
             file2.writelines(schedule)
         return solution

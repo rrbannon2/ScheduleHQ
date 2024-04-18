@@ -115,6 +115,17 @@ def write():
 
     return jsonify(solution)
 
+@app.route('/getSchedule',methods= ["GET"])
+def get_schedule():
+    with open('Schedule/scheduleFile.txt','r') as file0:
+        solution = file0.read()
+        solution = solution.replace(':',',')
+        solution = solution.split(';')
+        
+
+    return jsonify(solution)
+
+
 @app.route('/addEmployeePage',methods = ["GET"])
 def add_emp_home():
     return render_template('addEmployee.html')

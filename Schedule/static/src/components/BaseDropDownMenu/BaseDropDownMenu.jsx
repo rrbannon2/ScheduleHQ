@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Dropdown } from 'react-bootstrap';
-
 import FetchComponent from '../FetchComponent/FetchComponent';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 
@@ -22,7 +21,6 @@ const BaseDropDownMenu = ({ URL }) => {
         fetchData();
     }, [URL]);
 
-    // Render component only when fetchedInfo is available
     return (
         fetchedInfo &&
         <Dropdown>

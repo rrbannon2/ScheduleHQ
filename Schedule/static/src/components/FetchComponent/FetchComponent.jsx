@@ -18,7 +18,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 
                 })
                 .then(data => {
-                    console.log(data[0]);
+                    // console.log(data);
                     resolve(data);
                 })
                 .catch(error => {

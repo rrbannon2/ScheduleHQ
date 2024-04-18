@@ -12,6 +12,7 @@ import StickyNavbar from './components/TopNavbar/StickyNavbar';
 import BusinessInfoPage from './components/BusinessInfo/BusinessInfo';
 import UpdateBusinessInfo from './components/BusinessInfo/UpdateBusinessInfo';
 import BaseDropDownMenu from './components/BaseDropDownMenu/BaseDropDownMenu';
+import DisplaySchedulePage from './components/DisplaySchedule/DisplaySchedulePage';
 
 const App = () => {
   return (
@@ -28,7 +29,8 @@ const App = () => {
       {/* <EditShiftPage dataID={"TestShift"} /> */}
       {/* <BusinessInfoPage addNew={false} existingInfo={null} /> */}
       {/* <UpdateBusinessInfo /> */}
-      <BaseDropDownMenu URL = "/loadEmployeeNames" />
+      {/* <BaseDropDownMenu URL = "/loadEmployeeNames" /> */}
+      <DisplaySchedulePage />
     </div>
   );
 };
