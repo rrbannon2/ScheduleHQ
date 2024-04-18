@@ -53,10 +53,10 @@ const DisplaySchedulePage = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {fetchedInfo.map((value, key) => {
+                        {fetchedInfo.map((value) => {
                             var splitVal = value.split(",");
                             return (
-                                <tr key={splitVal[0]}>
+                                <tr key = {splitVal[0]}>
                                     <td>{splitVal[0]}</td>
                                     <td>{splitVal[1]}</td>
                                     <td>{splitVal[2]}</td>
