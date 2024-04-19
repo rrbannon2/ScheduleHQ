@@ -29,7 +29,7 @@ function filterFunction() {
 };
 
 function getEmployees(){
-    fetch('/loadEmployeeNames', {
+    fetch('/loadEmployeeListData', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

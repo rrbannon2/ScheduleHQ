@@ -53,12 +53,12 @@ def load_employee_info():
     conn.close()
     return jsonify(query_response)
 
-@app.route('/loadEmployeeNames',methods = ["GET"])
+@app.route('/loadEmployeeListData',methods = ["GET"])
 def load_employee_names():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(sql.SQL("SELECT first_name, last_name, id FROM {}").format(sql.Identifier('employees')))
+    cursor.execute(sql.SQL("SELECT first_name, last_name, id, role FROM {}").format(sql.Identifier('employees')))
     return jsonify(cursor.fetchall())
 
 @app.route('/selectEmpToEdit', methods = ["GET"])
