@@ -1,11 +1,36 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from "axios";
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import './EmployeeTable.css';
 import AddEmployeeModal from '../AddEmployeeModal/AddEmployeeModal';
+import FetchComponent from '../FetchComponent/FetchComponent';
 
 const EmployeeTable = () => {
+    const [listOfEmployees, setListOfEmployees] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    console.log(showModal);
+
+    useEffect(() => {
+        axios.get("http://localhost:3000/loadEmployeeListData").then((response) => {
+            setListOfEmployees(response.data);
+        });
+    }, []);
+    console.log(listOfEmployees);
+    // const [fetchedInfo, setFetchedInfo] = useState(null);
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const data = await FetchComponent(null, "GET", "loadEmployeeNames", false);
+    //             setFetchedInfo(data);
+    //             console.log(data);
+    //         } catch (error) {
+    //             console.error("Error fetching shift data", error);
+    //             // Handle the error accordingly
+    //         }
+    //     };
+
+    //     fetchData();
+    // }, []);
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -85,8 +110,8 @@ const EmployeeTable = () => {
                 </Table>
             </div>
             {showModal &&
-                    <AddEmployeeModal show={showModal} handleClose={() => setShowModal(false)}/>
-                }
+                <AddEmployeeModal show={showModal} handleClose={() => setShowModal(false)} />
+            }
         </div>
     );
 };
