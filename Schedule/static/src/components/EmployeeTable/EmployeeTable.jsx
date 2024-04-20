@@ -3,7 +3,7 @@ import axios from "axios";
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import './EmployeeTable.css';
 import AddEmployeeModal from '../AddEmployeeModal/AddEmployeeModal';
-import FetchComponent from '../FetchComponent/FetchComponent';
+import { Link, useHref } from 'react-router-dom';
 
 const EmployeeTable = () => {
     const [listOfEmployees, setListOfEmployees] = useState([]);
@@ -15,22 +15,7 @@ const EmployeeTable = () => {
         });
     }, []);
     console.log(listOfEmployees);
-    // const [fetchedInfo, setFetchedInfo] = useState(null);
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             const data = await FetchComponent(null, "GET", "loadEmployeeNames", false);
-    //             setFetchedInfo(data);
-    //             console.log(data);
-    //         } catch (error) {
-    //             console.error("Error fetching shift data", error);
-    //             // Handle the error accordingly
-    //         }
-    //     };
-
-    //     fetchData();
-    // }, []);
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -40,7 +25,8 @@ const EmployeeTable = () => {
                     </Col>
                     <Col className='d-flex justify-content-end'>
                         <Button id='addEmployee'>
-                            Add Employee
+                            <Link id='addEmpLink' to="/addemptable">Add Employee</Link>
+                            
                         </Button>
                     </Col>
                 </Row>

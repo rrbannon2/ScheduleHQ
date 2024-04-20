@@ -18,8 +18,12 @@
 #addEmployee {
     background-color: #F4572F;
     border-color: #F4572F;
+    
 }
-
+#addEmpLink {
+    color: #fff !important;
+    text-decoration: none;
+}
 /* 
 #4C5DDD
 #1720F5
