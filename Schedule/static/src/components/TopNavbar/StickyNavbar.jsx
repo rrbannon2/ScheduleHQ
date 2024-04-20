@@ -17,7 +17,7 @@ const StickyNavbar = () => {
               <Link to="/employeetable">Employees </Link>
             </Nav.Link>
             <Nav.Link>
-              <Link to="/addskill">Skills</Link>
+              <Link to="/skillstable">Skills</Link>
             </Nav.Link>
             <Nav.Link>
               <Link to="/shiftstable">Shifts </Link>

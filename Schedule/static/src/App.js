@@ -14,6 +14,7 @@ import UpdateBusinessInfo from './components/BusinessInfo/UpdateBusinessInfo';
 import BaseDropDownMenu from './components/BaseDropDownMenu/BaseDropDownMenu';
 import DisplaySchedulePage from './components/DisplaySchedule/DisplaySchedulePage';
 import ShiftsTable from './components/ShiftsTable/ShiftsTable';
+import SkillsTable from './components/SkillsTable/SkillsTable';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 const App = () => {
@@ -46,6 +47,7 @@ const App = () => {
           <Route path="/updatebusinessinfo" element={<UpdateBusinessInfo />} />
           <Route path="/dropdownmenu" element={<BaseDropDownMenu URL="/loadEmployeeListData" />} />
           <Route path="/shiftstable" element={<ShiftsTable />} />
+          <Route path="/skillstable" element={<SkillsTable />} />
         </Routes>
       </Router>
     </div>
