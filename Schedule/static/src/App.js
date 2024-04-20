@@ -13,6 +13,7 @@ import BusinessInfoPage from './components/BusinessInfo/BusinessInfo';
 import UpdateBusinessInfo from './components/BusinessInfo/UpdateBusinessInfo';
 import BaseDropDownMenu from './components/BaseDropDownMenu/BaseDropDownMenu';
 import DisplaySchedulePage from './components/DisplaySchedule/DisplaySchedulePage';
+import ShiftsTable from './components/ShiftsTable/ShiftsTable';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 const App = () => {
@@ -36,14 +37,15 @@ const App = () => {
           <Route path="/employeetable" element={<EmployeeTable />} />
           <Route path="/addemptable" element={<AddEmployeeTable />} />
           <Route path="/baseemptable" element={<BaseEmployeeDataTable />} />
-          <Route path="/editemptable" element={<EditEmployeeDataTable dataID={"1"} />} />
+          <Route path="/editemptable" element={<EditEmployeeDataTable />} />
           <Route path="/addskill" element={<AddSkillPage />} />
           <Route path="/editskill" element={<EditSkillPage dataID={"TestSkill"} />} />
           <Route path="/addshift" element={<AddShiftPage />} />
-          <Route path="/editshift" element={<EditShiftPage dataID={"TestShift"} />} />
+          <Route path="/editshift" element={<EditShiftPage />} />
           <Route path="/businessinfo" element={<BusinessInfoPage addNew={false} existingInfo={null} />} />
           <Route path="/updatebusinessinfo" element={<UpdateBusinessInfo />} />
           <Route path="/dropdownmenu" element={<BaseDropDownMenu URL="/loadEmployeeListData" />} />
+          <Route path="/shiftstable" element={<ShiftsTable />} />
         </Routes>
       </Router>
     </div>

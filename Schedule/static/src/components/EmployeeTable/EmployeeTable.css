@@ -15,12 +15,12 @@
     color:#fff;
 }
 
-#addEmployee {
+#addNew {
     background-color: #F4572F;
     border-color: #F4572F;
     
 }
-#addEmpLink {
+#linkAddNew {
     color: #fff !important;
     text-decoration: none;
 }

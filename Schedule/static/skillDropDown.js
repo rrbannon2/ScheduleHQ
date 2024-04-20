@@ -29,7 +29,7 @@ function filterFunction() {
 };
 
 function getSkills(){
-    fetch('/loadSkills', {
+    fetch('/loadRequiredSkills', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

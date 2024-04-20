@@ -20,7 +20,7 @@ const ShiftPage = ({ addNew, existingInfo }) => {
                         <tr>
                             <th>Shift Name</th>
                             <th>Shift Importance</th>
-                            <th>Maximum Hours to Use</th>
+                            <th>Maximum Hours to Use</th> {/* Add hoverable info icon to inform user that if value is 0, no limit is being applied to number of hours used. */}
                         </tr>
                     </thead>
                     <tbody>

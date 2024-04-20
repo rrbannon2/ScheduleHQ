@@ -25,8 +25,8 @@ const EmployeeTable = () => {
                         <h4>Employees</h4>
                     </Col>
                     <Col className='d-flex justify-content-end'>
-                        <Button id='addEmployee'>
-                            <Link id='addEmpLink' to="/addemptable">Add Employee</Link>
+                        <Button id='addNew'>
+                            <Link id='linkAddNew' to="/addemptable">Add Employee</Link>
                             
                         </Button>
                     </Col>

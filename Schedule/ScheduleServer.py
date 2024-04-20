@@ -253,24 +253,25 @@ def edit_selected_skill_home():
 def edit_skills_home():
     return render_template('editSkills.html')
 
-@app.route('/loadSkills', methods = ["GET"])
-def load_skills():
-    return load_drop_down_info("skill","required_skills_for_shift")
+@app.route('/loadRequiredSkills', methods = ["GET"])
+def load_required_skills():
+    return load_drop_down_info(["skill","importance","role"],"required_skills_for_shift")
 
 @app.route('/loadShifts', methods = ["GET"])
 def load_shifts():
-    return load_drop_down_info("shiftname","shifts")
+    return load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
 
-def load_drop_down_info(column_to_select,table):
+def load_drop_down_info(columns_to_select,table):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute(sql.SQL("SELECT {} FROM {}").format(sql.Identifier(column_to_select),sql.Identifier(table)))
-    drop_down_data = cursor.fetchall()
+    cursor.execute(sql.SQL("SELECT {},{},{} FROM {}").format(sql.Identifier(columns_to_select[0]),sql.Identifier(columns_to_select[1]),sql.Identifier(columns_to_select[2]),sql.Identifier(table)))
+    query_response = cursor.fetchall()
         
     cursor.close()
     conn.close()
-    return jsonify(drop_down_data)
+    return_array = [{"name":x[0], "importance":x[1], columns_to_select[2]:x[2]} for x in query_response]
+    return jsonify(return_array)
 
 @app.route('/updateSkill',methods = ["POST"])
 def update_skill():
