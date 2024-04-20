@@ -30,9 +30,9 @@ const BaseDropDownMenu = ({ URL }) => {
         </Dropdown.Toggle>
 
         <Dropdown.Menu>
-                {fetchedInfo.map((value, key) => {
+                {fetchedInfo.map((value) => {
                     return (
-                        <Dropdown.Item>{value[0]} {value[1]}</Dropdown.Item>
+                        <Dropdown.Item key={value.id} >{value.firstName} {value.lastName}</Dropdown.Item>
                     );
                 })}
         </Dropdown.Menu>

@@ -59,7 +59,12 @@ def load_employee_names():
     cursor = conn.cursor()
 
     cursor.execute(sql.SQL("SELECT first_name, last_name, id, role FROM {}").format(sql.Identifier('employees')))
-    return jsonify(cursor.fetchall())
+    query_response = cursor.fetchall()
+    # return_dict = {"firstName":None,"lastName":query_response[1],"id":query_response[2],"role":query_response[3]}
+    return_array = [{"firstName":emp[0], "lastName":emp[1], "id":emp[2], "role":emp[3]} for emp in query_response]
+    # print(query_response)
+    return jsonify(return_array)
+    # return jsonify(query_response)
 
 @app.route('/selectEmpToEdit', methods = ["GET"])
 def select_emp_to_edit():
