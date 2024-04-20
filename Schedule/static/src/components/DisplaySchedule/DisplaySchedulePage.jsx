@@ -11,8 +11,6 @@ const DisplaySchedulePage = () => {
     useEffect(() => {
         const handleBeforeUnload = (event) => {
             event.preventDefault();
-            // Custom logic to handle the refresh
-            // Display a confirmation message or perform necessary actions
           };
         const fetchData = async () => {
             try {

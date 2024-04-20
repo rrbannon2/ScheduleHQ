@@ -17,6 +17,7 @@ const EmployeeTable = () => {
     console.log(listOfEmployees);
 
     return (
+        listOfEmployees &&
         <div className='tableContainer'>
             <div className='containerTitle'>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
@@ -33,14 +34,33 @@ const EmployeeTable = () => {
                 <Table striped hover>
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>ID</th>
                             <th>First Name</th>
                             <th>Last Name</th>
-                            <th>Username</th>
+                            <th>Role</th>
                             <th>Edit</th>
                         </tr>
                     </thead>
-                    <tbody>
+                        <tbody>
+                            {listOfEmployees.map((value) => {
+                                return (
+                                    <tr key={value.id}>
+                                        <td>{value.id}</td>
+                                        <td>{value.firstName}</td>
+                                        <td>{value.lastName}</td>
+                                        <td>{value.role}</td>
+                                        <td>
+                                            <Button variant='link'>
+                                                <Link to="/editemptable" state={value.id}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-three-dots" viewBox="0 0 16 16">
+                                                    <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
+                                                </svg>
+                                                </Link>
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         <tr>
                             <td>1</td>
                             <td>Mark</td>

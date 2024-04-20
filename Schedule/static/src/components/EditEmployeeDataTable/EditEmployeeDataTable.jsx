@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import BaseEmployeeDataTable from '../BaseEmployeeDataTable/BaseEmployeeDataTable';
 import FetchComponent from '../FetchComponent/FetchComponent';
+import { useLocation } from 'react-router-dom';
 
-const EditEmployeeDataTable = ( dataID ) => {
+const EditEmployeeDataTable = ( ) => {
     const [empInfo, setEmpInfo] = useState(null);
-
+    var dataID = { "dataID": useLocation().state };
+    
     useEffect(() => {
+        
         const fetchData = async () => {
             try {
                 const data = await FetchComponent(dataID, "GET", "/loadEmployeeInfo","employee");
@@ -17,7 +20,7 @@ const EditEmployeeDataTable = ( dataID ) => {
         };
 
         fetchData();
-    }, [dataID]);
+    }, []);
 
     // Render component only when empInfo is available
     return (
