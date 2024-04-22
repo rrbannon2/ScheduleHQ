@@ -40,7 +40,7 @@ const App = () => {
           <Route path="/baseemptable" element={<BaseEmployeeDataTable />} />
           <Route path="/editemptable" element={<EditEmployeeDataTable />} />
           <Route path="/addskill" element={<AddSkillPage />} />
-          <Route path="/editskill" element={<EditSkillPage dataID={"TestSkill"} />} />
+          <Route path="/editskill" element={<EditSkillPage />} />
           <Route path="/addshift" element={<AddShiftPage />} />
           <Route path="/editshift" element={<EditShiftPage />} />
           <Route path="/businessinfo" element={<BusinessInfoPage addNew={false} existingInfo={null} />} />

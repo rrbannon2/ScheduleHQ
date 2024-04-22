@@ -104,6 +104,6 @@ const PrepData = (addNew) => {
         };
     };
     
-    addNew ? FetchComponent(basicJsonDict, "POST", "/addShift") : FetchComponent(basicJsonDict, "POST", "/updateShift");
+    addNew ? FetchComponent(basicJsonDict, "POST", "/addShift",null) : FetchComponent(basicJsonDict, "POST", "/updateShift",null);
 };
 export default ShiftPage;

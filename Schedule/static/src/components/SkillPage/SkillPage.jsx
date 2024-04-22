@@ -104,6 +104,6 @@ const PrepData = (addNew) => {
         };
     };
     
-    addNew ? FetchComponent(basicJsonDict, "POST", "/addSkill") : FetchComponent(basicJsonDict, "POST", "/updateSkill");
+    addNew ? FetchComponent(basicJsonDict, "POST", "/addSkill",null) : FetchComponent(basicJsonDict, "POST", "/updateSkill",null);
 };
 export default SkillPage;
