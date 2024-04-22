@@ -13,6 +13,14 @@ def get_db_connection():
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
     return conn
 
+
+def add_default_emp_skill_level(skill,emp):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s)").format(sql.Identifier('skills')),[skill,emp,0])
+    conn.commit()
+    return None
+
 @app.route('/addEmployee',methods = ["POST"])
 def add_employee():
     emp_info = list(request.get_json().values())
@@ -279,7 +287,15 @@ def update_skill():
 
 @app.route('/addSkill', methods = ["POST"])
 def add_skill():
-    return use_info(request.get_json(),which_function="insert",table="required_skills_for_shift")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    status, skill = use_info(request.get_json(),which_function="insert",table="required_skills_for_shift")
+    if status == "Skill Added Successfully":
+        cursor.execute(sql.SQL("SELECT id FROM {}").format(sql.Identifier('employees')))
+        emp_ids = cursor.fetchall()
+        for id in emp_ids:
+            add_default_emp_skill_level(skill,id)
+    return jsonify("Operation successful")
 
 def use_info(info,which_function = None,table = None):
     if table == "required_skills_for_shift":
@@ -294,6 +310,7 @@ def use_info(info,which_function = None,table = None):
         importance = info['importance']
         role_or_max_hrs = 'role'
         name_column = "skill"
+        return_statement = "Skill Added Successfully",name
     elif table == "shifts":
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -306,18 +323,21 @@ def use_info(info,which_function = None,table = None):
         importance = info['importance']
         role_or_max_hrs = "maxhours"
         name_column = "shiftname"
+        return_statement = jsonify("Shift Added Successfully")
     else:
         return jsonify("Operation failed")
 
-    if which_function == "insert":
-        cursor.execute(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)").format(sql.Identifier(table)),[name, time_vals, importance, info3])
-    elif which_function == "update":
-        cursor.execute(sql.SQL("UPDATE {} SET (schedule_blocks,importance,{}) = (%s,%s,%s) WHERE {} = %s").format(sql.Identifier(table),sql.Identifier(role_or_max_hrs),sql.Identifier(name_column)),[time_vals,importance,info3,name])
-
+    try:
+        if which_function == "insert":
+            cursor.execute(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)").format(sql.Identifier(table)),[name, time_vals, importance, info3])
+        elif which_function == "update":
+            cursor.execute(sql.SQL("UPDATE {} SET (schedule_blocks,importance,{}) = (%s,%s,%s) WHERE {} = %s").format(sql.Identifier(table),sql.Identifier(role_or_max_hrs),sql.Identifier(name_column)),[time_vals,importance,info3,name])
+    except:
+        return jsonify("Operation failed")
     conn.commit()
     cursor.close()
     conn.close()
-    return jsonify("Operation successful")
+    return return_statement
 
 @app.route('/addShift',methods = ["POST"])
 def add_shift():
