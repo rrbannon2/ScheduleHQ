@@ -1,0 +1,14 @@
+
+
+button:hover {
+  opacity:1;
+}
+
+
+
+/* Add a color to the delete button */
+#deleteBtn {
+  background-color: #ff1100;
+  border-color: #ff1100;
+}
+

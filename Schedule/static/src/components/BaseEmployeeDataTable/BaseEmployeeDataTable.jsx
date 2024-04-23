@@ -2,9 +2,15 @@ import React,{useState, useEffect} from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import './BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
+import DeleteEmployeeModal from '../DeleteModal/DeleteModal';
 
 
 const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
+    const [showModal, setShowModal] = useState(false);
+    const DeleteEmployee = (empToDelete) => {
+        FetchComponent(empToDelete, "POST", "deleteEmployee"); 
+        setShowModal(false);
+    };
     
     return (
         <div className='tableContainer'>
@@ -99,7 +105,6 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                             <td> {addEmployee ? <input id="thursday_2" /> : <input defaultValue={employeeInfo[11][11]} id="thursday_2" />}</td>
                             <td> {addEmployee ? <input id="friday_2" /> : <input defaultValue={employeeInfo[11][12]} id="friday_2" />}</td>
                             <td> {addEmployee ? <input id="saturday_2" /> : <input defaultValue={employeeInfo[11][13]} id="saturday_2" />}</td>
-                         
                         </tr>
                     </tbody>
                 </Table>
@@ -110,12 +115,25 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                         </Button>
                     </Col>
                 </Row>
+                {addEmployee ? null : <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
+                    <Col className='d-flex justify-content-end'>
+                        <Button id='delete' onClick={() => setShowModal(true)}>
+                            Delete Employee
+                        </Button>
+                    </Col>
+                </Row>}
             </div>
+            {showModal &&
+                <DeleteEmployeeModal show={showModal} handleClose={() => setShowModal(false)} handleDelete={() => DeleteEmployee(employeeInfo[0])} />
+            }
+
         </div>
+        
     );
+
 };
 
-function PrepEmployeeData(addEmployee) {
+const PrepEmployeeData = (addEmployee) => {
     var basicInfoCells = ['id', 'firstName', 'lastName', 'role', 'wage', 'short_shift', 'long_shift', 'min_weekly_hours',
         'max_weekly_hours', 'min_days', 'max_days', 'sunday_1', 'monday_1', 'tuesday_1', 'wednesday_1', 'thursday_1', 'friday_1',
         'saturday_1', 'sunday_2', 'monday_2', 'tuesday_2', 'wednesday_2', 'thursday_2', 'friday_2', 'saturday_2'];
@@ -133,4 +151,8 @@ function PrepEmployeeData(addEmployee) {
     
     addEmployee ? FetchComponent(basicJsonDict, "POST", "/addEmployee",null) : FetchComponent(basicJsonDict, "POST", "/updateEmployee",null);
 };
+
+
+
+
 export default BaseEmployeeDataTable;

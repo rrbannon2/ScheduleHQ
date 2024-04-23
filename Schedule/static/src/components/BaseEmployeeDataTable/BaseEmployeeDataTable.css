@@ -24,12 +24,17 @@
 /* } */
 
 #addEmployee {
-    background-color: #F4572F;
-    border-color: #F4572F;
+    background-color: #ff8e0d;
+    border-color: #ff8e0d;
 }
 #addNew {
-    background-color: #F4572F;
-    border-color: #F4572F;
+    background-color: #ff8e0d;
+    border-color: #ff8e0d;
+}
+
+#delete{
+    background-color: #ff1100;
+    border-color: #ff1100;
 }
 
 /* 
