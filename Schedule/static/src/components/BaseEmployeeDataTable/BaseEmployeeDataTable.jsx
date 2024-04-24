@@ -2,7 +2,7 @@ import React,{useState, useEffect} from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import './BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
-import DeleteEmployeeModal from '../DeleteModal/DeleteModal';
+import { DeleteEmployeeModal } from '../DeleteModal/DeleteModal';
 
 
 const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
@@ -115,7 +115,8 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                         </Button>
                     </Col>
                 </Row>
-                {addEmployee ? null : <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
+                {addEmployee ? null :
+                    <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='d-flex justify-content-end'>
                         <Button id='delete' onClick={() => setShowModal(true)}>
                             Delete Employee

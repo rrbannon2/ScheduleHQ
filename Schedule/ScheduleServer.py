@@ -100,9 +100,7 @@ def update_employee():
     return jsonify("Updated Employee Information Saved Successfully.")
 
 @app.route('/deleteEmployee',methods = ["POST"])
-def delete_employee():
-    
-     
+def delete_employee():     
     emp_id = request.get_json()
     execute_SQL(sql.SQL("DELETE FROM {} WHERE id = %s").format(sql.Identifier('employees')),execute_args = [emp_id])
     execute_SQL(sql.SQL("DELETE FROM {} WHERE id = %s").format(sql.Identifier('extremes')),execute_args = [emp_id])
@@ -110,6 +108,14 @@ def delete_employee():
     execute_SQL(sql.SQL("DELETE FROM {} WHERE id = %s").format(sql.Identifier('skills')),execute_args = [emp_id])
 
     return jsonify("Employee Deleted.")
+
+@app.route('/deleteSkill',methods=["POST"])
+def delete_skill():
+    skill_name = request.get_json()
+    execute_SQL(sql.SQL("DELETE FROM {} WHERE skill = %s").format(sql.Identifier('required_skills_for_shift')),execute_args = [skill_name])
+    execute_SQL(sql.SQL("DELETE FROM {} WHERE skill = %s").format(sql.Identifier('skills')),execute_args = [skill_name])
+
+    return jsonify("Skill Deleted.")
 
 @app.route('/', methods=['GET'])
 def home():

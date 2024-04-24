@@ -2,11 +2,15 @@ import React,{useState, useEffect} from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
+import { DeleteSkillModal } from '../DeleteModal/DeleteModal';
 
 
 const SkillPage = ({ addNew, existingInfo }) => {
-    console.log(existingInfo);
-    
+    const [showModal, setShowModal] = useState(false);
+    const DeleteSkill = (toDelete) => {
+        FetchComponent(toDelete, "POST", "deleteSkill"); 
+        setShowModal(false);
+    };
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -83,7 +87,18 @@ const SkillPage = ({ addNew, existingInfo }) => {
                         </Button>
                     </Col>
                 </Row>
+                {addNew ? null :
+                    <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
+                    <Col className='d-flex justify-content-end'>
+                        <Button id='delete' onClick={() => setShowModal(true)}>
+                            Delete Skill
+                        </Button>
+                    </Col>
+                </Row>}
             </div>
+            {showModal &&
+                <DeleteSkillModal show={showModal} handleClose={() => setShowModal(false)} handleDelete={() => DeleteSkill(existingInfo[0])} />
+            }
         </div>
     );
 };
