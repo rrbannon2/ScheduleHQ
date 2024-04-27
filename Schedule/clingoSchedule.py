@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2 import sql
 
 
-def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_scheduled = 0):
+def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule_i = 1, weeks_scheduled = 0):
     days_in_week = 7
     weeks_to_schedule = weeks_to_schedule_i
     # schedule_blocks
@@ -13,7 +13,8 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
     store_minimum_supervisors = '1'
     # max_total_weekly_hours = 
     
-    truck_day = truck_day_i
+    time_limit = int(time_limit)
+    week_ending_date = week_ending_date
     overtime_allowed = False
     weekend_rotation = True
     store_manager_name = "1"
@@ -487,7 +488,7 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
             
             # solution = control.solve(on_model=on_model)
             with control.solve(on_model=on_model,async_=True) as ret:
-                if not ret.wait(120):
+                if not ret.wait(time_limit):
                     print('cancelling')
                     ret.cancel()
             

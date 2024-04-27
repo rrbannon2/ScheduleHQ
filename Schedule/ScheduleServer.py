@@ -123,8 +123,9 @@ def home():
 
 @app.route('/writeSchedule', methods = ["POST"])
 def write():
-    print(request.get_json())
-    clingoSchedule.run_clingo(3)
+    response = request.get_json()
+
+    clingoSchedule.run_clingo(response["seconds"],response["date"])
     with open('Schedule/scheduleFile.txt', 'r') as file0:
         solution = file0.read()
         solution = solution.replace('(',',')

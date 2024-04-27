@@ -15,8 +15,8 @@ const GenerateSchedulePage = () => {
                         <h4>Schedule Generation Details</h4>
                     </Col>
                     <Col className='d-flex justify-content-end'>
-                        <Button id='addNew' to="/" onClick={() => FetchComponent({ "date": document.getElementById("date").value, "seconds":document.getElementById("seconds").value },"POST","/writeSchedule",null)}> {/* Should probably be using something like useState rather than DOM manipulation. FIX */}
-                            Generate Schedule Now
+                        <Button id='addNew'  onClick={() => FetchComponent({ "date": document.getElementById("date").value, "seconds":document.getElementById("seconds").value },"POST","/writeSchedule",null)}> {/* Should probably be using something like useState rather than DOM manipulation. FIX */}
+                            <Link id='linkAddNew' to="/">Generate Schedule Now</Link>
                         </Button>
                     </Col>
                 </Row>
