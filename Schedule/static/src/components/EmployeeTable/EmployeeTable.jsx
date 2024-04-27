@@ -14,7 +14,7 @@ const EmployeeTable = () => {
             setListOfEmployees(response.data);
         });
     }, []);
-    console.log(listOfEmployees);
+    // console.log(listOfEmployees);
 
     return (
         listOfEmployees &&

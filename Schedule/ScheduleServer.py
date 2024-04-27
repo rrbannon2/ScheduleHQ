@@ -121,15 +121,18 @@ def delete_skill():
 def home():
     return render_template('index.html')
 
-@app.route('/writeSchedule', methods = ["GET"])
+@app.route('/writeSchedule', methods = ["POST"])
 def write():
+    print(request.get_json())
     clingoSchedule.run_clingo(3)
     with open('Schedule/scheduleFile.txt', 'r') as file0:
         solution = file0.read()
         solution = solution.replace('(',',')
         solution = solution.split(';')
-
-    return jsonify(solution)
+    if len(solution) > 0:
+        return jsonify("Schedule Written Successfully")
+    else:
+        return jsonify("No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists.")
 
 @app.route('/getSchedule',methods= ["GET"])
 def get_schedule():
