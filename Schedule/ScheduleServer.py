@@ -126,7 +126,8 @@ def write():
     clingoSchedule.run_clingo(3)
     with open('Schedule/scheduleFile.txt', 'r') as file0:
         solution = file0.read()
-        solution = solution.split(',')
+        solution = solution.replace('(',',')
+        solution = solution.split(';')
 
     return jsonify(solution)
 
@@ -134,7 +135,7 @@ def write():
 def get_schedule():
     with open('Schedule/scheduleFile.txt','r') as file0:
         solution = file0.read()
-        solution = solution.replace(':',',')
+        solution = solution.replace('(',',')
         solution = solution.split(';')
         
 

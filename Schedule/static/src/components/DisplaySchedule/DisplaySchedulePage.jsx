@@ -1,7 +1,9 @@
 import React,{useState, useEffect} from 'react';
-import { Table, Row, Col } from 'react-bootstrap';
+import { Table, Row, Col, Button } from 'react-bootstrap';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
+import { Link } from 'react-router-dom';
+
 
 
 const DisplaySchedulePage = () => {
@@ -34,6 +36,12 @@ const DisplaySchedulePage = () => {
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='align-items-center'>
                         Schedule For Week Ending XX/XX/XXXX
+                        </Col>
+                        <Col className='d-flex justify-content-end'>
+                        <Button id='addNew'>
+                            <Link id='linkAddNew' to="/generateschedule">Generate New Schedule</Link>
+                            
+                        </Button>
                     </Col>
                 </Row>
   
@@ -72,27 +80,27 @@ const DisplaySchedulePage = () => {
         </div>
     );
 };
-const formatScheduleData = (data) => {
+// const formatScheduleData = (data) => {
     
-    var scheduleDict = {};
-    for (var i in data) {
-        if (data[i] !== "") {
-            var block = data[i].split(":");
-            // console.log(block);
-            var empName = block[0];
-            var shiftTime = block[1];
-            // console.log(shiftTime);
-            if (scheduleDict.hasOwnProperty(empName)) {
-                scheduleDict[empName].push(shiftTime);
-            }
-            else {
-                scheduleDict[empName] = [];
-                scheduleDict[empName].push(shiftTime);
-                // scheduleDict[empName].push("Off");
-            };
-        };
-    };
-    return scheduleDict;
-};
+//     var scheduleDict = {};
+//     for (var i in data) {
+//         if (data[i] !== "") {
+//             var block = data[i].split(":");
+//             // console.log(block);
+//             var empName = block[0];
+//             var shiftTime = block[1];
+//             // console.log(shiftTime);
+//             if (scheduleDict.hasOwnProperty(empName)) {
+//                 scheduleDict[empName].push(shiftTime);
+//             }
+//             else {
+//                 scheduleDict[empName] = [];
+//                 scheduleDict[empName].push(shiftTime);
+//                 // scheduleDict[empName].push("Off");
+//             };
+//         };
+//     };
+//     return scheduleDict;
+// };
 
 export default DisplaySchedulePage;

@@ -372,9 +372,25 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
 
 
     """
-    solution = None
 
-    days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+    def format_time(time):
+        am_pm = "am"
+        hours,minutes = time.split('.')
+        hours = int(hours)
+        if hours > 12:
+            hours = hours - 12
+            am_pm = "pm"
+        elif hours == 12:
+            am_pm = "pm"
+        elif hours == 0:
+            hours = 12
+        if minutes == "5":
+            minutes = "30"
+        else:
+            minutes = "00"
+        formatted_time = str(hours) + ':' + minutes + am_pm
+        return formatted_time        
+
     def on_model(model):
         emp_names = []
         for emp in Employee.employees.values():
@@ -419,26 +435,32 @@ def run_clingo(truck_day_i, clingon_code = '', weeks_to_schedule_i = 1, weeks_sc
                         formatted_emp = emp_obj.first_name.capitalize() + " " + emp_obj.last_name.capitalize()
                         if day == 0:
                             if schedule_dict[wk][emp][day]:
-                                schedule_block = '{}:{}-{},'.format(formatted_emp,((min(schedule_dict[wk][emp][day])-8)/2)+8,((max(schedule_dict[wk][emp][day])-8)/2)+8.5)
+                                shift_start = format_time(str(((min(schedule_dict[wk][emp][day])-8)/2)+8))
+                                shift_end = format_time(str(((max(schedule_dict[wk][emp][day])-8)/2)+8.5))
+                                schedule_block = '{}({}-{},'.format(formatted_emp,shift_start,shift_end)
                                 
                             else:
-                                schedule_block = formatted_emp + ':' + 'Off,'
+                                schedule_block = formatted_emp + '(' + 'Off,'
                                 
                         elif day == 6:
                             if schedule_dict[wk][emp][day]:
-                                schedule_block += '{}-{},'.format(((min(schedule_dict[wk][emp][day])-8)/2)+8,((max(schedule_dict[wk][emp][day])-8)/2)+8.5)
+                                shift_start = format_time(str(((min(schedule_dict[wk][emp][day])-8)/2)+8))
+                                shift_end = format_time(str(((max(schedule_dict[wk][emp][day])-8)/2)+8.5))
+                                schedule_block += '{}-{},'.format(shift_start,shift_end)
                                 schedule.append(schedule_block + ';')
                             else:
                                 schedule_block += 'Off,'
                                 schedule.append(schedule_block + ';')
                         else:
                             if schedule_dict[wk][emp][day]:
-                                schedule_block += '{}-{},'.format(((min(schedule_dict[wk][emp][day])-8)/2)+8,((max(schedule_dict[wk][emp][day])-8)/2)+8.5)
+                                shift_start = format_time(str(((min(schedule_dict[wk][emp][day])-8)/2)+8))
+                                shift_end = format_time(str(((max(schedule_dict[wk][emp][day])-8)/2)+8.5))
+                                schedule_block += '{}-{},'.format(shift_start,shift_end)
                                 
                             else:
                                 schedule_block += 'Off,'
 
-
+            print(schedule)
 
 
             
