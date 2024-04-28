@@ -12,7 +12,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
     store_minimum_employees = '2'
     store_minimum_supervisors = '1'
     # max_total_weekly_hours = 
-    
+    required_meal_break_shift_length = 12
     time_limit = int(time_limit)
     week_ending_date = week_ending_date
     overtime_allowed = False
@@ -24,6 +24,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
     
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
     
+    #TODO: Fix how time is being calculated. Currently set_important_shift is using raw start and end times while elsewhere schedule_blocks is being used. Resulting in poorly optimized schedule.
     def set_important_shift(name, start_times, end_times, wk, importance, maximum_shift_hours = None):
         clingo_code = ''
         if wk == -1:
@@ -83,8 +84,8 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         skill_info = cur.fetchall()
         #TODO: extract for loop except function call, make it a function to be used for load_shifts as well.
         for skill in skill_info:
-            start_times = skill[1][0:7]
-            end_times = skill[1][7:]
+            start_times = [i * 2 for i in skill[1][:7]]
+            end_times = [i * 2 for i in skill[1][7:]]
             skill_name = skill[0].lower().replace(" ", "_")
             role = skill[3]
             importance = skill[2]
@@ -110,8 +111,8 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('shifts')))
         shift_info = cur.fetchall()
         for shift in shift_info:
-            start_times = shift[1][0:7]
-            end_times = shift[1][7:]
+            start_times = [i * 2 for i in shift[1][:7]]
+            end_times = [i * 2 for i in shift[1][7:]]
             shift_name = shift[0].lower().replace(" ", "_")
             importance = shift[2]
             max_hours = shift[3]
@@ -125,7 +126,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
     def extract_and_format_schedule_blocks(schedule_info):
         schedule_blocks = [[],[],[],[],[],[],[]]
         for i in range(len(schedule_info)):
-            schedule_blocks[i % 7].append(schedule_info[i])
+            schedule_blocks[i % 7].append(schedule_info[i]*2)
     
         return schedule_blocks
 
@@ -144,8 +145,8 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         emp_availabilities = [i for i in cur.fetchall()]
         for emp in emp_availabilities:
             info = [i for i in emp]
-            start_times = info[1][:7]
-            end_times = info[1][7:]
+            start_times = [i * 2 for i in info[1][:7]]
+            end_times = [i * 2 for i in info[1][7:]]
             Employee.employees[info[0]].set_availability(start_times,end_times,0,0)
         
 
@@ -186,7 +187,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
             clingo_add += self.set_maximum_shift_length(self.maximum_shift_length)
             clingo_add += self.set_max_days()
             if self.meal_break:
-                clingo_add += self.add_meal_break()
+                clingo_add += self.add_meal_break(required_meal_break_shift_length)
             for skill in self.skills.keys():
                 clingo_add += self.set_clingo_skill_levels(skill,self.skills[skill])
 
@@ -197,13 +198,12 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         
            
         def set_shift_preferences(self, days, start_times, end_times, preference_lvls, weeks = [wk for wk in range(weeks_scheduled,weeks_to_schedule)]):
-           
             for week in weeks:
                 for i in range(len(days)):
-                    start_time = max(start_times[i] - schedule_blocks[i][0],0)
-                    end_time = min(((end_times[i] - schedule_blocks[i][0]) * 2), schedule_blocks[i][1]- schedule_blocks[i][0])
+                    start_time = start_times[i]
+                    end_time = end_times[i]
                     for j in range(start_time,end_time):
-                        self.shift_preferences[week][days[i]][j] = preference_lvls[i]
+                        self.shift_preferences[week][days[i]][j-schedule_blocks[i][0]] = preference_lvls[i]
             
             
 
@@ -248,11 +248,11 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
             return clingo_addition
             
         #TODO: shift length that triggers meal break should be an argument not a preset constant
-        def add_meal_break(self):
+        def add_meal_break(self, required_meal_break_shift_length):
             clingo_addition = '{meal_break(TOD,D,W,'
             clingo_addition += '{}) : time(TOD,D,W)'.format(self.clingo_id)
             clingo_addition += '} = 1'
-            clingo_addition += ' :- hours_count({},D,W,X), X > 12. '.format(self.clingo_id)
+            clingo_addition += ' :- hours_count({},D,W,X), X > {}. '.format(self.clingo_id, required_meal_break_shift_length)
             clingo_addition += 'assign(TOD,D,W,{}) :- meal_break(TOD+1,D,W,{}). '.format(self.clingo_id, self.clingo_id)
             clingo_addition += 'assign(TOD,D,W,{}) :- meal_break(TOD-1,D,W,{}). '.format(self.clingo_id, self.clingo_id)
             return clingo_addition
@@ -261,12 +261,10 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
     clingo_code = clingon_code
     business_info = load_business_info(conn)
     business_name, schedule_blocks, store_minimum_employees, store_minimum_supervisors,otExemptRole, max_total_weekly_hours, total_weekly_hours_weight = business_info
-    
+    print(schedule_blocks)
     max_total_weekly_hours *= 2
     # max_total_weekly_hours = 438
-    for i in range(len(schedule_blocks)):
-        schedule_blocks[i][1] = ((schedule_blocks[i][1] - schedule_blocks[i][0]) * 2) + schedule_blocks[i][0]
-    # print(schedule_blocks)
+
 
     load_employees(conn)
     employee_skill_levels_dict = {emp:{} for emp in Employee.employees.keys()}
@@ -436,8 +434,8 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
                         formatted_emp = emp_obj.first_name.capitalize() + " " + emp_obj.last_name.capitalize()
                         if day == 0:
                             if schedule_dict[wk][emp][day]:
-                                shift_start = format_time(str(((min(schedule_dict[wk][emp][day])-8)/2)+8))
-                                shift_end = format_time(str(((max(schedule_dict[wk][emp][day])-8)/2)+8.5))
+                                shift_start = format_time(str((min(schedule_dict[wk][emp][day])/2)))
+                                shift_end = format_time(str((max(schedule_dict[wk][emp][day])/2)+.5))
                                 schedule_block = '{}({}-{},'.format(formatted_emp,shift_start,shift_end)
                                 
                             else:
@@ -445,8 +443,8 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
                                 
                         elif day == 6:
                             if schedule_dict[wk][emp][day]:
-                                shift_start = format_time(str(((min(schedule_dict[wk][emp][day])-8)/2)+8))
-                                shift_end = format_time(str(((max(schedule_dict[wk][emp][day])-8)/2)+8.5))
+                                shift_start = format_time(str((min(schedule_dict[wk][emp][day])/2)))
+                                shift_end = format_time(str((max(schedule_dict[wk][emp][day])/2)+.5))
                                 schedule_block += '{}-{},'.format(shift_start,shift_end)
                                 schedule.append(schedule_block + ';')
                             else:
@@ -454,8 +452,8 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
                                 schedule.append(schedule_block + ';')
                         else:
                             if schedule_dict[wk][emp][day]:
-                                shift_start = format_time(str(((min(schedule_dict[wk][emp][day])-8)/2)+8))
-                                shift_end = format_time(str(((max(schedule_dict[wk][emp][day])-8)/2)+8.5))
+                                shift_start = format_time(str((min(schedule_dict[wk][emp][day])/2)))
+                                shift_end = format_time(str((max(schedule_dict[wk][emp][day])/2)+.5))
                                 schedule_block += '{}-{},'.format(shift_start,shift_end)
                                 
                             else:
