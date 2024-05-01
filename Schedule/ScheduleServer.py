@@ -117,6 +117,13 @@ def delete_skill():
 
     return jsonify("Skill Deleted.")
 
+@app.route('/deleteShift',methods = ["POST"])
+def delete_shift():
+    shift_name = request.get_json()
+    execute_SQL(sql.SQL("DELETE FROM {} WHERE shiftName = %s").format(sql.Identifier('shifts')),execute_args = [shift_name])
+
+    return jsonify("Shift Deleted.")
+
 @app.route('/', methods=['GET'])
 def home():
     return render_template('index.html')

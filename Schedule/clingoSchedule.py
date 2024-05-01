@@ -459,7 +459,6 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
                             else:
                                 schedule_block += 'Off,'
 
-            print(schedule)
 
 
             

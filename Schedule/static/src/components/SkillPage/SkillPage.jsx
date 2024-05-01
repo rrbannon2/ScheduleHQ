@@ -8,7 +8,7 @@ import { DeleteSkillModal } from '../DeleteModal/DeleteModal';
 const SkillPage = ({ addNew, existingInfo }) => {
     const [showModal, setShowModal] = useState(false);
     const DeleteSkill = (toDelete) => {
-        FetchComponent(toDelete, "POST", "deleteSkill"); 
+        FetchComponent(toDelete, "POST", "/deleteSkill"); 
         setShowModal(false);
     };
     return (

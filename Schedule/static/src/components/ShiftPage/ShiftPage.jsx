@@ -1,12 +1,17 @@
-import React from 'react';
+import React,{useState, useEffect} from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
-
+import { DeleteShiftModal } from '../DeleteModal/DeleteModal';
 
 const ShiftPage = ({ addNew, existingInfo }) => {
     console.log(existingInfo);
     
+    const [showModal, setShowModal] = useState(false);
+    const DeleteShift = (toDelete) => {
+        FetchComponent(toDelete, "POST", "/deleteShift"); 
+        setShowModal(false);
+    };
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -83,7 +88,18 @@ const ShiftPage = ({ addNew, existingInfo }) => {
                         </Button>
                     </Col>
                 </Row>
+                {addNew ? null :
+                    <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
+                    <Col className='d-flex justify-content-end'>
+                        <Button id='delete' onClick={() => setShowModal(true)}>
+                            Delete Shift
+                        </Button>
+                    </Col>
+                </Row>}
             </div>
+            {showModal &&
+                <DeleteShiftModal show={showModal} handleClose={() => setShowModal(false)} handleDelete={() => DeleteShift(existingInfo[0])} />
+            }
         </div>
     );
 };
