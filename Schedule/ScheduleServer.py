@@ -2,12 +2,20 @@ from flask import Flask, request, jsonify, render_template
 import clingoSchedule
 import psycopg2
 from psycopg2 import sql
-
+from flask_login import LoginManager
+import secrets
+import hashlib
 
 app = Flask(__name__)
 zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 
-skill_to_edit = ''
+# login_manager = LoginManager()
+# login_manager.init_app(app)
+# login_manager.login_view = 'login'
+
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return user_id
 
 def get_db_connection():
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
@@ -34,6 +42,28 @@ def execute_SQL(sql_statement,execute_args=False):
 def add_default_emp_skill_level(skill,emp):     
     execute_SQL(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s)").format(sql.Identifier('skills')),execute_args = [skill,emp,0])
     return None
+
+@app.route('/addUser',methods = ["POST"])
+def add_user():
+    user_info = request.get_json()
+    user_email = user_info["userEmail"]
+    user_password = user_info["password"]
+    salt = secrets.randbelow(1000000)
+    salted_pass = user_password + str(salt)
+    print(salted_pass)
+    salted_pass = salted_pass.encode('utf-8')
+    hashed_pass = str(hashlib.sha512(salted_pass).hexdigest()) #TODO: THIS IS TEMPORARY, NOT HOW PASSWORDS WILL BE HASHED AND STORED. FIX.
+    
+    try:
+        execute_SQL(sql.SQL("INSERT INTO {} (email,salt,salted_password) VALUES(%s,%s,%s)").format(sql.Identifier('users')),execute_args = [user_email,salt,hashed_pass])
+    except:
+        print("Already an account")
+        print(execute_SQL(sql.SQL("SELECT * FROM {}").format(sql.Identifier('users'))))
+        return jsonify("There is already an account with that email address")
+    print(execute_SQL(sql.SQL("SELECT * FROM {}").format(sql.Identifier('users'))))
+    return jsonify("Test")
+
+
 
 @app.route('/addEmployee',methods = ["POST"])
 def add_employee():
@@ -82,8 +112,6 @@ def select_emp_to_edit():
 
 @app.route('/updateEmployee',methods = ["POST"])
 def update_employee():
-    
-     
     request_data = list(request.get_json().values())
     
     emp_id = request_data[0]
@@ -123,6 +151,13 @@ def delete_shift():
     execute_SQL(sql.SQL("DELETE FROM {} WHERE shiftName = %s").format(sql.Identifier('shifts')),execute_args = [shift_name])
 
     return jsonify("Shift Deleted.")
+
+@app.route('/deleteUser',methods = ["POST"])
+def delete_user():
+    user_name = request.get_json()
+    execute_SQL(sql.SQL("DELETE FROM {} WHERE email = %s").format(sql.Identifier('users')),execute_args = [user_name])
+
+    return jsonify("User Deleted.")
 
 @app.route('/', methods=['GET'])
 def home():

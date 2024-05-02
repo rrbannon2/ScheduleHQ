@@ -10,6 +10,7 @@ import EditSkillPage from './components/EditSkill/EditSkill';
 import AddShiftPage from './components/AddShift/AddShift';
 import EditShiftPage from './components/EditShift/EditShift';
 import BusinessInfoPage from './components/BusinessInfo/BusinessInfo';
+import SignUpPage from './components/SignUpPage/SignUpPage';
 import UpdateBusinessInfo from './components/BusinessInfo/UpdateBusinessInfo';
 import BaseDropDownMenu from './components/BaseDropDownMenu/BaseDropDownMenu';
 import DisplaySchedulePage from './components/DisplaySchedule/DisplaySchedulePage';
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="/editskill" element={<EditSkillPage />} />
           <Route path="/addshift" element={<AddShiftPage />} />
           <Route path="/editshift" element={<EditShiftPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
           <Route path="/businessinfo" element={<BusinessInfoPage addNew={false} existingInfo={null} />} />
           <Route path="/updatebusinessinfo" element={<UpdateBusinessInfo />} />
           <Route path="/dropdownmenu" element={<BaseDropDownMenu URL="/loadEmployeeListData" />} />

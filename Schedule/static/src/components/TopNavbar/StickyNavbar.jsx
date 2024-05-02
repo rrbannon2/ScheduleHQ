@@ -22,6 +22,9 @@ const StickyNavbar = () => {
             <Nav.Link>
               <Link to="/shiftstable">Shifts </Link>
             </Nav.Link>
+            <Nav.Link>
+              <Link to="/signup">Sign Up </Link>
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

@@ -38,6 +38,9 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # cur.execute("DROP TABLE shifts")
 # cur.execute("CREATE TABLE shifts(shiftName varchar(255), schedule_blocks integer ARRAY[14], importance int, maxHours int)")
 # cur.execute("CREATE TABLE saved_schedule()")
+# cur.execute("DROP TABLE users")
+# cur.execute("CREATE TABLE users(user_id SERIAL,email varchar(255),salt int ,salted_password varchar(255))")
+# cur.execute("ALTER TABLE users ADD CONSTRAINT emails_primary PRIMARY KEY (email)")
 
 conn.commit()
 cur.close()
