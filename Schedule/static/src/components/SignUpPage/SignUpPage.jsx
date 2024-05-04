@@ -18,13 +18,13 @@ const SignUpPage = () => {
                     <th>Email Address</th>
                     <th><input id="userEmail"></input></th>
                 </Row>
-                <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
+                <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'> 
                     <th>Password</th> 
-                    <th><input id="password"></input></th>
+                    <th><input id="password" type = "password"></input></th>
                 </Row>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <th>Confirm Password</th>
-                    <th><input id="password2"></input></th>
+                    <th><input id="password2" type = "password"></input></th>
                 </Row>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col>
@@ -51,7 +51,6 @@ const PrepData = () => {
     };
 
 
-    
     var basicJsonDict = {};
    
     for (let basicCell of infoCells) {
