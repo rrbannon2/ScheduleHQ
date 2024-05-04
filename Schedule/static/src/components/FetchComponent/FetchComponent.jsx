@@ -18,7 +18,6 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 
                 })
                 .then(data => {
-                    // console.log(data);
                     resolve(data);
                 })
                 .catch(error => {
@@ -37,18 +36,18 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
-            
+                    
                     return response.json();
             
                 })
                 .then(data => {
-                    // Handle the response from the Flask server
-                    console.log(data);
-                    // Perform actions based on the response
+                    // console.log(data);
+                    alert(data);
+                    return data;
+                    
                 })
                 .catch(error => {
                     console.error('There was a problem with the fetch operation:', error);
-                    // Handle errors here
                 });
         };
     });

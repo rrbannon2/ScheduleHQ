@@ -50,7 +50,6 @@ def add_user():
     user_password = user_info["password"]
     salt = secrets.randbelow(1000000)
     salted_pass = user_password + str(salt)
-    print(salted_pass)
     salted_pass = salted_pass.encode('utf-8')
     hashed_pass = str(hashlib.sha512(salted_pass).hexdigest()) #TODO: THIS IS TEMPORARY, NOT HOW PASSWORDS WILL BE HASHED AND STORED. FIX.
     
@@ -58,10 +57,9 @@ def add_user():
         execute_SQL(sql.SQL("INSERT INTO {} (email,salt,salted_password) VALUES(%s,%s,%s)").format(sql.Identifier('users')),execute_args = [user_email,salt,hashed_pass])
     except:
         print("Already an account")
-        print(execute_SQL(sql.SQL("SELECT * FROM {}").format(sql.Identifier('users'))))
         return jsonify("There is already an account with that email address")
     print(execute_SQL(sql.SQL("SELECT * FROM {}").format(sql.Identifier('users'))))
-    return jsonify("Test")
+    return jsonify("Sign up successful!")
 
 
 

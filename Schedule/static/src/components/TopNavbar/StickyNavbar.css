@@ -10,8 +10,19 @@
     font-size: 25px !important;
 }
 
+.plainLink {
+    color: #E4E6F7 !important;
+    font-size: 18px !important;
+    text-decoration: none;
+}
+
 .nav-link a {
     color: #E4E6F7 !important;
     font-size: 18px !important;
     text-decoration: none;
 }
+
+/* a:-webkit-any-link {
+    text-decoration: none;
+    color: inherit;
+  } */
