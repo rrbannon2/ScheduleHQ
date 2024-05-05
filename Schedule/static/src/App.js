@@ -13,6 +13,7 @@ import BusinessInfoPage from './components/BusinessInfo/BusinessInfo';
 import SignUpPage from './components/SignUpPage/SignUpPage';
 import UpdateBusinessInfo from './components/BusinessInfo/UpdateBusinessInfo';
 import BaseDropDownMenu from './components/BaseDropDownMenu/BaseDropDownMenu';
+import LoginPage from './components/LoginPage/LoginPage';
 import DisplaySchedulePage from './components/DisplaySchedule/DisplaySchedulePage';
 import GenerateSchedulePage from './components/GenerateSchedule/GenerateSchedulePage';
 import ShiftsTable from './components/ShiftsTable/ShiftsTable';
@@ -36,7 +37,8 @@ const App = () => {
         {/* <UpdateBusinessInfo /> */}
         
         <Routes>
-          <Route path="/" element={<DisplaySchedulePage />} />
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/home" element={<DisplaySchedulePage />} />
           <Route path="/generateschedule" element={<GenerateSchedulePage />} />
           <Route path="/employeetable" element={<EmployeeTable />} />
           <Route path="/addemptable" element={<AddEmployeeTable />} />

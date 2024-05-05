@@ -7,7 +7,7 @@ const StickyNavbar = () => {
   return (
     <Navbar expand="lg" className="topNavbar">
       <Container fluid style={{ margin: '20px 80px' }}>
-        <Link className = "plainLink" to="/">
+        <Link className = "plainLink" to="/home">
           <Navbar.Brand>Schedule HQ</Navbar.Brand>
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -21,6 +21,9 @@ const StickyNavbar = () => {
             </Nav.Link>
             <Nav.Link>
               <Link to="/shiftstable">Shifts </Link>
+            </Nav.Link>
+            <Nav.Link>
+              <Link to="/">Log In</Link>
             </Nav.Link>
             <Nav.Link>
               <Link to="/signup">Sign Up </Link>
