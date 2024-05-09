@@ -25,28 +25,28 @@ const DisplaySchedulePage = () => {
         };
 
         fetchData();
-        // console.log(fetchedInfo);
+
     }, []);
 
-    // Render component only when empInfo is available
+
     return (
         fetchedInfo && 
         <div className='tableContainer'>
             <div className='containerTitle'>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='align-items-center'>
-                        Schedule For Week Ending XX/XX/XXXX
-                        </Col>
-                        <Col className='d-flex justify-content-end'>
+                        Schedule For Week Ending {fetchedInfo[0].split(" ")[1]}
+                    </Col>
+                    <Col className='d-flex justify-content-end'>
                         <Button id='addNew'>
-                            <Link id='linkAddNew' to="/generateschedule">Generate New Schedule</Link>
-                            
+                            <Link id='linkAddNew' to="/generateschedule">Generate New Schedule</Link>    
                         </Button>
                     </Col>
                 </Row>
   
                 <Table striped hover>
                     <thead>
+                        
                         <tr>
                                 <th></th>
                                 <th>Sunday</th>
@@ -60,19 +60,23 @@ const DisplaySchedulePage = () => {
                     </thead>
                     <tbody>
                         {fetchedInfo.map((value) => {
-                            var splitVal = value.split(",");
-                            return (
-                                <tr key = {splitVal[0]}>
-                                    <td>{splitVal[0]}</td>
-                                    <td>{splitVal[1]}</td>
-                                    <td>{splitVal[2]}</td>
-                                    <td>{splitVal[3]}</td>
-                                    <td>{splitVal[4]}</td>
-                                    <td>{splitVal[5]}</td>
-                                    <td>{splitVal[6]}</td>
-                                    <td>{splitVal[7]}</td>
-                                </tr>
-                            );
+                            if (value.substring(0, 3) !== "*-!") {
+                                var splitVal = value.split(",");
+                            
+                                return (
+                                    <tr key={splitVal[0]}>
+                                        <td>{splitVal[0]}</td>
+                                        <td>{splitVal[1]}</td>
+                                        <td>{splitVal[2]}</td>
+                                        <td>{splitVal[3]}</td>
+                                        <td>{splitVal[4]}</td>
+                                        <td>{splitVal[5]}</td>
+                                        <td>{splitVal[6]}</td>
+                                        <td>{splitVal[7]}</td>
+                                    </tr>
+                                );
+                            }
+                            else {return null};
                         })}     
                     </tbody>
                 </Table>
@@ -80,27 +84,6 @@ const DisplaySchedulePage = () => {
         </div>
     );
 };
-// const formatScheduleData = (data) => {
-    
-//     var scheduleDict = {};
-//     for (var i in data) {
-//         if (data[i] !== "") {
-//             var block = data[i].split(":");
-//             // console.log(block);
-//             var empName = block[0];
-//             var shiftTime = block[1];
-//             // console.log(shiftTime);
-//             if (scheduleDict.hasOwnProperty(empName)) {
-//                 scheduleDict[empName].push(shiftTime);
-//             }
-//             else {
-//                 scheduleDict[empName] = [];
-//                 scheduleDict[empName].push(shiftTime);
-//                 // scheduleDict[empName].push("Off");
-//             };
-//         };
-//     };
-//     return scheduleDict;
-// };
+
 
 export default DisplaySchedulePage;

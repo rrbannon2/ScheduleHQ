@@ -6,7 +6,6 @@ import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 
 const GenerateSchedulePage = () => {
 
-
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -15,8 +14,8 @@ const GenerateSchedulePage = () => {
                         <h4>Schedule Generation Details</h4>
                     </Col>
                     <Col className='d-flex justify-content-end'>
-                        <Button id='addNew'  onClick={() => FetchComponent({ "date": document.getElementById("date").value, "seconds":document.getElementById("seconds").value },"POST","/writeSchedule",null)}> {/* Should probably be using something like useState rather than DOM manipulation. FIX */}
-                            <Link id='linkAddNew' to="/">Generate Schedule Now</Link>
+                        <Button id='addNew' onClick={() => SubmitData()}>
+                            <Link id='linkAddNew' to="/home">Generate Schedule Now</Link>
                         </Button>
                     </Col>
                 </Row>
@@ -24,7 +23,7 @@ const GenerateSchedulePage = () => {
                     <thead>
                         <tr>
                             <th>Week Ending Date:</th>
-                            <td> <input id="date"></input></td>
+                            <td> <input onBlur={() => ValidateData()} id="date"></input></td>
                         </tr>
 
                         <tr>
@@ -39,3 +38,22 @@ const GenerateSchedulePage = () => {
 };
 
 export default GenerateSchedulePage;
+
+const ValidateData = () => {
+    const dateRegExp = /[0-3]\d\/[0-3]\d\/\d\d\d\d/;
+    var dateVal = document.getElementById("date").value;
+
+    if (!dateVal.match(dateRegExp)) {
+        alert("Date Entered Not Valid, Format Must Be DD/MM/YYYY or MM/DD/YYYY");
+        return null;
+    };
+    alert("test");
+    
+    return true;
+};
+
+const SubmitData = () => {
+    ValidateData() ? FetchComponent({ "date": document.getElementById("date").value, "seconds": document.getElementById("seconds").value }, "POST", "/writeSchedule", null) :
+        console.log("Date not valid");
+    
+};

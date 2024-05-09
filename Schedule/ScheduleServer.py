@@ -1,21 +1,45 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session
 import clingoSchedule
 import psycopg2
 from psycopg2 import sql
-from flask_login import LoginManager
+import flask_login as fl_lgin
 import secrets
 import hashlib
+from userClass import User
+
 
 app = Flask(__name__)
 zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 
-# login_manager = LoginManager()
+app.secret_key = secrets.token_hex()
+# login_manager = fl_lgin.LoginManager()
 # login_manager.init_app(app)
 # login_manager.login_view = 'login'
 
 # @login_manager.user_loader
 # def load_user(user_id):
-#     return user_id
+#     print(User.users)
+#     return User.users[user_id]
+
+@app.route('/login',methods = ["POST"])
+def login():
+    login_info = request.get_json()
+    email = login_info["userEmail"]
+    attempt_password = login_info["password"]
+    
+    query_response = execute_SQL(sql.SQL("SELECT user_id, salt, salted_password FROM {} WHERE email = %s").format(sql.Identifier("users")),execute_args=[email]) 
+    user_id, salt, user_password = query_response[0][:3]
+    user_id = str(user_id)
+    print(query_response)
+    salted_attempt_password = attempt_password + str(salt)
+    if str(hashlib.sha512(salted_attempt_password.encode('utf-8')).hexdigest()) == user_password:
+        User({"user_id" : user_id,"email" : email})
+        
+        # fl_lgin.login_user(load_user(user_id))
+        return jsonify("Login successful")
+    else:
+        return jsonify("Incorrect email or password. Please try again")
+
 
 def get_db_connection():
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
@@ -44,6 +68,7 @@ def add_default_emp_skill_level(skill,emp):
     return None
 
 @app.route('/addUser',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def add_user():
     user_info = request.get_json()
     user_email = user_info["userEmail"]
@@ -62,8 +87,8 @@ def add_user():
     return jsonify("Sign up successful!")
 
 
-
 @app.route('/addEmployee',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def add_employee():
     emp_info = list(request.get_json().values())
 
@@ -82,19 +107,20 @@ def add_employee():
     
     return jsonify('Employee added successfully')
 
-@app.route('/editExistingEmployee', methods = ["GET"])
-def edit_existing_emp_home():
-    return render_template('editEmployee.html')
+# @app.route('/editExistingEmployee', methods = ["GET"])
+# def edit_existing_emp_home():
+#     return render_template('editEmployee.html')
 
 @app.route('/loadEmployeeInfo',methods=["GET"])
+# @fl_lgin.login_required
 def load_employee_info():
+
     employee = request.args.get('employee')
-    
     query_response = execute_SQL(sql.SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s").format(sql.Identifier('employees'),sql.Identifier('extremes'),sql.Identifier('availability')),execute_args = [employee])
-    
     return jsonify(query_response)
 
 @app.route('/loadEmployeeListData',methods = ["GET"])
+# @fl_lgin.login_required
 def load_employee_names():
     
     query_response = execute_SQL(sql.SQL("SELECT first_name, last_name, id, role FROM {}").format(sql.Identifier('employees')))
@@ -103,12 +129,13 @@ def load_employee_names():
     return jsonify(return_array)
 
 
-@app.route('/selectEmpToEdit', methods = ["GET"])
-def select_emp_to_edit():
-    employee_id = request.args.get('employee')
-    return render_template('editSelectedEmployee.html',employee = str(employee_id))
+# @app.route('/selectEmpToEdit', methods = ["GET"])
+# def select_emp_to_edit():
+#     employee_id = request.args.get('employee')
+#     return render_template('editSelectedEmployee.html',employee = str(employee_id))
 
 @app.route('/updateEmployee',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def update_employee():
     request_data = list(request.get_json().values())
     
@@ -126,6 +153,7 @@ def update_employee():
     return jsonify("Updated Employee Information Saved Successfully.")
 
 @app.route('/deleteEmployee',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def delete_employee():     
     emp_id = request.get_json()
     execute_SQL(sql.SQL("DELETE FROM {} WHERE id = %s").format(sql.Identifier('employees')),execute_args = [emp_id])
@@ -136,6 +164,7 @@ def delete_employee():
     return jsonify("Employee Deleted.")
 
 @app.route('/deleteSkill',methods=["POST"])
+# @fl_lgin.fresh_login_required
 def delete_skill():
     skill_name = request.get_json()
     execute_SQL(sql.SQL("DELETE FROM {} WHERE skill = %s").format(sql.Identifier('required_skills_for_shift')),execute_args = [skill_name])
@@ -144,6 +173,7 @@ def delete_skill():
     return jsonify("Skill Deleted.")
 
 @app.route('/deleteShift',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def delete_shift():
     shift_name = request.get_json()
     execute_SQL(sql.SQL("DELETE FROM {} WHERE shiftName = %s").format(sql.Identifier('shifts')),execute_args = [shift_name])
@@ -151,17 +181,19 @@ def delete_shift():
     return jsonify("Shift Deleted.")
 
 @app.route('/deleteUser',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def delete_user():
     user_name = request.get_json()
     execute_SQL(sql.SQL("DELETE FROM {} WHERE email = %s").format(sql.Identifier('users')),execute_args = [user_name])
 
     return jsonify("User Deleted.")
 
-@app.route('/', methods=['GET'])
-def home():
-    return render_template('index.html')
+# @app.route('/', methods=['GET'])
+# def home():
+#     return render_template('index.html')
 
 @app.route('/writeSchedule', methods = ["POST"])
+# @fl_lgin.login_required
 def write():
     response = request.get_json()
 
@@ -176,61 +208,62 @@ def write():
         return jsonify("No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists.")
 
 @app.route('/getSchedule',methods= ["GET"])
+# @fl_lgin.login_required
 def get_schedule():
     with open('Schedule/scheduleFile.txt','r') as file0:
         solution = file0.read()
         solution = solution.replace('(',',')
         solution = solution.split(';')
-        
-
+        print(solution[-1])
     return jsonify(solution)
 
 
-@app.route('/addEmployeePage',methods = ["GET"])
-def add_emp_home():
-    return render_template('addEmployee.html')
+# @app.route('/addEmployeePage',methods = ["GET"])
+# def add_emp_home():
+#     return render_template('addEmployee.html')
     
-@app.route('/addSkillsPage', methods = ["GET"])
-def add_skills_home():
-    return render_template('addSkills.html')
+# @app.route('/addSkillsPage', methods = ["GET"])
+# def add_skills_home():
+#     return render_template('addSkills.html')
 
-@app.route('/businessInfoPage',methods = ["GET"])
-def business_info_home():
-    return render_template('businessInfo.html')
+# @app.route('/businessInfoPage',methods = ["GET"])
+# def business_info_home():
+#     return render_template('businessInfo.html')
 
-@app.route('/addShiftPage', methods = ["GET"])
-def add_shift_home():
-    return render_template('addShift.html')
+# @app.route('/addShiftPage', methods = ["GET"])
+# def add_shift_home():
+#     return render_template('addShift.html')
 
-@app.route('/editShiftPage', methods = ["GET"])
-def edit_shift_home():
-    return render_template('editShift.html')
+# @app.route('/editShiftPage', methods = ["GET"])
+# def edit_shift_home():
+#     return render_template('editShift.html')
 
-@app.route('/employeeSkillsPage', methods = ["GET"])
-def edit_employee_skills():
-    emp_id = request.args.get('employee')
-    # first_name = request.args.get('firstName')
-    # last_name = request.args.get('lastName')
-    # role = request.args.get('role')
+# @app.route('/employeeSkillsPage', methods = ["GET"])
+# def edit_employee_skills():
+#     emp_id = request.args.get('employee')
+#     # first_name = request.args.get('firstName')
+#     # last_name = request.args.get('lastName')
+#     # role = request.args.get('role')
     
-    info = execute_SQL(sql.SQL("SELECT * FROM employees WHERE id = %s"),execute_args = [emp_id])[0]
+#     info = execute_SQL(sql.SQL("SELECT * FROM employees WHERE id = %s"),execute_args = [emp_id])[0]
     
-    first_name = info[1]
-    last_name = info[2]
-    role = info[3]
-    return render_template('employeeSkills.html',employee = emp_id, firstName = first_name, lastName = last_name, role0 = role)
+#     first_name = info[1]
+#     last_name = info[2]
+#     role = info[3]
+#     return render_template('employeeSkills.html',employee = emp_id, firstName = first_name, lastName = last_name, role0 = role)
 
-@app.route('/selectSkillToEdit', methods = ["GET"])
-def select_skill_to_edit():
-    skill_name = request.args.get('skill')
+# @app.route('/selectSkillToEdit', methods = ["GET"])
+# def select_skill_to_edit():
+#     skill_name = request.args.get('skill')
     
-    return render_template('editSelectedSkill.html',skill = str(skill_name))
+#     return render_template('editSelectedSkill.html',skill = str(skill_name))
 
-@app.route('/generateSchedulePage',methods=["GET"])
-def generate_schedule_home():
-    return render_template('generateSchedule.html')
+# @app.route('/generateSchedulePage',methods=["GET"])
+# def generate_schedule_home():
+#     return render_template('generateSchedule.html')
 
 @app.route('/updateBusinessInfo',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def update_business_info():
     business_info = list(request.get_json().values())
     business_name = business_info[0]
@@ -249,17 +282,20 @@ def update_business_info():
     return jsonify("Added Successfully")
 
 @app.route('/loadBusinessInfo',methods = ["GET"])
+# @fl_lgin.login_required
 def load_business_info():
     business_info = execute_SQL(sql.SQL("SELECT * FROM {}").format(sql.Identifier('business_info')))
     return jsonify(business_info)
 
 @app.route('/loadSkillLevels',methods = ["GET"])
+# @fl_lgin.login_required
 def load_skill_levels():
     employee = request.args.get('employee')
     query_response = execute_SQL(sql.SQL("SELECT skill,skill_level FROM {} WHERE id = %s").format(sql.Identifier('skills')),execute_args = [employee])
     return jsonify(query_response)
 
 @app.route('/updateSkillLevel',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def update_skill_level():
     request_data = request.get_json()
     skill = request_data['skill']
@@ -270,10 +306,12 @@ def update_skill_level():
     return jsonify("Skill level updated successfully.")
 
 @app.route('/loadSkillInfo',methods = ["GET"])
+# @fl_lgin.login_required
 def load_skill_info():
     return load_selected_item_details(request.args.get('skill'),"required_skills_for_shift",'skill')
 
 @app.route('/loadShiftInfo', methods = ["GET"])
+# @fl_lgin.login_required
 def load_shift_info():
     return load_selected_item_details(request.args.get('shift'),"shifts","shiftname")
 
@@ -283,19 +321,22 @@ def load_selected_item_details(selected_item,table,name_column):
 
 
 
-@app.route('/editSelectedSkillPage', methods = ["GET"])
-def edit_selected_skill_home():
-    return render_template('editSelectedSkill.html')
+# @app.route('/editSelectedSkillPage', methods = ["GET"])
+# def edit_selected_skill_home():
+#     return render_template('editSelectedSkill.html')
 
-@app.route('/editSkills', methods = ["GET"])
-def edit_skills_home():
-    return render_template('editSkills.html')
+
+# @app.route('/editSkills', methods = ["GET"])
+# def edit_skills_home():
+#     return render_template('editSkills.html')
 
 @app.route('/loadRequiredSkills', methods = ["GET"])
+# @fl_lgin.login_required
 def load_required_skills():
     return load_drop_down_info(["skill","importance","role"],"required_skills_for_shift")
 
 @app.route('/loadShifts', methods = ["GET"])
+# @fl_lgin.login_required
 def load_shifts():
     return load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
 
@@ -306,10 +347,12 @@ def load_drop_down_info(columns_to_select,table):
     return jsonify(return_array)
 
 @app.route('/updateSkill',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def update_skill():
     return use_info(request.get_json(),which_function="update",table="required_skills_for_shift")
 
 @app.route('/addSkill', methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def add_skill():
     status, skill = use_info(request.get_json(),which_function="insert",table="required_skills_for_shift")
     if status == "Skill Added Successfully":
@@ -354,14 +397,17 @@ def use_info(info,which_function = None,table = None):
     return return_statement
 
 @app.route('/addShift',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def add_shift():
     return use_info(request.get_json(),which_function="insert",table="shifts")
 
 @app.route('/updateShift',methods = ["POST"])
+# @fl_lgin.fresh_login_required
 def update_shift():
     return use_info(request.get_json(),which_function="update",table="shifts")
 
 @app.route('/selectShiftToEdit',methods = ["GET"])
+# @fl_lgin.login_required
 def select_shift_to_edit():
     shift_name = request.args.get('shift')
     return render_template('editSelectedShift.html',shift = str(shift_name))

@@ -19,7 +19,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
     weekend_rotation = True
     store_manager_name = "1"
     otExemptRole = 2
-    num_models = 0
+    num_models = 1
     
     
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
@@ -261,7 +261,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
     clingo_code = clingon_code
     business_info = load_business_info(conn)
     business_name, schedule_blocks, store_minimum_employees, store_minimum_supervisors,otExemptRole, max_total_weekly_hours, total_weekly_hours_weight = business_info
-    print(schedule_blocks)
+
     max_total_weekly_hours *= 2
     # max_total_weekly_hours = 438
 
@@ -428,6 +428,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
             schedule = []
 
             for wk in schedule_dict.keys():
+                schedule.append("*-! " + str(week_ending_date) + " !-*")
                 for emp in schedule_dict[wk].keys():
                     for day in schedule_dict[wk][emp].keys():
                         emp_obj = Employee.employees[int(emp)]
@@ -459,7 +460,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
                             else:
                                 schedule_block += 'Off,'
 
-
+            
 
             
             file2.writelines(schedule)
