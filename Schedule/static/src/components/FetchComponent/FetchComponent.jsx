@@ -1,4 +1,4 @@
-
+import { Navigate } from 'react-router-dom';
 export default function FetchComponent(inputData, whichMethod, where, searchParamName) {
     return new Promise((resolve, reject) => {
         if (whichMethod === "GET") {
@@ -12,6 +12,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
             })
                 .then(response => {
                     if (!response.ok) {
+                        alert(response.statusText);
                         throw new Error('Network response was not ok');
                     }
                     return response.json();
@@ -21,6 +22,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                     resolve(data);
                 })
                 .catch(error => {
+                    console.error("There was a problem with the fetch operation GET:", error);
                     reject(error);
                 });
         }
@@ -41,9 +43,10 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
             
                 })
                 .then(data => {
+                    
+                    resolve(data);
                     // console.log(data);
-                    alert(data);
-                    return data;
+                    // alert(data['token']);
                     
                 })
                 .catch(error => {

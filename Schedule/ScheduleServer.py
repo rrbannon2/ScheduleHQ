@@ -6,39 +6,75 @@ import flask_login as fl_lgin
 import secrets
 import hashlib
 from userClass import User
+from flask_jwt import JWT, jwt_required, current_identity
 
 
 app = Flask(__name__)
 zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 
-app.secret_key = secrets.token_hex()
-# login_manager = fl_lgin.LoginManager()
-# login_manager.init_app(app)
-# login_manager.login_view = 'login'
+app.config['SECRET_KEY'] = secrets.token_hex()
 
-# @login_manager.user_loader
-# def load_user(user_id):
-#     print(User.users)
-#     return User.users[user_id]
+# app.config['SECRET_KEY'] = 'super-secret'
+tokens_dict = {}
 
+def load_user(user_id):
+    print(User.users)
+    return User.users[user_id]
+
+def authenticate(email,password):
+    query_response = execute_SQL(sql.SQL("SELECT user_id, salt, salted_password FROM {} WHERE email = %s").format(sql.Identifier("users")),execute_args=[email]) 
+    user_id, salt, user_password = query_response[0][:3]
+    user_id = str(user_id)
+    print(query_response)
+    salted_attempt_password = password + str(salt)
+    if str(hashlib.sha512(salted_attempt_password.encode('utf-8')).hexdigest()) == user_password:
+        User({"user_id" : user_id,"email" : email})
+        return load_user(user_id)
+    else:
+        return None
+
+def identity(payload):
+    user_id = payload['identity']
+    return load_user(user_id)
+
+def token_verify(token_val):
+    users_dict = User.users
+    print(tokens_dict)
+    token_val = str(token_val)
+    if token_val in tokens_dict:
+        user_id = tokens_dict[token_val]
+        print(user_id)
+        print(users_dict[user_id].tokens)
+        if token_val in users_dict[user_id].tokens:
+            print("Testing 3")
+            users_dict[user_id].tokens.pop()
+            return users_dict[user_id]
+    return False
+
+def generate_token(user):
+    token = secrets.token_hex()
+    user.tokens.insert(0,token)
+    tokens_dict[token] = user.user_id
+    # tokens_dict.pop(user.tokens[-1],None)
+    return token
+
+    
 @app.route('/login',methods = ["POST"])
 def login():
     login_info = request.get_json()
     email = login_info["userEmail"]
     attempt_password = login_info["password"]
-    
-    query_response = execute_SQL(sql.SQL("SELECT user_id, salt, salted_password FROM {} WHERE email = %s").format(sql.Identifier("users")),execute_args=[email]) 
-    user_id, salt, user_password = query_response[0][:3]
-    user_id = str(user_id)
-    print(query_response)
-    salted_attempt_password = attempt_password + str(salt)
-    if str(hashlib.sha512(salted_attempt_password.encode('utf-8')).hexdigest()) == user_password:
-        User({"user_id" : user_id,"email" : email})
-        
-        # fl_lgin.login_user(load_user(user_id))
-        return jsonify("Login successful")
+    user = authenticate(email,attempt_password)
+    if user:
+        print("token generated")
+        token = generate_token(user)
+        return {"response":"Login Successful","token":token}
     else:
-        return jsonify("Incorrect email or password. Please try again")
+        return {"response": "Email or Password incorrect, please try again.","token":None}
+    
+    
+    
+    
 
 
 def get_db_connection():
@@ -68,7 +104,6 @@ def add_default_emp_skill_level(skill,emp):
     return None
 
 @app.route('/addUser',methods = ["POST"])
-# @fl_lgin.fresh_login_required
 def add_user():
     user_info = request.get_json()
     user_email = user_info["userEmail"]
@@ -77,7 +112,6 @@ def add_user():
     salted_pass = user_password + str(salt)
     salted_pass = salted_pass.encode('utf-8')
     hashed_pass = str(hashlib.sha512(salted_pass).hexdigest()) #TODO: THIS IS TEMPORARY, NOT HOW PASSWORDS WILL BE HASHED AND STORED. FIX.
-    
     try:
         execute_SQL(sql.SQL("INSERT INTO {} (email,salt,salted_password) VALUES(%s,%s,%s)").format(sql.Identifier('users')),execute_args = [user_email,salt,hashed_pass])
     except:
@@ -208,15 +242,22 @@ def write():
         return jsonify("No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists.")
 
 @app.route('/getSchedule',methods= ["GET"])
-# @fl_lgin.login_required
 def get_schedule():
-    with open('Schedule/scheduleFile.txt','r') as file0:
-        solution = file0.read()
-        solution = solution.replace('(',',')
-        solution = solution.split(';')
-        print(solution[-1])
-    return jsonify(solution)
-
+    token = request.args.get("token")
+    print(token)
+    user = token_verify(token)
+    print("User", user)
+    if user:
+        print('success')
+        with open('Schedule/scheduleFile.txt','r') as file0:
+            solution = file0.read()
+            solution = solution.replace('(',',')
+            solution = solution.split(';')
+            print(solution[-1])
+        return jsonify(solution)
+    else:
+        return {'a':'b'}, 401
+    
 
 # @app.route('/addEmployeePage',methods = ["GET"])
 # def add_emp_home():
@@ -338,13 +379,17 @@ def load_required_skills():
 @app.route('/loadShifts', methods = ["GET"])
 # @fl_lgin.login_required
 def load_shifts():
-    return load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
+    token = generate_token()
+    return_array = load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
+    return {"token":token,"returnArray":return_array}
+    # return load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
 
 def load_drop_down_info(columns_to_select,table):
     query_response = execute_SQL(sql.SQL("SELECT {},{},{} FROM {}").format(sql.Identifier(columns_to_select[0]),sql.Identifier(columns_to_select[1]),sql.Identifier(columns_to_select[2]),sql.Identifier(table)))        
 
     return_array = [{"name":x[0], "importance":x[1], columns_to_select[2]:x[2]} for x in query_response]
-    return jsonify(return_array)
+    # return jsonify(return_array)
+    return return_array
 
 @app.route('/updateSkill',methods = ["POST"])
 # @fl_lgin.fresh_login_required

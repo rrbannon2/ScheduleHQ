@@ -2,13 +2,21 @@ import React,{useState, useEffect} from 'react';
 import { Table, Row, Col, Button } from 'react-bootstrap';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
-import { Link } from 'react-router-dom';
+import { Link,useLocation,Navigate, useNavigate, redirect } from 'react-router-dom';
+
 
 
 
 const DisplaySchedulePage = () => {
     
     const [fetchedInfo, setFetchedInfo] = useState(null);
+    var token = useLocation().state;
+    try {
+        token = { "dataID": token['data'] };
+    } catch (error) {
+        alert("You are not currently signed in, you will now be redirected to the sign in page.")
+        Navigate({"to":'/'});
+    }
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -16,11 +24,11 @@ const DisplaySchedulePage = () => {
           };
         const fetchData = async () => {
             try {
-                const data = await FetchComponent(null, "GET", "/getSchedule",false);
+                const data = await FetchComponent(token, "GET", "/getSchedule","token");
                 setFetchedInfo(data);
             } catch (error) {
-                console.error("Error fetching shift data", error);
-                // Handle the error accordingly
+                alert("Please return to the log in page");
+                console.error("Error fetching data", error);
             }
         };
 
