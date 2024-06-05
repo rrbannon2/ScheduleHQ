@@ -254,7 +254,8 @@ def get_schedule():
             solution = solution.replace('(',',')
             solution = solution.split(';')
             print(solution[-1])
-        return jsonify(solution)
+        new_token = generate_token(user)
+        return {"solution":solution,"token":new_token}
     else:
         return {'a':'b'}, 401
     
@@ -361,27 +362,29 @@ def load_selected_item_details(selected_item,table,name_column):
     return jsonify(item_info)
 
 
-
-# @app.route('/editSelectedSkillPage', methods = ["GET"])
-# def edit_selected_skill_home():
-#     return render_template('editSelectedSkill.html')
-
-
-# @app.route('/editSkills', methods = ["GET"])
-# def edit_skills_home():
-#     return render_template('editSkills.html')
-
 @app.route('/loadRequiredSkills', methods = ["GET"])
 # @fl_lgin.login_required
 def load_required_skills():
-    return load_drop_down_info(["skill","importance","role"],"required_skills_for_shift")
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        return_array = load_drop_down_info(["skill","importance","role"],"required_skills_for_shift")
+        new_token = generate_token(user)
+        return {"token":new_token,"returnArray":return_array}
+    else:
+        return {'a':'b'},401
 
 @app.route('/loadShifts', methods = ["GET"])
 # @fl_lgin.login_required
 def load_shifts():
-    token = generate_token()
-    return_array = load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
-    return {"token":token,"returnArray":return_array}
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        return_array = load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
+        new_token = generate_token(user)
+        return {"token":new_token,"returnArray":return_array}
+    else:
+        return {'a':'b'},401
     # return load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
 
 def load_drop_down_info(columns_to_select,table):
@@ -450,12 +453,6 @@ def add_shift():
 # @fl_lgin.fresh_login_required
 def update_shift():
     return use_info(request.get_json(),which_function="update",table="shifts")
-
-@app.route('/selectShiftToEdit',methods = ["GET"])
-# @fl_lgin.login_required
-def select_shift_to_edit():
-    shift_name = request.args.get('shift')
-    return render_template('editSelectedShift.html',shift = str(shift_name))
 
 if __name__ == '__main__':
     app.run(debug=True) 

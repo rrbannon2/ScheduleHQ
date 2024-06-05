@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import axios from "axios";
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import "../EmployeeTable/EmployeeTable.css"
 import { Link, useHref } from 'react-router-dom';
+import FetchComponent from '../FetchComponent/FetchComponent';
 
 const SkillsTable = () => {
     const [fetchedInfo, setFetchedInfo] = useState([]);
     
 
     useEffect(() => {
-        axios.get("http://localhost:3000/loadRequiredSkills").then((response) => {
-            setFetchedInfo(response.data);
-        });
+        const handleBeforeUnload = (event) => {
+            event.preventDefault();
+          };
+        const fetchData = async () => {
+            try {
+                const data = await FetchComponent(null, "GET", "/loadRequiredSkills",null);
+                setFetchedInfo(data["returnArray"]);
+            } catch (error) {
+                alert("Please return to the log in page");
+                console.error("Error fetching data", error);
+                return null;
+            }
+            return "Success"
+        };
+
+        fetchData();
+
     }, []);
-    console.log(fetchedInfo);
 
     return (
         fetchedInfo &&

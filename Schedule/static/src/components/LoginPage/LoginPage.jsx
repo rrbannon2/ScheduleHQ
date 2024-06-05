@@ -22,7 +22,7 @@ const LoginPage = () => {
         console.log(dataVal['token']);
         const tokenVal = dataVal['token'];
         if (!(tokenVal === null)) {
-            navigate('/home', { state: { data: tokenVal } }); //Not Working properly
+            navigate('/home', { state: { data: tokenVal } }); 
         } else {
             alert(dataVal['response']);
         };
