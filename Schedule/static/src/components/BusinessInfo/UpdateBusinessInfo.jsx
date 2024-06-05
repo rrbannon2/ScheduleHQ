@@ -19,7 +19,6 @@ const UpdateBusinessInfo = () => {
         fetchData();
     }, []);
 
-    // Render component only when empInfo is available
     return (
         fetchedInfo && <BusinessInfoPage addNew={false} existingInfo={fetchedInfo} />
     );

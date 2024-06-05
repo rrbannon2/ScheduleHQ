@@ -43,10 +43,9 @@ def token_verify(token_val):
     token_val = str(token_val)
     if token_val in tokens_dict:
         user_id = tokens_dict[token_val]
-        print(user_id)
+        tokens_dict.pop(token_val,None)
         print(users_dict[user_id].tokens)
         if token_val in users_dict[user_id].tokens:
-            print("Testing 3")
             users_dict[user_id].tokens.pop()
             return users_dict[user_id]
     return False
@@ -54,9 +53,25 @@ def token_verify(token_val):
 def generate_token(user):
     token = secrets.token_hex()
     user.tokens.insert(0,token)
+    tokens_dict.pop(user.tokens[-1],None)
     tokens_dict[token] = user.user_id
-    # tokens_dict.pop(user.tokens[-1],None)
+    # print(tokens_dict)
+
     return token
+
+
+def token_required(request_func):
+    # print(request.get_json)
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        body = request_func()
+        new_token = generate_token(user)
+        return {"token":new_token,"body":body}
+    else:
+        return {'a':'b'},401
+    
+# app.config['before_request'] = token_required
 
     
 @app.route('/login',methods = ["POST"])
@@ -73,9 +88,6 @@ def login():
         return {"response": "Email or Password incorrect, please try again.","token":None}
     
     
-    
-    
-
 
 def get_db_connection():
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
@@ -97,7 +109,6 @@ def execute_SQL(sql_statement,execute_args=False):
     cursor.close()
     conn.close()
     return fetched
-
 
 def add_default_emp_skill_level(skill,emp):     
     execute_SQL(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s)").format(sql.Identifier('skills')),execute_args = [skill,emp,0])
@@ -141,50 +152,57 @@ def add_employee():
     
     return jsonify('Employee added successfully')
 
-# @app.route('/editExistingEmployee', methods = ["GET"])
-# def edit_existing_emp_home():
-#     return render_template('editEmployee.html')
-
 @app.route('/loadEmployeeInfo',methods=["GET"])
 # @fl_lgin.login_required
 def load_employee_info():
-
-    employee = request.args.get('employee')
-    query_response = execute_SQL(sql.SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s").format(sql.Identifier('employees'),sql.Identifier('extremes'),sql.Identifier('availability')),execute_args = [employee])
-    return jsonify(query_response)
+    token = request.args.get("token")
+    print("EmployeeToken",token)
+    user = token_verify(token)
+    if user:
+        employee = request.args.get('employee')
+        query_response = execute_SQL(sql.SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s").format(sql.Identifier('employees'),sql.Identifier('extremes'),sql.Identifier('availability')),execute_args = [employee])
+        new_token = generate_token(user)
+        return {'body':query_response,'token':new_token}
+    else:
+        return {'a':'b'},401
 
 @app.route('/loadEmployeeListData',methods = ["GET"])
 # @fl_lgin.login_required
 def load_employee_names():
-    
-    query_response = execute_SQL(sql.SQL("SELECT first_name, last_name, id, role FROM {}").format(sql.Identifier('employees')))
-    return_array = [{"firstName":emp[0], "lastName":emp[1], "id":emp[2], "role":emp[3]} for emp in query_response]
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        query_response = execute_SQL(sql.SQL("SELECT first_name, last_name, id, role FROM {}").format(sql.Identifier('employees')))
+        return_array = [{"firstName":emp[0], "lastName":emp[1], "id":emp[2], "role":emp[3]} for emp in query_response]
+        new_token = generate_token(user)
+        return {'body':return_array,'token':new_token}
+    else:
+        return {'a':'b'},401
 
-    return jsonify(return_array)
-
-
-# @app.route('/selectEmpToEdit', methods = ["GET"])
-# def select_emp_to_edit():
-#     employee_id = request.args.get('employee')
-#     return render_template('editSelectedEmployee.html',employee = str(employee_id))
 
 @app.route('/updateEmployee',methods = ["POST"])
 # @fl_lgin.fresh_login_required
 def update_employee():
-    request_data = list(request.get_json().values())
-    
-    emp_id = request_data[0]
-    employee_table_data = request_data[1:5]
-    extremes_table_data = request_data[5:11]
-    avail_info = request_data[11:]
-    avail_info = [int(i) for i in avail_info]
-    
-    execute_SQL(sql.SQL("UPDATE {} SET(first_name, last_name, role, wage) = (%s, %s, %s, %s) WHERE id = %s").format(sql.Identifier('employees')),
-                   [*employee_table_data,emp_id])
-    execute_SQL(sql.SQL("UPDATE {} SET(min_shift,max_shift,min_weekly,max_weekly,min_days,max_days) = (%s, %s, %s, %s, %s, %s) WHERE id = %s").format(sql.Identifier('extremes')),execute_args = [*extremes_table_data,emp_id])
-    execute_SQL(sql.SQL("UPDATE {} SET shift_pref = %s WHERE id = %s").format(sql.Identifier('availability')),execute_args = [avail_info,emp_id])
-
-    return jsonify("Updated Employee Information Saved Successfully.")
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        request_data = list(request.get_json().values())
+        
+        emp_id = request_data[0]
+        employee_table_data = request_data[1:5]
+        extremes_table_data = request_data[5:11]
+        avail_info = request_data[11:]
+        avail_info = [int(i) for i in avail_info]
+        
+        execute_SQL(sql.SQL("UPDATE {} SET(first_name, last_name, role, wage) = (%s, %s, %s, %s) WHERE id = %s").format(sql.Identifier('employees')),
+                    [*employee_table_data,emp_id])
+        execute_SQL(sql.SQL("UPDATE {} SET(min_shift,max_shift,min_weekly,max_weekly,min_days,max_days) = (%s, %s, %s, %s, %s, %s) WHERE id = %s").format(sql.Identifier('extremes')),execute_args = [*extremes_table_data,emp_id])
+        execute_SQL(sql.SQL("UPDATE {} SET shift_pref = %s WHERE id = %s").format(sql.Identifier('availability')),execute_args = [avail_info,emp_id])
+        new_token = generate_token(user)
+        return {'body':"Updated Employee Information Saved Successfully.",'token':new_token}
+    else:
+        return {'a':'b'},401
+        
 
 @app.route('/deleteEmployee',methods = ["POST"])
 # @fl_lgin.fresh_login_required
@@ -229,80 +247,49 @@ def delete_user():
 @app.route('/writeSchedule', methods = ["POST"])
 # @fl_lgin.login_required
 def write():
+    # token = request.args.get("token")
+    # user = token_verify(token)
+    # if user:
+    #     response = request.get_json()
+    #     clingoSchedule.run_clingo(response["seconds"],response["date"])
+    #     with open('Schedule/scheduleFile.txt', 'r') as file0:
+    #         solution = file0.read()
+    #         solution = solution.replace('(',',')
+    #         solution = solution.split(';')
+        # new_token = generate_token(user)
+    #     if len(solution) > 0:    
+    #         return {'body':"Schedule Written Successfully",'token':new_token}
+    #     else:
+    #         return {'body':"No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists.","token":new_token}
+    # else:
+    #     return {'a':'b'},401
     response = request.get_json()
-
     clingoSchedule.run_clingo(response["seconds"],response["date"])
     with open('Schedule/scheduleFile.txt', 'r') as file0:
         solution = file0.read()
         solution = solution.replace('(',',')
         solution = solution.split(';')
     if len(solution) > 0:
-        return jsonify("Schedule Written Successfully")
+        return {'body':"Schedule Written Successfully"}
     else:
-        return jsonify("No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists.")
+        return {'body':"No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists."}
+
 
 @app.route('/getSchedule',methods= ["GET"])
 def get_schedule():
     token = request.args.get("token")
-    print(token)
     user = token_verify(token)
-    print("User", user)
     if user:
-        print('success')
         with open('Schedule/scheduleFile.txt','r') as file0:
             solution = file0.read()
             solution = solution.replace('(',',')
             solution = solution.split(';')
             print(solution[-1])
         new_token = generate_token(user)
-        return {"solution":solution,"token":new_token}
+        return {'body':solution,'token':new_token}
     else:
-        return {'a':'b'}, 401
-    
-
-# @app.route('/addEmployeePage',methods = ["GET"])
-# def add_emp_home():
-#     return render_template('addEmployee.html')
-    
-# @app.route('/addSkillsPage', methods = ["GET"])
-# def add_skills_home():
-#     return render_template('addSkills.html')
-
-# @app.route('/businessInfoPage',methods = ["GET"])
-# def business_info_home():
-#     return render_template('businessInfo.html')
-
-# @app.route('/addShiftPage', methods = ["GET"])
-# def add_shift_home():
-#     return render_template('addShift.html')
-
-# @app.route('/editShiftPage', methods = ["GET"])
-# def edit_shift_home():
-#     return render_template('editShift.html')
-
-# @app.route('/employeeSkillsPage', methods = ["GET"])
-# def edit_employee_skills():
-#     emp_id = request.args.get('employee')
-#     # first_name = request.args.get('firstName')
-#     # last_name = request.args.get('lastName')
-#     # role = request.args.get('role')
-    
-#     info = execute_SQL(sql.SQL("SELECT * FROM employees WHERE id = %s"),execute_args = [emp_id])[0]
-    
-#     first_name = info[1]
-#     last_name = info[2]
-#     role = info[3]
-#     return render_template('employeeSkills.html',employee = emp_id, firstName = first_name, lastName = last_name, role0 = role)
-
-# @app.route('/selectSkillToEdit', methods = ["GET"])
-# def select_skill_to_edit():
-#     skill_name = request.args.get('skill')
-    
-#     return render_template('editSelectedSkill.html',skill = str(skill_name))
-
-# @app.route('/generateSchedulePage',methods=["GET"])
-# def generate_schedule_home():
-#     return render_template('generateSchedule.html')
+        return {'a':'b'},401
+        
 
 @app.route('/updateBusinessInfo',methods = ["POST"])
 # @fl_lgin.fresh_login_required

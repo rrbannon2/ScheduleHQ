@@ -12,7 +12,7 @@ const EditEmployeeDataTable = ( ) => {
         const fetchData = async () => {
             try {
                 const data = await FetchComponent(dataID, "GET", "/loadEmployeeInfo","employee");
-                setEmpInfo(data[0]);
+                setEmpInfo(data['body'][0]);
             } catch (error) {
                 console.error("Error fetching employee data", error);
                 // Handle the error accordingly

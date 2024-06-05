@@ -10,14 +10,6 @@ import { Link,useLocation,Navigate, useNavigate, redirect } from 'react-router-d
 const DisplaySchedulePage = () => {
     
     const [fetchedInfo, setFetchedInfo] = useState(null);
-    const [fetchedToken, setFetchedToken] = useState(null);
-    var token = useLocation().state;
-    // try {
-    //     token = { "dataID": token['data'] };
-    // } catch (error) {
-    //     alert("You are not currently signed in, you will now be redirected to the sign in page.")
-    //     Navigate({"to":'/'});
-    // }
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -26,7 +18,7 @@ const DisplaySchedulePage = () => {
         const fetchData = async () => {
             try {
                 const data = await FetchComponent(null, "GET", "/getSchedule",null);
-                setFetchedInfo(data["solution"]);
+                setFetchedInfo(data["body"]);
             } catch (error) {
                 alert("Please return to the log in page");
                 console.error("Error fetching data", error);
@@ -38,11 +30,6 @@ const DisplaySchedulePage = () => {
         fetchData();
 
     }, []);
-
-    // console.log(setFetchedToken);
-    // console.log(token)
-    // useLocation().state = fetchedToken;
-    // console.log(useLocation().state)
 
     return (
         fetchedInfo && 

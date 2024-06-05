@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import FetchComponent from '../FetchComponent/FetchComponent';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
-
+// TODO: Make this component a modal on the display schedule page,
+// would avoid needing to navigate and the clunky name in navbar.
 const GenerateSchedulePage = () => {
 
     return (
@@ -47,7 +48,7 @@ const ValidateData = () => {
         alert("Date Entered Not Valid, Format Must Be DD/MM/YYYY or MM/DD/YYYY");
         return null;
     };
-    alert("test");
+    // alert("test");
     
     return true;
 };

@@ -4,7 +4,7 @@ var tokenVal = null;
 export default function FetchComponent(inputData, whichMethod, where, searchParamName) {
     return new Promise((resolve, reject) => {
         if (whichMethod === "GET") {
-            var searchURL = searchParamName ? "?" + new URLSearchParams(searchParamName + "=" + inputData["dataID"]) : "?" + new URLSearchParams("token=" + tokenVal);
+            var searchURL = searchParamName ? "?" + new URLSearchParams(searchParamName + "=" + inputData["dataID"]+"&"+"token=" + tokenVal) : "?" + new URLSearchParams("token=" + tokenVal);
         
             fetch(where + searchURL, {
                 method: whichMethod,
@@ -23,7 +23,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 .then(data => {
                     resolve(data);
                     tokenVal = data['token'];
-                    console.log(tokenVal);
+                    
                 })
                 .catch(error => {
                     console.error("There was a problem with the fetch operation GET:", error);
@@ -54,16 +54,16 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                         resolve(data);
                         // console.log(data);
                         tokenVal = data['token'];
-                        console.log(tokenVal);
+                        
                             
                     })
                     .catch(error => {
                         console.error('There was a problem with the fetch operation:', error);
                     });
             } else {
-                var searchURL2 = where == '/login' ? new URLSearchParams("token" + tokenVal) : "";
+                var searchURL2 = new URLSearchParams("token=" + tokenVal);
                 // alert(where);
-                console.log(searchURL2);
+                // inputData["token"]
                 fetch(where + searchURL2, {
                     // fetch(where,{
                     method: whichMethod,
@@ -83,9 +83,8 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                     .then(data => {
                     
                         resolve(data);
-                        // console.log(data);
                         tokenVal = data['token'];
-                        console.log(tokenVal);
+                        
                     
                     })
                     .catch(error => {

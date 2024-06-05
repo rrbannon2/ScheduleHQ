@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import axios from "axios";
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import './EmployeeTable.css';
 import AddEmployeeModal from '../AddEmployeeModal/AddEmployeeModal';
 import { Link, useHref } from 'react-router-dom';
+import FetchComponent from '../FetchComponent/FetchComponent';
 
 const EmployeeTable = () => {
     const [listOfEmployees, setListOfEmployees] = useState([]);
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        axios.get("http://localhost:3000/loadEmployeeListData").then((response) => {
-            setListOfEmployees(response.data);
-        });
+        const fetchData = async () => {
+            try {
+                const data = await FetchComponent(null, "GET", "/loadEmployeeListData", null);
+                setListOfEmployees(data["body"]);
+            } catch (error) {
+                alert("Please return to the log in page");
+                console.error("Error fetching data", error);
+            }
+        };
+
+        fetchData();
+
     }, []);
-    // console.log(listOfEmployees);
 
     return (
         listOfEmployees &&

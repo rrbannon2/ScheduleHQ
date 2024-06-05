@@ -42,7 +42,7 @@ const App = () => {
           <Route path="/generateschedule" element={<GenerateSchedulePage />} />
           <Route path="/employeetable" element={<EmployeeTable />} />
           <Route path="/addemptable" element={<AddEmployeeTable />} />
-          <Route path="/baseemptable" element={<BaseEmployeeDataTable />} />
+          {/* <Route path="/baseemptable" element={<BaseEmployeeDataTable />} /> */}
           <Route path="/editemptable" element={<EditEmployeeDataTable />} />
           <Route path="/addskill" element={<AddSkillPage />} />
           <Route path="/editskill" element={<EditSkillPage />} />

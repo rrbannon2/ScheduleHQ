@@ -19,7 +19,6 @@ const LoginPage = () => {
         };
         
         const dataVal = await FetchComponent(basicJsonDict, "POST", "/login", null);
-        console.log(dataVal['token']);
         const tokenVal = dataVal['token'];
         if (!(tokenVal === null)) {
             navigate('/home', { state: { data: tokenVal } }); 
