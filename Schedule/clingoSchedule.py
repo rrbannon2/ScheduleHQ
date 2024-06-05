@@ -428,7 +428,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
             schedule = []
 
             for wk in schedule_dict.keys():
-                schedule.append("*-! " + str(week_ending_date) + " !-*")
+                schedule.append("*-! " + str(week_ending_date) + " !-*;")
                 for emp in schedule_dict[wk].keys():
                     for day in schedule_dict[wk][emp].keys():
                         emp_obj = Employee.employees[int(emp)]

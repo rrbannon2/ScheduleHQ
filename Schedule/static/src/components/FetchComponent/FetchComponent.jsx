@@ -22,7 +22,11 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 })
                 .then(data => {
                     resolve(data);
-                    tokenVal = data['token'];
+                    if (data['token']) {
+                        tokenVal = data['token'];
+                    } else {
+                        console.log("Testing aeong");
+                    }
                     
                 })
                 .catch(error => {
@@ -32,7 +36,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
         }
         else {
 
-            if (where == '/login') {
+            if (where == '/login' || where == '/writeSchedule' || where == '/updateBusinessInfo') {
                 fetch(where, {
                     // fetch(where,{
                     method: whichMethod,
@@ -53,8 +57,11 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                             
                         resolve(data);
                         // console.log(data);
-                        tokenVal = data['token'];
-                        
+                        if (data['token']) {
+                            tokenVal = data['token'];
+                        } else {
+                            console.log("Testing aeong");
+                        }
                             
                     })
                     .catch(error => {

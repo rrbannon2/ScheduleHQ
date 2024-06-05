@@ -284,7 +284,6 @@ def get_schedule():
             solution = file0.read()
             solution = solution.replace('(',',')
             solution = solution.split(';')
-            print(solution[-1])
         new_token = generate_token(user)
         return {'body':solution,'token':new_token}
     else:
