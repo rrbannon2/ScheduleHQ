@@ -90,45 +90,7 @@ const ShiftPage = ({ addNew, existingInfo }) => {
 
                     </tbody>
                 </Table>
-                {/* <Table striped hover>
-                    <thead>
-                        <tr>
-                            <th> </th>
-                            <th>Sunday</th>
-                            <th>Monday</th>
-                            <th>Tuesday</th>
-                            <th>Wednesday</th>
-                            <th>Thursday</th>
-                            <th>Friday</th>
-                            <th>Saturday</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Start Time</td>
-                            <td> {addNew ? <input id="sunday_1" /> : <input defaultValue={existingInfo[1][0]} id="sunday_1" />}</td>
-                            <td> {addNew ? <input id="monday_1" /> : <input defaultValue={existingInfo[1][1]} id="monday_1" />}</td>
-                            <td> {addNew ? <input id="tuesday_1" /> : <input defaultValue={existingInfo[1][2]} id="tuesday_1" />}</td>
-                            <td> {addNew ? <input id="wednesday_1" /> : <input defaultValue={existingInfo[1][3]} id="wednesday_1" />}</td>
-                            <td> {addNew ? <input id="thursday_1" /> : <input defaultValue={existingInfo[1][4]} id="thursday_1" />}</td>
-                            <td> {addNew ? <input id="friday_1" /> : <input defaultValue={existingInfo[1][5]} id="friday_1" />}</td>
-                            <td> {addNew ? <input id="saturday_1" /> : <input defaultValue={existingInfo[1][6]} id="saturday_1" />}</td>
-
-                        </tr>
-
-                        <tr>
-                            <td>End Time</td>
-                            <td> {addNew ? <input id="sunday_2" /> : <input defaultValue={existingInfo[1][7]} id="sunday_2" />}</td>
-                            <td> {addNew ? <input id="monday_2" /> : <input defaultValue={existingInfo[1][8]} id="monday_2" />}</td>
-                            <td> {addNew ? <input id="tuesday_2" /> : <input defaultValue={existingInfo[1][9]} id="tuesday_2" />}</td>
-                            <td> {addNew ? <input id="wednesday_2" /> : <input defaultValue={existingInfo[1][10]} id="wednesday_2" />}</td>
-                            <td> {addNew ? <input id="thursday_2" /> : <input defaultValue={existingInfo[1][11]} id="thursday_2" />}</td>
-                            <td> {addNew ? <input id="friday_2" /> : <input defaultValue={existingInfo[1][12]} id="friday_2" />}</td>
-                            <td> {addNew ? <input id="saturday_2" /> : <input defaultValue={existingInfo[1][13]} id="saturday_2" />}</td>
-                         
-                        </tr>
-                    </tbody>
-                </Table> */}
+                
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='d-flex justify-content-end'>
                         <Button id='addNew' onClick={() => PrepData(addNew)}>

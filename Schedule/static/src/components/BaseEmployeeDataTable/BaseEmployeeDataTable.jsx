@@ -73,39 +73,49 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                 <Table striped hover>
                     <thead>
                         <tr>
-                            <th>Day</th>
-                            <th>Sunday</th>
-                            <th>Monday</th>
-                            <th>Tuesday</th>
-                            <th>Wednesday</th>
-                            <th>Thursday</th>
-                            <th>Friday</th>
-                            <th>Saturday</th>
+                            <th> </th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><text>Start Time of Availability</text></td>
+                            <td>Sunday</td>
                             <td> {addEmployee ? <input id="sunday_1" /> : <input defaultValue={employeeInfo[11][0]} id="sunday_1" />}</td>
-                            <td> {addEmployee ? <input id="monday_1" /> : <input defaultValue={employeeInfo[11][1]} id="monday_1" />}</td>
-                            <td> {addEmployee ? <input id="tuesday_1" /> : <input defaultValue={employeeInfo[11][2]} id="tuesday_1" />}</td>
-                            <td> {addEmployee ? <input id="wednesday_1" /> : <input defaultValue={employeeInfo[11][3]} id="wednesday_1" />}</td>
-                            <td> {addEmployee ? <input id="thursday_1" /> : <input defaultValue={employeeInfo[11][4]} id="thursday_1" />}</td>
-                            <td> {addEmployee ? <input id="friday_1" /> : <input defaultValue={employeeInfo[11][5]} id="friday_1" />}</td>
-                            <td> {addEmployee ? <input id="saturday_1" /> : <input defaultValue={employeeInfo[11][6]} id="saturday_1" />}</td>
-
+                            <td> {addEmployee ? <input id="sunday_2" /> : <input defaultValue={employeeInfo[11][7]} id="sunday_2" />}</td>
                         </tr>
 
                         <tr>
-                            <td><text>End Time of Availability</text></td>
-                            <td> {addEmployee ? <input id="sunday_2" /> : <input defaultValue={employeeInfo[11][7]} id="sunday_2" />}</td>
-                            <td> {addEmployee ? <input id="monday_2" /> : <input defaultValue={employeeInfo[11][8]} id="monday_2" />}</td>
+                            <td>Monday</td>                            
+                            <td> {addEmployee ? <input id="monday_1" /> : <input defaultValue={employeeInfo[11][1]} id="monday_1" />}</td>
+                            <td> {addEmployee ? <input id="monday_2" /> : <input defaultValue={employeeInfo[11][8]} id="monday_2" />}</td>                            
+                        </tr>
+                        <tr>
+                            <td>Tuesday</td>
+                            <td> {addEmployee ? <input id="tuesday_1" /> : <input defaultValue={employeeInfo[11][2]} id="tuesday_1" />}</td>
                             <td> {addEmployee ? <input id="tuesday_2" /> : <input defaultValue={employeeInfo[11][9]} id="tuesday_2" />}</td>
+                        </tr>
+                        <tr>
+                            <td>Wednesday</td>
+                            <td> {addEmployee ? <input id="wednesday_1" /> : <input defaultValue={employeeInfo[11][3]} id="wednesday_1" />}</td>
                             <td> {addEmployee ? <input id="wednesday_2" /> : <input defaultValue={employeeInfo[11][10]} id="wednesday_2" />}</td>
+                        </tr>
+                        <tr>
+                            <td>Thursday</td>
+                            <td> {addEmployee ? <input id="thursday_1" /> : <input defaultValue={employeeInfo[11][4]} id="thursday_1" />}</td>
                             <td> {addEmployee ? <input id="thursday_2" /> : <input defaultValue={employeeInfo[11][11]} id="thursday_2" />}</td>
+                        </tr>
+                        <tr>
+                            <td>Friday</td>
+                            <td> {addEmployee ? <input id="friday_1" /> : <input defaultValue={employeeInfo[11][5]} id="friday_1" />}</td>
                             <td> {addEmployee ? <input id="friday_2" /> : <input defaultValue={employeeInfo[11][12]} id="friday_2" />}</td>
+                        </tr>
+                        <tr>
+                            <td>Saturday</td>
+                            <td> {addEmployee ? <input id="saturday_1" /> : <input defaultValue={employeeInfo[11][6]} id="saturday_1" />}</td>
                             <td> {addEmployee ? <input id="saturday_2" /> : <input defaultValue={employeeInfo[11][13]} id="saturday_2" />}</td>
                         </tr>
+
                     </tbody>
                 </Table>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
