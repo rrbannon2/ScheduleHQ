@@ -14,7 +14,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
             })
                 .then(response => {
                     if (!response.ok) {
-                        alert(response.statusText);
+                        alert(response.statusText + " Please return to the log in page");
                         throw new Error('Network response was not ok');
                     }
                     return response.json();
@@ -24,9 +24,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                     resolve(data);
                     if (data['token']) {
                         tokenVal = data['token'];
-                    } else {
-                        console.log("Testing aeong");
-                    }
+                    };
                     
                 })
                 .catch(error => {
@@ -59,9 +57,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                         // console.log(data);
                         if (data['token']) {
                             tokenVal = data['token'];
-                        } else {
-                            console.log("Testing aeong");
-                        }
+                        };
                             
                     })
                     .catch(error => {
@@ -71,7 +67,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 var searchURL2 = new URLSearchParams("token=" + tokenVal);
                 // alert(where);
                 // inputData["token"]
-                fetch(where + searchURL2, {
+                fetch(where +"?" + searchURL2, {
                     // fetch(where,{
                     method: whichMethod,
                     headers: {
@@ -90,7 +86,9 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                     .then(data => {
                     
                         resolve(data);
-                        tokenVal = data['token'];
+                        if (data['token']) {
+                            tokenVal = data['token'];
+                        };
                         
                     
                     })

@@ -8,7 +8,7 @@ import { DeleteEmployeeModal } from '../DeleteModal/DeleteModal';
 const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
     const [showModal, setShowModal] = useState(false);
     const DeleteEmployee = (empToDelete) => {
-        FetchComponent(empToDelete, "POST", "deleteEmployee"); 
+        FetchComponent(empToDelete, "POST", "deleteEmployee",null); 
         setShowModal(false);
     };
     

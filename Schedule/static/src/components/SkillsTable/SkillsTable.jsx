@@ -17,11 +17,8 @@ const SkillsTable = () => {
                 const data = await FetchComponent(null, "GET", "/loadRequiredSkills",null);
                 setFetchedInfo(data["returnArray"]);
             } catch (error) {
-                alert("Please return to the log in page");
                 console.error("Error fetching data", error);
-                return null;
             }
-            return "Success"
         };
 
         fetchData();

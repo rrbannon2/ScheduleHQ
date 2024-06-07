@@ -2,7 +2,7 @@ import React,{useState, useEffect} from 'react';
 import { Table, Row, Col, Button } from 'react-bootstrap';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
-import { Link,useLocation,Navigate, useNavigate, redirect } from 'react-router-dom';
+import { Link,useLocation,Navigate, useNavigate } from 'react-router-dom';
 
 
 
@@ -20,9 +20,8 @@ const DisplaySchedulePage = () => {
                 const data = await FetchComponent(null, "GET", "/getSchedule",null);
                 setFetchedInfo(data["body"]);
             } catch (error) {
-                alert("Please return to the log in page");
                 console.error("Error fetching data", error);
-                return null;
+                
             }
             return "Success"
         };

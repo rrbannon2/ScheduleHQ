@@ -15,14 +15,13 @@ const EditEmployeeDataTable = ( ) => {
                 setEmpInfo(data['body'][0]);
             } catch (error) {
                 console.error("Error fetching employee data", error);
-                // Handle the error accordingly
             }
         };
 
         fetchData();
     }, []);
 
-    // Render component only when empInfo is available
+
     return (
         empInfo && <BaseEmployeeDataTable addEmployee={false} employeeInfo={empInfo} />
     );
