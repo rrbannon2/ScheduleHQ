@@ -22,7 +22,7 @@ def load_user(user_id):
     return User.users[user_id]
 
 def authenticate(email,password):
-    query_response = execute_SQL(sql.SQL("SELECT user_id, salt, salted_password FROM {} WHERE email = %s").format(sql.Identifier("users")),execute_args=[email]) 
+    query_response = execute_SQL("SELECT user_id, salt, salted_password FROM {} WHERE email = %s",[sql.Identifier("users")],execute_args=[email]) 
     user_id, salt, user_password = query_response[0][:3]
     user_id = str(user_id)
     print(query_response)
@@ -92,9 +92,18 @@ def get_db_connection():
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
     return conn
 
-def execute_SQL(sql_statement,execute_args=False,identifiers = False):
+def execute_SQL(sql_statement,identifiers = False,execute_args=False):
     conn = get_db_connection()
     cursor = conn.cursor()
+    if identifiers:
+        for i in identifiers:
+            if type(i) != sql.Identifier:
+                print("SQL request contains invalid values in identifiers")
+                return "SQL request contains invalid values in identifiers"
+        sql_statement = sql.SQL(sql_statement).format(*identifiers)
+    else:
+        sql_statement = sql.SQL(sql_statement)
+
     if execute_args:
         cursor.execute(sql_statement,execute_args)
     else:
@@ -110,7 +119,7 @@ def execute_SQL(sql_statement,execute_args=False,identifiers = False):
     return fetched
 
 def add_default_emp_skill_level(skill,emp):     
-    execute_SQL(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s)").format(sql.Identifier('skills')),execute_args = [skill,emp,0])
+    execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('skills')],execute_args = [skill,emp,0])
     return None
 
 @app.route('/addUser',methods = ["POST"])
@@ -123,12 +132,14 @@ def add_user():
     salted_pass = salted_pass.encode('utf-8')
     hashed_pass = str(hashlib.sha512(salted_pass).hexdigest()) #TODO: THIS IS TEMPORARY, NOT HOW PASSWORDS WILL BE HASHED AND STORED. FIX.
     try:
-        execute_SQL(sql.SQL("INSERT INTO {} (email,salt,salted_password) VALUES(%s,%s,%s)").format(sql.Identifier('users')),execute_args = [user_email,salt,hashed_pass])
+        execute_SQL("INSERT INTO {} (email,salt,salted_password) VALUES(%s,%s,%s)",[sql.Identifier('users')],execute_args = [user_email,salt,hashed_pass])
     except:
         print("Already an account")
         return jsonify("There is already an account with that email address")
-    print(execute_SQL(sql.SQL("SELECT * FROM {}").format(sql.Identifier('users'))))
+    print(execute_SQL("SELECT * FROM {}",[sql.Identifier('users')]))
     return jsonify("Sign up successful!")
+
+
 
 
 @app.route('/addEmployee',methods = ["POST"])
@@ -140,16 +151,16 @@ def add_employee():
 
         avail_info = emp_info[11:]
         avail_info = [int(i) for i in avail_info]
-        execute_SQL(sql.SQL("INSERT INTO {}(id, first_name, last_name, role, wage) VALUES (%s, %s, %s, %s, %s)").format(sql.Identifier('employees')),execute_args = emp_info[0:5])
+        execute_SQL("INSERT INTO {}(id, first_name, last_name, role, wage) VALUES (%s, %s, %s, %s, %s)",[sql.Identifier('employees')],execute_args = emp_info[0:5])
         id = emp_info[0]
         
-        execute_SQL(sql.SQL("INSERT INTO {} VALUES(%s, %s)").format(sql.Identifier('availability')),execute_args = [id,avail_info]) 
-        execute_SQL(sql.SQL("INSERT INTO {} VALUES(%s, %s, %s, %s, %s, %s, %s)").format(sql.Identifier('extremes')),execute_args = [id,*emp_info[5:11]])
-        skill_names = execute_SQL(sql.SQL("SELECT skill FROM {}").format(sql.Identifier('required_skills_for_shift')))
+        execute_SQL("INSERT INTO {} VALUES(%s, %s)",[sql.Identifier('availability')],execute_args = [id,avail_info]) 
+        execute_SQL("INSERT INTO {} VALUES(%s, %s, %s, %s, %s, %s, %s)",[sql.Identifier('extremes')],execute_args = [id,*emp_info[5:11]])
+        skill_names = execute_SQL("SELECT skill FROM {}",[sql.Identifier('required_skills_for_shift')])
         
         #Could possibly be achieved with a temporary single row single column table for id, LEFT JOIN(SELECT skill FROM required_skills_for_shift,id_table)
         for name in skill_names:
-            execute_SQL(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s)").format(sql.Identifier('skills')),execute_args = [name,id,0])
+            execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('skills')],execute_args = [name,id,0])
         new_token = generate_token(user)
         return {'body':"Employee Added Successfully",'token':new_token}
     else:
@@ -162,7 +173,7 @@ def load_employee_info():
     user = token_verify(token)
     if user:
         employee = request.args.get('employee')
-        query_response = execute_SQL(sql.SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s").format(sql.Identifier('employees'),sql.Identifier('extremes'),sql.Identifier('availability')),execute_args = [employee])
+        query_response = execute_SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s",(sql.Identifier('employees'),sql.Identifier('extremes'),sql.Identifier('availability')),execute_args = [employee])
         new_token = generate_token(user)
         return {'body':query_response,'token':new_token}
     else:
@@ -174,7 +185,7 @@ def load_employee_names():
     token = request.args.get("token")
     user = token_verify(token)
     if user:
-        query_response = execute_SQL(sql.SQL("SELECT first_name, last_name, id, role FROM {}").format(sql.Identifier('employees')))
+        query_response = execute_SQL("SELECT first_name, last_name, id, role FROM {}",[sql.Identifier('employees')])
         return_array = [{"firstName":emp[0], "lastName":emp[1], "id":emp[2], "role":emp[3]} for emp in query_response]
         new_token = generate_token(user)
         return {'body':return_array,'token':new_token}
@@ -196,10 +207,10 @@ def update_employee():
         avail_info = request_data[11:]
         avail_info = [int(i) for i in avail_info]
         
-        execute_SQL(sql.SQL("UPDATE {} SET(first_name, last_name, role, wage) = (%s, %s, %s, %s) WHERE id = %s").format(sql.Identifier('employees')),
+        execute_SQL("UPDATE {} SET(first_name, last_name, role, wage) = (%s, %s, %s, %s) WHERE id = %s",[sql.Identifier('employees')],
                     [*employee_table_data,emp_id])
-        execute_SQL(sql.SQL("UPDATE {} SET(min_shift,max_shift,min_weekly,max_weekly,min_days,max_days) = (%s, %s, %s, %s, %s, %s) WHERE id = %s").format(sql.Identifier('extremes')),execute_args = [*extremes_table_data,emp_id])
-        execute_SQL(sql.SQL("UPDATE {} SET shift_pref = %s WHERE id = %s").format(sql.Identifier('availability')),execute_args = [avail_info,emp_id])
+        execute_SQL("UPDATE {} SET(min_shift,max_shift,min_weekly,max_weekly,min_days,max_days) = (%s, %s, %s, %s, %s, %s) WHERE id = %s",[sql.Identifier('extremes')],execute_args = [*extremes_table_data,emp_id])
+        execute_SQL("UPDATE {} SET shift_pref = %s WHERE id = %s",[sql.Identifier('availability')],execute_args = [avail_info,emp_id])
         new_token = generate_token(user)
         return {'body':"Updated Employee Information Saved Successfully.",'token':new_token}
     else:
@@ -210,10 +221,10 @@ def update_employee():
 # @fl_lgin.fresh_login_required
 def delete_employee():     
     emp_id = request.get_json()
-    execute_SQL(sql.SQL("DELETE FROM {} WHERE id = %s").format(sql.Identifier('employees')),execute_args = [emp_id])
-    execute_SQL(sql.SQL("DELETE FROM {} WHERE id = %s").format(sql.Identifier('extremes')),execute_args = [emp_id])
-    execute_SQL(sql.SQL("DELETE FROM {} WHERE id = %s").format(sql.Identifier('availability')),execute_args = [emp_id])
-    execute_SQL(sql.SQL("DELETE FROM {} WHERE id = %s").format(sql.Identifier('skills')),execute_args = [emp_id])
+    execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('employees')],execute_args = [emp_id])
+    execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('extremes')],execute_args = [emp_id])
+    execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('availability')],execute_args = [emp_id])
+    execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('skills')],execute_args = [emp_id])
 
     return jsonify("Employee Deleted.")
 
@@ -221,8 +232,8 @@ def delete_employee():
 # @fl_lgin.fresh_login_required
 def delete_skill():
     skill_name = request.get_json()
-    execute_SQL(sql.SQL("DELETE FROM {} WHERE skill = %s").format(sql.Identifier('required_skills_for_shift')),execute_args = [skill_name])
-    execute_SQL(sql.SQL("DELETE FROM {} WHERE skill = %s").format(sql.Identifier('skills')),execute_args = [skill_name])
+    execute_SQL("DELETE FROM {} WHERE skill = %s",[sql.Identifier('required_skills_for_shift')],execute_args = [skill_name])
+    execute_SQL("DELETE FROM {} WHERE skill = %s",[sql.Identifier('skills')],execute_args = [skill_name])
 
     return jsonify("Skill Deleted.")
 
@@ -230,7 +241,7 @@ def delete_skill():
 # @fl_lgin.fresh_login_required
 def delete_shift():
     shift_name = request.get_json()
-    execute_SQL(sql.SQL("DELETE FROM {} WHERE shiftName = %s").format(sql.Identifier('shifts')),execute_args = [shift_name])
+    execute_SQL("DELETE FROM {} WHERE shiftName = %s",[sql.Identifier('shifts')],execute_args = [shift_name])
 
     return jsonify("Shift Deleted.")
 
@@ -238,7 +249,7 @@ def delete_shift():
 # @fl_lgin.fresh_login_required
 def delete_user():
     user_name = request.get_json()
-    execute_SQL(sql.SQL("DELETE FROM {} WHERE email = %s").format(sql.Identifier('users')),execute_args = [user_name])
+    execute_SQL("DELETE FROM {} WHERE email = %s",[sql.Identifier('users')],execute_args = [user_name])
 
     return jsonify("User Deleted.")
 
@@ -302,11 +313,11 @@ def update_business_info():
 
     
      
-    update_Bool = execute_SQL(sql.SQL("SELECT * FROM {}").format(sql.Identifier('business_info')))
+    update_Bool = execute_SQL("SELECT * FROM {}",[sql.Identifier('business_info')])
     if update_Bool:
-        execute_SQL(sql.SQL("UPDATE {} SET (business_name,min_employees,min_managers,exempt_role,max_total_hours,max_hours_importance,hours_of_op) = (%s,%s,%s,%s,%s,%s,%s)").format(sql.Identifier('business_info')),execute_args = [business_name,*business_info_ints[:5],hours_of_op])
+        execute_SQL("UPDATE {} SET (business_name,min_employees,min_managers,exempt_role,max_total_hours,max_hours_importance,hours_of_op) = (%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('business_info')],execute_args = [business_name,*business_info_ints[:5],hours_of_op])
     else:
-        execute_SQL(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s)").format(sql.Identifier('business_info')),execute_args = [business_name,hours_of_op,*business_info_ints[:5]])
+        execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('business_info')],execute_args = [business_name,hours_of_op,*business_info_ints[:5]])
     
     
     return jsonify("Added Successfully")
@@ -314,14 +325,14 @@ def update_business_info():
 @app.route('/loadBusinessInfo',methods = ["GET"])
 # @fl_lgin.login_required
 def load_business_info():
-    business_info = execute_SQL(sql.SQL("SELECT * FROM {}").format(sql.Identifier('business_info')))
+    business_info = execute_SQL("SELECT * FROM {}",[sql.Identifier('business_info')])
     return jsonify(business_info)
 
 @app.route('/loadSkillLevels',methods = ["GET"])
 # @fl_lgin.login_required
 def load_skill_levels():
     employee = request.args.get('employee')
-    query_response = execute_SQL(sql.SQL("SELECT skill,skill_level FROM {} WHERE id = %s").format(sql.Identifier('skills')),execute_args = [employee])
+    query_response = execute_SQL("SELECT skill,skill_level FROM {} WHERE id = %s",[sql.Identifier('skills')],execute_args = [employee])
     return jsonify(query_response)
 
 @app.route('/updateSkillLevel',methods = ["POST"])
@@ -334,7 +345,7 @@ def update_skill_level():
         skill_level = request_data['skill_level']
         id = request_data['id']
 
-        execute_SQL(sql.SQL("UPDATE {} SET skill_level = %s WHERE id = %s AND skill = %s").format(sql.Identifier('skills')),execute_args = [skill_level,id,skill])
+        execute_SQL("UPDATE {} SET skill_level = %s WHERE id = %s AND skill = %s",[sql.Identifier('skills')],execute_args = [skill_level,id,skill])
         new_token = generate_token(user)
         return {'body':"Skill level updated successfully",'token':new_token}
     else:
@@ -349,7 +360,7 @@ def load_shift_info():
     return load_selected_item_details(request.args.get('shift'),"shifts","shiftname")
 
 def load_selected_item_details(selected_item,table,name_column):
-    item_info = execute_SQL(sql.SQL("SELECT * FROM {} WHERE {} = %s").format(sql.Identifier(table),sql.Identifier(name_column)),execute_args = [selected_item])
+    item_info = execute_SQL("SELECT * FROM {} WHERE {} = %s",(sql.Identifier(table),sql.Identifier(name_column)),execute_args = [selected_item])
     return jsonify(item_info)
 
 
@@ -376,7 +387,7 @@ def load_shifts():
         return {'a':'b'},401
 
 def load_drop_down_info(columns_to_select,table):
-    query_response = execute_SQL(sql.SQL("SELECT {},{},{} FROM {}").format(sql.Identifier(columns_to_select[0]),sql.Identifier(columns_to_select[1]),sql.Identifier(columns_to_select[2]),sql.Identifier(table)))        
+    query_response = execute_SQL("SELECT {},{},{} FROM {}",(sql.Identifier(columns_to_select[0]),sql.Identifier(columns_to_select[1]),sql.Identifier(columns_to_select[2]),sql.Identifier(table)))        
 
     return_array = [{"name":x[0], "importance":x[1], columns_to_select[2]:x[2]} for x in query_response]
     return return_array
@@ -399,7 +410,7 @@ def add_skill():
     if user:
         status, skill = use_info(request.get_json(),which_function="insert",table="required_skills_for_shift")
         if status == "Skill Added Successfully":
-            emp_ids = execute_SQL(sql.SQL("SELECT id FROM {}").format(sql.Identifier('employees')))
+            emp_ids = execute_SQL("SELECT id FROM {}",[sql.Identifier('employees')])
             for id in emp_ids:
                 add_default_emp_skill_level(skill,id)
             return_statement = "Skill Added Successfully"
@@ -437,9 +448,9 @@ def use_info(info,which_function = None,table = None):
 
     try:
         if which_function == "insert":
-            execute_SQL(sql.SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)").format(sql.Identifier(table)),execute_args = [name, time_vals, importance, info3])
+            execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s)",[sql.Identifier(table)],execute_args = [name, time_vals, importance, info3])
         elif which_function == "update":
-            execute_SQL(sql.SQL("UPDATE {} SET (schedule_blocks,importance,{}) = (%s,%s,%s) WHERE {} = %s").format(sql.Identifier(table),sql.Identifier(role_or_max_hrs),sql.Identifier(name_column)),execute_args = [time_vals,importance,info3,name])
+            execute_SQL("UPDATE {} SET (schedule_blocks,importance,{}) = (%s,%s,%s) WHERE {} = %s",(sql.Identifier(table),sql.Identifier(role_or_max_hrs),sql.Identifier(name_column)),execute_args = [time_vals,importance,info3,name])
             return "Update Successful"
     except:
         return "Operation failed"
