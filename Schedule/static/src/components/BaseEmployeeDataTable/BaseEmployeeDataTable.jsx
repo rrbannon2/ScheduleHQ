@@ -3,15 +3,19 @@ import { Table, Button, Row, Col } from 'react-bootstrap';
 import './BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
 import { DeleteEmployeeModal } from '../DeleteModal/DeleteModal';
+import { EmployeeSkillModal } from '../EmployeeSkillModal/EmployeeSkillModal';
 
 
 const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
-    const [showModal, setShowModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEmpSkillModal, setShowEmpSkillModal] = useState(false);
     const DeleteEmployee = (empToDelete) => {
         FetchComponent(empToDelete, "POST", "deleteEmployee",null); 
-        setShowModal(false);
+        setShowDeleteModal(false);
     };
-    
+    const UpdateEmployeeSkillLevel = (empToUpdate, skill, newSkillLevel) => {
+        
+    };
     return (
         <div className='tableContainer'>
             <div className='containerTitle'>
@@ -128,14 +132,14 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                 {addEmployee ? null :
                     <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='d-flex justify-content-end'>
-                        <Button id='delete' onClick={() => setShowModal(true)}>
+                        <Button id='delete' onClick={() => setShowDeleteModal(true)}>
                             Delete Employee
                         </Button>
                     </Col>
                 </Row>}
             </div>
-            {showModal &&
-                <DeleteEmployeeModal show={showModal} handleClose={() => setShowModal(false)} handleDelete={() => DeleteEmployee(employeeInfo[0])} />
+            {showDeleteModal &&
+                <DeleteEmployeeModal show={showDeleteModal} handleClose={() => setShowDeleteModal(false)} handleDelete={() => DeleteEmployee(employeeInfo[0])} />
             }
 
         </div>

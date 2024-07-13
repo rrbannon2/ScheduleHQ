@@ -9,3 +9,5 @@
 Schedule/static/node_modules
 
 .vscode/.DS_Store
+Schedule/dbTableBackups/users.sql
+Schedule/dbTableBackups/admin_users.sql

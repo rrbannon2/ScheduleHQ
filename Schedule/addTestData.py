@@ -38,10 +38,12 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # cur.execute("DROP TABLE shifts")
 # cur.execute("CREATE TABLE shifts(shiftName varchar(255), schedule_blocks integer ARRAY[14], importance int, maxHours int)")
 # cur.execute("CREATE TABLE saved_schedule()")
-# cur.execute("DROP TABLE users")
-# cur.execute("CREATE TABLE users(user_id SERIAL,email varchar(255),salt int ,salted_password varchar(255))")
-# cur.execute("ALTER TABLE users ADD CONSTRAINT emails_primary PRIMARY KEY (email)")
+# cur.execute("DROP TABLE admin_users")
+# cur.execute("CREATE TABLE admin_users(user_id SERIAL,email varchar(255) PRIMARY KEY,salt int ,salted_password varchar(255), organization varchar(255) UNIQUE)")
 
+
+# cur.execute("ALTER TABLE employees RENAME to test_employees")
+# cur.execute("DROP TABLE variables")
 conn.commit()
 cur.close()
 conn.close()

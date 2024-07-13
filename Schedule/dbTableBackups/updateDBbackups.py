@@ -12,10 +12,6 @@ def update_backup(table,filename,cursor):
             file.write(str(line))
             file.write(str("\n"))
 
-update_backup('employees','employees.sql',cur)
-update_backup('extremes','extremes.sql',cur)
-update_backup('required_skills_for_shift','required_skills_for_shift.sql',cur)
-update_backup('availability','availability.sql',cur)
-update_backup('skills','skills.sql',cur)
-update_backup('business_info','business_info.sql',cur)
-update_backup('shifts','shifts.sql',cur)
+cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+for table in cur.fetchall():
+    update_backup(table[0],"{}.sql".format(table[0]),cur)

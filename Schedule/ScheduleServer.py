@@ -17,77 +17,6 @@ app.config['SECRET_KEY'] = secrets.token_hex()
 # app.config['SECRET_KEY'] = 'super-secret'
 tokens_dict = {}
 
-def load_user(user_id):
-    print(User.users)
-    return User.users[user_id]
-
-def authenticate(email,password):
-    query_response = execute_SQL("SELECT user_id, salt, salted_password FROM {} WHERE email = %s",[sql.Identifier("users")],execute_args=[email]) 
-    user_id, salt, user_password = query_response[0][:3]
-    user_id = str(user_id)
-    print(query_response)
-    salted_attempt_password = password + str(salt)
-    if str(hashlib.sha512(salted_attempt_password.encode('utf-8')).hexdigest()) == user_password:
-        User({"user_id" : user_id,"email" : email})
-        return load_user(user_id)
-    else:
-        return None
-
-def identity(payload):
-    user_id = payload['identity']
-    return load_user(user_id)
-
-def token_verify(token_val):
-    users_dict = User.users
-    print(tokens_dict)
-    token_val = str(token_val)
-    if token_val in tokens_dict:
-        user_id = tokens_dict[token_val]
-        tokens_dict.pop(token_val,None)
-        print(users_dict[user_id].tokens)
-        if token_val in users_dict[user_id].tokens:
-            users_dict[user_id].tokens.pop()
-            return users_dict[user_id]
-    return False
-
-def generate_token(user):
-    token = secrets.token_hex()
-    user.tokens.insert(0,token)
-    tokens_dict.pop(user.tokens[-1],None)
-    tokens_dict[token] = user.user_id
-    # print(tokens_dict)
-
-    return token
-
-
-def token_required(request_func):
-    # print(request.get_json)
-    token = request.args.get("token")
-    user = token_verify(token)
-    if user:
-        body = request_func()
-        new_token = generate_token(user)
-        return {"token":new_token,"body":body}
-    else:
-        return {'a':'b'},401
-    
-# app.config['before_request'] = token_required
-
-    
-@app.route('/login',methods = ["POST"])
-def login():
-    login_info = request.get_json()
-    email = login_info["userEmail"]
-    attempt_password = login_info["password"]
-    user = authenticate(email,attempt_password)
-    if user:
-        token = generate_token(user)
-        return {"response":"Login Successful","token":token}
-    else:
-        return {"response": "Email or Password incorrect, please try again.","token":None}
-    
-    
-
 def get_db_connection():
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
     return conn
@@ -118,40 +47,122 @@ def execute_SQL(sql_statement,identifiers = False,execute_args=False):
     conn.close()
     return fetched
 
-def add_default_emp_skill_level(skill,emp):     
-    execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('skills')],execute_args = [skill,emp,0])
-    return None
+def load_user(user_id):
+    print(User.users)
+    return User.users[user_id]
 
 @app.route('/addUser',methods = ["POST"])
 def add_user():
     user_info = request.get_json()
     user_email = user_info["userEmail"]
     user_password = user_info["password"]
+    user_org = user_info["orgName"]
     salt = secrets.randbelow(1000000)
     salted_pass = user_password + str(salt)
     salted_pass = salted_pass.encode('utf-8')
     hashed_pass = str(hashlib.sha512(salted_pass).hexdigest()) #TODO: THIS IS TEMPORARY, NOT HOW PASSWORDS WILL BE HASHED AND STORED. FIX.
     try:
-        execute_SQL("INSERT INTO {} (email,salt,salted_password) VALUES(%s,%s,%s)",[sql.Identifier('users')],execute_args = [user_email,salt,hashed_pass])
+        execute_SQL("INSERT INTO {} (email,salt,salted_password,organization) VALUES(%s,%s,%s,%s)",[sql.Identifier('admin_users')],execute_args = [user_email,salt,hashed_pass,user_org])
     except:
         print("Already an account")
-        return jsonify("There is already an account with that email address")
-    print(execute_SQL("SELECT * FROM {}",[sql.Identifier('users')]))
+        return jsonify("There is already an account with that email address or organization name.")
+    print(execute_SQL("SELECT * FROM {}",[sql.Identifier('admin_users')]))
+    # execute_SQL("CREATE TABLE {} (id int, first_name varchar(255), last_name varchar(255), role int, wage int)",[sql.Identifier('{}_employees'.format(user_org))])
+    # execute_SQL("CREATE TABLE {} (id int, shift_pref integer ARRAY[28] DEFAULT %s)",[sql.Identifier('{}_availability'.format(user_org))],execute_args=[zero_val_array])
+    # execute_SQL("CREATE TABLE {}_
+    # execute_SQL("CREATE TABLE {}_
+    # execute_SQL("CREATE TABLE {}_
+    # execute_SQL("CREATE TABLE {}_
+    # execute_SQL("CREATE TABLE {}_
+    # execute_SQL("CREATE TABLE {}_
+    # execute_SQL("CREATE TABLE {}_
+    # execute_SQL("CREATE TABLE {}_
+    # execute_SQL("CREATE TABLE {}_
     return jsonify("Sign up successful!")
 
+def authenticate(email,password):
+    query_response = execute_SQL("SELECT user_id, salt, salted_password, organization FROM {} WHERE email = %s",[sql.Identifier("admin_users")],execute_args=[email]) 
+    user_id, salt, user_password,organization = query_response[0][:4]
+    user_id = str(user_id)
+    organization = str(organization)
+    print(query_response)
+    salted_attempt_password = password + str(salt)
+    if str(hashlib.sha512(salted_attempt_password.encode('utf-8')).hexdigest()) == user_password:
+        User({"user_id" : user_id,"email" : email,"organization":organization})
+        return load_user(user_id)
+    else:
+        return None
+
+def identity(payload):
+    user_id = payload['identity']
+    return load_user(user_id)
+
+def token_verify(token_val):
+    users_dict = User.users
+    print(tokens_dict)
+    token_val = str(token_val)
+    if token_val in tokens_dict:
+        user_id = tokens_dict[token_val]
+        tokens_dict.pop(token_val,None)
+        # print(users_dict[user_id].tokens)
+        if token_val in users_dict[user_id].tokens:
+            users_dict[user_id].tokens.pop()
+            return users_dict[user_id]
+    return False
+
+def generate_token(user):
+    token = secrets.token_hex()
+    user.tokens.insert(0,token)
+    tokens_dict.pop(user.tokens[-1],None)
+    tokens_dict[token] = user.user_id
+    # print(tokens_dict)
+
+    return token
+
+
+def token_required(request_func):
+    # print(request.get_json)
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        body = request_func()
+        new_token = generate_token(user)
+        return {"token":new_token,"body":body}
+    else:
+        return {'a':'b'},401
+    
+# app.config['before_request'] = token_required
+
+@app.route('/login',methods = ["POST"])
+def login():
+    login_info = request.get_json()
+    email = login_info["userEmail"]
+    attempt_password = login_info["password"]
+    user = authenticate(email,attempt_password)
+    if user:
+        token = generate_token(user)
+        return {"response":"Login Successful","token":token}
+    else:
+        return {"response": "Email or Password incorrect, please try again.","token":None}
+
+def add_default_emp_skill_level(skill,emp):     
+    execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('skills')],execute_args = [skill,emp,0])
+    return None
 
 
 
 @app.route('/addEmployee',methods = ["POST"])
 def add_employee():
     token = request.args.get("token")
+    request_dict = request.get_json()
+    # token = request_dict.pop("token",None)
     user = token_verify(token)
     if user:
-        emp_info = list(request.get_json().values())
-
+        emp_info = list(request_dict.values())
+        organization = user.get_organization()
         avail_info = emp_info[11:]
         avail_info = [int(i) for i in avail_info]
-        execute_SQL("INSERT INTO {}(id, first_name, last_name, role, wage) VALUES (%s, %s, %s, %s, %s)",[sql.Identifier('employees')],execute_args = emp_info[0:5])
+        execute_SQL("INSERT INTO {}(id, first_name, last_name, role, wage) VALUES (%s, %s, %s, %s, %s)",[sql.Identifier('{}_employees'.format(organization))],execute_args = emp_info[0:5])
         id = emp_info[0]
         
         execute_SQL("INSERT INTO {} VALUES(%s, %s)",[sql.Identifier('availability')],execute_args = [id,avail_info]) 
@@ -170,10 +181,13 @@ def add_employee():
 # @fl_lgin.login_required
 def load_employee_info():
     token = request.args.get("token")
+    # request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
+        organization = user.get_organization()
         employee = request.args.get('employee')
-        query_response = execute_SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s",(sql.Identifier('employees'),sql.Identifier('extremes'),sql.Identifier('availability')),execute_args = [employee])
+        query_response = execute_SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s",(sql.Identifier('{}_employees'.format(organization)),sql.Identifier('extremes'),sql.Identifier('availability')),execute_args = [employee])
         new_token = generate_token(user)
         return {'body':query_response,'token':new_token}
     else:
@@ -183,9 +197,17 @@ def load_employee_info():
 # @fl_lgin.login_required
 def load_employee_names():
     token = request.args.get("token")
+    # request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        query_response = execute_SQL("SELECT first_name, last_name, id, role FROM {}",[sql.Identifier('employees')])
+        organization = user.get_organization()
+        try:
+            query_response = execute_SQL("SELECT first_name, last_name, id, role FROM {}",[sql.Identifier('{}_employees'.format(organization))])
+        except:
+            new_token = generate_token(user)
+            return {'body':["No existing employees found"],'token':new_token}
+        print(query_response)
         return_array = [{"firstName":emp[0], "lastName":emp[1], "id":emp[2], "role":emp[3]} for emp in query_response]
         new_token = generate_token(user)
         return {'body':return_array,'token':new_token}
@@ -197,9 +219,12 @@ def load_employee_names():
 # @fl_lgin.fresh_login_required
 def update_employee():
     token = request.args.get("token")
+    request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        request_data = list(request.get_json().values())
+        organization = user.get_organization()
+        request_data = list(request_dict.values())
         
         emp_id = request_data[0]
         employee_table_data = request_data[1:5]
@@ -207,7 +232,7 @@ def update_employee():
         avail_info = request_data[11:]
         avail_info = [int(i) for i in avail_info]
         
-        execute_SQL("UPDATE {} SET(first_name, last_name, role, wage) = (%s, %s, %s, %s) WHERE id = %s",[sql.Identifier('employees')],
+        execute_SQL("UPDATE {} SET(first_name, last_name, role, wage) = (%s, %s, %s, %s) WHERE id = %s",[sql.Identifier('{}_employees'.format(organization))],
                     [*employee_table_data,emp_id])
         execute_SQL("UPDATE {} SET(min_shift,max_shift,min_weekly,max_weekly,min_days,max_days) = (%s, %s, %s, %s, %s, %s) WHERE id = %s",[sql.Identifier('extremes')],execute_args = [*extremes_table_data,emp_id])
         execute_SQL("UPDATE {} SET shift_pref = %s WHERE id = %s",[sql.Identifier('availability')],execute_args = [avail_info,emp_id])
@@ -220,13 +245,19 @@ def update_employee():
 @app.route('/deleteEmployee',methods = ["POST"])
 # @fl_lgin.fresh_login_required
 def delete_employee():     
+    token = request.args.get("token")
     emp_id = request.get_json()
-    execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('employees')],execute_args = [emp_id])
-    execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('extremes')],execute_args = [emp_id])
-    execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('availability')],execute_args = [emp_id])
-    execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('skills')],execute_args = [emp_id])
-
-    return jsonify("Employee Deleted.")
+    user = token_verify(token)
+    if user:
+        organization = user.get_organization()
+        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('{}_employees'.format(organization))],execute_args = [emp_id])
+        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('extremes')],execute_args = [emp_id])
+        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('availability')],execute_args = [emp_id])
+        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('skills')],execute_args = [emp_id])
+        new_token = generate_token(user)
+        return {'body':"Employee Deleted Successfully",'token':new_token}
+    else:
+        return {'a':'b'},401
 
 @app.route('/deleteSkill',methods=["POST"])
 # @fl_lgin.fresh_login_required
@@ -291,6 +322,8 @@ def write():
 @app.route('/getSchedule',methods= ["GET"])
 def get_schedule():
     token = request.args.get("token")
+    # request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
         with open('Schedule/scheduleFile.txt','r') as file0:
@@ -338,9 +371,10 @@ def load_skill_levels():
 @app.route('/updateSkillLevel',methods = ["POST"])
 def update_skill_level():
     token = request.args.get("token")
+    request_data = request.get_json()
+    # token = request_data["token"]
     user = token_verify(token)
     if user:
-        request_data = request.get_json()
         skill = request_data['skill']
         skill_level = request_data['skill_level']
         id = request_data['id']
@@ -367,7 +401,10 @@ def load_selected_item_details(selected_item,table,name_column):
 @app.route('/loadRequiredSkills', methods = ["GET"])
 def load_required_skills():
     token = request.args.get("token")
+    # request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
+    
     if user:
         return_array = load_drop_down_info(["skill","importance","role"],"required_skills_for_shift")
         new_token = generate_token(user)
@@ -378,6 +415,8 @@ def load_required_skills():
 @app.route('/loadShifts', methods = ["GET"])
 def load_shifts():
     token = request.args.get("token")
+    # request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
         return_array = load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
@@ -395,9 +434,11 @@ def load_drop_down_info(columns_to_select,table):
 @app.route('/updateSkill',methods = ["POST"])
 def update_skill():
     token = request.args.get("token")
+    request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        return_statement = use_info(request.get_json(),which_function="update",table="required_skills_for_shift")
+        return_statement = use_info(request_dict,which_function="update",table="required_skills_for_shift")
         new_token = generate_token(user)
         return {'body':return_statement,'token':new_token}
     else:
@@ -406,11 +447,14 @@ def update_skill():
 @app.route('/addSkill', methods = ["POST"])
 def add_skill():
     token = request.args.get("token")
+    request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        status, skill = use_info(request.get_json(),which_function="insert",table="required_skills_for_shift")
+        organization = user.get_organization()
+        status, skill = use_info(request_dict,which_function="insert",table="required_skills_for_shift")
         if status == "Skill Added Successfully":
-            emp_ids = execute_SQL("SELECT id FROM {}",[sql.Identifier('employees')])
+            emp_ids = execute_SQL("SELECT id FROM {}",[sql.Identifier('{}_employees'.format(organization))])
             for id in emp_ids:
                 add_default_emp_skill_level(skill,id)
             return_statement = "Skill Added Successfully"
@@ -460,9 +504,11 @@ def use_info(info,which_function = None,table = None):
 @app.route('/addShift',methods = ["POST"])
 def add_shift():
     token = request.args.get("token")
+    request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        return_statement = use_info(request.get_json(),which_function="insert",table="shifts")
+        return_statement = use_info(request_dict,which_function="insert",table="shifts")
         new_token = generate_token(user)
         return {'body':return_statement,'token':new_token}
     else:
@@ -471,9 +517,11 @@ def add_shift():
 @app.route('/updateShift',methods = ["POST"])
 def update_shift():
     token = request.args.get("token")
+    request_dict = request.get_json()
+    # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        return_statement = use_info(request.get_json(),which_function="update",table="shifts")
+        return_statement = use_info(request_dict,which_function="update",table="shifts")
         new_token = generate_token(user)
         return {'body':return_statement,'token':new_token}
     else:

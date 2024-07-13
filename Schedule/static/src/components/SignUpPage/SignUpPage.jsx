@@ -19,6 +19,10 @@ const SignUpPage = () => {
                     <th><input id="userEmail"></input></th>
                 </Row>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'> 
+                    <th>Organization Name</th> 
+                    <th><input id="orgName"></input></th>
+                </Row>
+                <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'> 
                     <th>Password</th> 
                     <th><input id="password" type = "password"></input></th>
                 </Row>
@@ -38,7 +42,7 @@ const SignUpPage = () => {
 export default SignUpPage;
 
 const PrepData = () => {
-    var infoCells = ['userEmail', 'password'];
+    var infoCells = ['userEmail', 'password', 'orgName'];
     let passWord = document.getElementById("password").value;
     if (passWord !== document.getElementById("password2").value) {
         alert("Passwords must match, Please try again")
@@ -46,8 +50,12 @@ const PrepData = () => {
     };
 
     if (passWord.length < 10) {
-        alert("Password must be at least 10 characters long.")
+        alert("Password must be at least 10 characters long.");
         return ("Password must be at least 10 characters long.");  
+    };
+    if (document.getElementById("orgName").value.length == 0) {
+        alert("Organization Name cannot be empty");
+        return ("Organization Name cannot be empty");
     };
 
 
