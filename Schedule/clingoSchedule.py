@@ -461,8 +461,6 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
                                 schedule_block += 'Off,'
 
             
-
-            
             file2.writelines(schedule)
         return solution
             

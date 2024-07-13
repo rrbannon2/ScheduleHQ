@@ -67,17 +67,14 @@ def add_user():
         print("Already an account")
         return jsonify("There is already an account with that email address or organization name.")
     print(execute_SQL("SELECT * FROM {}",[sql.Identifier('admin_users')]))
-    # execute_SQL("CREATE TABLE {} (id int, first_name varchar(255), last_name varchar(255), role int, wage int)",[sql.Identifier('{}_employees'.format(user_org))])
-    # execute_SQL("CREATE TABLE {} (id int, shift_pref integer ARRAY[28] DEFAULT %s)",[sql.Identifier('{}_availability'.format(user_org))],execute_args=[zero_val_array])
-    # execute_SQL("CREATE TABLE {}_
-    # execute_SQL("CREATE TABLE {}_
-    # execute_SQL("CREATE TABLE {}_
-    # execute_SQL("CREATE TABLE {}_
-    # execute_SQL("CREATE TABLE {}_
-    # execute_SQL("CREATE TABLE {}_
-    # execute_SQL("CREATE TABLE {}_
-    # execute_SQL("CREATE TABLE {}_
-    # execute_SQL("CREATE TABLE {}_
+    execute_SQL("CREATE TABLE {} (id int PRIMARY KEY, first_name varchar(255), last_name varchar(255), role int, wage int)",[sql.Identifier('{}_employees'.format(user_org))])
+    execute_SQL("CREATE TABLE {} (id int PRIMARY KEY, shift_pref integer ARRAY[28] DEFAULT %s)",[sql.Identifier('{}_availability'.format(user_org))],execute_args=[zero_val_array])
+    execute_SQL("CREATE TABLE {} (skill varchar(255), id int, skill_level int, CONSTRAINT PK_Skill PRIMARY KEY (skill,id))",[sql.Identifier('{}_skills'.format(user_org))])
+    execute_SQL("CREATE TABLE {} (skill varchar(255), schedule_blocks integer ARRAY[14], importance int, role int)",[sql.Identifier('{}_required_skills_for_shift'.format(user_org))])
+    execute_SQL("CREATE TABLE {} (id int PRIMARY KEY, min_shift int DEFAULT 0, max_shift int DEFAULT 24, min_weekly int DEFAULT 0, max_weekly int DEFAULT 120, min_days int DEFAULT 0, max_days int DEFAULT 7)",[sql.Identifier('{}_extremes'.format(user_org))])
+    execute_SQL("CREATE TABLE {} (business_name varchar(255), hours_of_op integer ARRAY[28], min_employees int, min_managers int, exempt_role int,max_total_hours int, max_hours_importance int)",[sql.Identifier('{}_business_info'.format(user_org))])
+    execute_SQL("CREATE TABLE {} (shiftName varchar(255), schedule_blocks integer ARRAY[14], importance int, maxHours int)",[sql.Identifier('{}_shifts'.format(user_org))])
+
     return jsonify("Sign up successful!")
 
 def authenticate(email,password):
@@ -145,8 +142,8 @@ def login():
     else:
         return {"response": "Email or Password incorrect, please try again.","token":None}
 
-def add_default_emp_skill_level(skill,emp):     
-    execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('skills')],execute_args = [skill,emp,0])
+def add_default_emp_skill_level(skill,emp, organization):     
+    execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('{}_skills'.format(organization))],execute_args = [skill,emp,0])
     return None
 
 
@@ -165,13 +162,13 @@ def add_employee():
         execute_SQL("INSERT INTO {}(id, first_name, last_name, role, wage) VALUES (%s, %s, %s, %s, %s)",[sql.Identifier('{}_employees'.format(organization))],execute_args = emp_info[0:5])
         id = emp_info[0]
         
-        execute_SQL("INSERT INTO {} VALUES(%s, %s)",[sql.Identifier('availability')],execute_args = [id,avail_info]) 
-        execute_SQL("INSERT INTO {} VALUES(%s, %s, %s, %s, %s, %s, %s)",[sql.Identifier('extremes')],execute_args = [id,*emp_info[5:11]])
-        skill_names = execute_SQL("SELECT skill FROM {}",[sql.Identifier('required_skills_for_shift')])
+        execute_SQL("INSERT INTO {} VALUES(%s, %s)",[sql.Identifier('{}_availability'.format(organization))],execute_args = [id,avail_info]) 
+        execute_SQL("INSERT INTO {} VALUES(%s, %s, %s, %s, %s, %s, %s)",[sql.Identifier('{}_extremes'.format(organization))],execute_args = [id,*emp_info[5:11]])
+        skill_names = execute_SQL("SELECT skill FROM {}",[sql.Identifier('{}_required_skills_for_shift'.format(organization))])
         
         #Could possibly be achieved with a temporary single row single column table for id, LEFT JOIN(SELECT skill FROM required_skills_for_shift,id_table)
         for name in skill_names:
-            execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('skills')],execute_args = [name,id,0])
+            execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('{}_skills'.format(organization))],execute_args = [name,id,0])
         new_token = generate_token(user)
         return {'body':"Employee Added Successfully",'token':new_token}
     else:
@@ -187,7 +184,7 @@ def load_employee_info():
     if user:
         organization = user.get_organization()
         employee = request.args.get('employee')
-        query_response = execute_SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s",(sql.Identifier('{}_employees'.format(organization)),sql.Identifier('extremes'),sql.Identifier('availability')),execute_args = [employee])
+        query_response = execute_SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s",(sql.Identifier('{}_employees'.format(organization)),sql.Identifier('{}_extremes'.format(organization)),sql.Identifier('{}_availability'.format(organization))),execute_args = [employee])
         new_token = generate_token(user)
         return {'body':query_response,'token':new_token}
     else:
@@ -234,8 +231,8 @@ def update_employee():
         
         execute_SQL("UPDATE {} SET(first_name, last_name, role, wage) = (%s, %s, %s, %s) WHERE id = %s",[sql.Identifier('{}_employees'.format(organization))],
                     [*employee_table_data,emp_id])
-        execute_SQL("UPDATE {} SET(min_shift,max_shift,min_weekly,max_weekly,min_days,max_days) = (%s, %s, %s, %s, %s, %s) WHERE id = %s",[sql.Identifier('extremes')],execute_args = [*extremes_table_data,emp_id])
-        execute_SQL("UPDATE {} SET shift_pref = %s WHERE id = %s",[sql.Identifier('availability')],execute_args = [avail_info,emp_id])
+        execute_SQL("UPDATE {} SET(min_shift,max_shift,min_weekly,max_weekly,min_days,max_days) = (%s, %s, %s, %s, %s, %s) WHERE id = %s",[sql.Identifier('{}_extremes'.format(organization))],execute_args = [*extremes_table_data,emp_id])
+        execute_SQL("UPDATE {} SET shift_pref = %s WHERE id = %s",[sql.Identifier('{}_availability'.format(organization))],execute_args = [avail_info,emp_id])
         new_token = generate_token(user)
         return {'body':"Updated Employee Information Saved Successfully.",'token':new_token}
     else:
@@ -243,7 +240,6 @@ def update_employee():
         
 
 @app.route('/deleteEmployee',methods = ["POST"])
-# @fl_lgin.fresh_login_required
 def delete_employee():     
     token = request.args.get("token")
     emp_id = request.get_json()
@@ -251,45 +247,57 @@ def delete_employee():
     if user:
         organization = user.get_organization()
         execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('{}_employees'.format(organization))],execute_args = [emp_id])
-        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('extremes')],execute_args = [emp_id])
-        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('availability')],execute_args = [emp_id])
-        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('skills')],execute_args = [emp_id])
+        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('{}_extremes'.format(organization))],execute_args = [emp_id])
+        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('{}_availability'.format(organization))],execute_args = [emp_id])
+        execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [emp_id])
         new_token = generate_token(user)
         return {'body':"Employee Deleted Successfully",'token':new_token}
     else:
         return {'a':'b'},401
 
 @app.route('/deleteSkill',methods=["POST"])
-# @fl_lgin.fresh_login_required
 def delete_skill():
-    skill_name = request.get_json()
-    execute_SQL("DELETE FROM {} WHERE skill = %s",[sql.Identifier('required_skills_for_shift')],execute_args = [skill_name])
-    execute_SQL("DELETE FROM {} WHERE skill = %s",[sql.Identifier('skills')],execute_args = [skill_name])
-
-    return jsonify("Skill Deleted.")
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        organization = user.get_organization()
+        skill_name = request.get_json()
+        execute_SQL("DELETE FROM {} WHERE skill = %s",[sql.Identifier('{}_required_skills_for_shift'.format(organization))],execute_args = [skill_name])
+        execute_SQL("DELETE FROM {} WHERE skill = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [skill_name])
+        new_token = generate_token(user)
+        return {'body': "Skill Deleted Successfully", 'token':new_token}
+    else:
+        return {'a':'b'},401
 
 @app.route('/deleteShift',methods = ["POST"])
-# @fl_lgin.fresh_login_required
 def delete_shift():
-    shift_name = request.get_json()
-    execute_SQL("DELETE FROM {} WHERE shiftName = %s",[sql.Identifier('shifts')],execute_args = [shift_name])
-
-    return jsonify("Shift Deleted.")
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        organization = user.get_organization()
+        shift_name = request.get_json()
+        execute_SQL("DELETE FROM {} WHERE shiftName = %s",[sql.Identifier('{}_shifts'.format(organization))],execute_args = [shift_name])
+        new_token = generate_token(user)
+        return {'body': "Shift Deleted Successfully", 'token':new_token}
+    else:
+        return {'a':'b'},401
 
 @app.route('/deleteUser',methods = ["POST"])
-# @fl_lgin.fresh_login_required
 def delete_user():
-    user_name = request.get_json()
-    execute_SQL("DELETE FROM {} WHERE email = %s",[sql.Identifier('users')],execute_args = [user_name])
+    token = request.args.get("token")
+    emp_id = request.get_json()
+    user = token_verify(token)
+    if user:
+        organization = user.get_organization()
+        user_name = request.get_json()
+        execute_SQL("DELETE FROM {} WHERE email = %s",[sql.Identifier('users')],execute_args = [user_name])
+        new_token = generate_token(user)
+        return {'body': "User Deleted Successfully", 'token':new_token}
+    else:
+        return {'a':'b'},401
 
-    return jsonify("User Deleted.")
-
-# @app.route('/', methods=['GET'])
-# def home():
-#     return render_template('index.html')
 
 @app.route('/writeSchedule', methods = ["POST"])
-# @fl_lgin.login_required
 def write():
     # token = request.args.get("token")
     # user = token_verify(token)
@@ -337,36 +345,52 @@ def get_schedule():
         
 
 @app.route('/updateBusinessInfo',methods = ["POST"])
-# @fl_lgin.fresh_login_required
 def update_business_info():
-    business_info = list(request.get_json().values())
-    business_name = business_info[0]
-    business_info_ints = [int(i) for i in business_info[1:]]
-    hours_of_op = business_info_ints[5:]
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        organization = user.get_organization()
+        business_info = list(request.get_json().values())
+        business_name = business_info[0]
+        business_info_ints = [int(i) for i in business_info[1:]]
+        hours_of_op = business_info_ints[5:]
 
-    
-     
-    update_Bool = execute_SQL("SELECT * FROM {}",[sql.Identifier('business_info')])
-    if update_Bool:
-        execute_SQL("UPDATE {} SET (business_name,min_employees,min_managers,exempt_role,max_total_hours,max_hours_importance,hours_of_op) = (%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('business_info')],execute_args = [business_name,*business_info_ints[:5],hours_of_op])
+        update_Bool = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_business_info'.format(organization))])
+        if update_Bool:
+            execute_SQL("UPDATE {} SET (business_name,min_employees,min_managers,exempt_role,max_total_hours,max_hours_importance,hours_of_op) = (%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_business_info'.format(organization))],execute_args = [business_name,*business_info_ints[:5],hours_of_op])
+        else:
+            execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_business_info'.format(organization))],execute_args = [business_name,hours_of_op,*business_info_ints[:5]])
+        new_token = generate_token(user)
+        return {'body': "Business Information Updated Successfully", 'token':new_token}
     else:
-        execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('business_info')],execute_args = [business_name,hours_of_op,*business_info_ints[:5]])
+        return {'a':'b'},401
     
-    
-    return jsonify("Added Successfully")
 
 @app.route('/loadBusinessInfo',methods = ["GET"])
-# @fl_lgin.login_required
 def load_business_info():
-    business_info = execute_SQL("SELECT * FROM {}",[sql.Identifier('business_info')])
-    return jsonify(business_info)
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        organization = user.get_organization()
+        business_info = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_business_info'.format(organization))])
+        new_token = generate_token(user)
+        return {'body': business_info, 'token':new_token}
+    else:
+        return {'a':'b'},401
+
 
 @app.route('/loadSkillLevels',methods = ["GET"])
-# @fl_lgin.login_required
 def load_skill_levels():
-    employee = request.args.get('employee')
-    query_response = execute_SQL("SELECT skill,skill_level FROM {} WHERE id = %s",[sql.Identifier('skills')],execute_args = [employee])
-    return jsonify(query_response)
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        organization = user.get_organization()
+        employee = request.args.get('employee')
+        query_response = execute_SQL("SELECT skill,skill_level FROM {} WHERE id = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [employee])
+        new_token = generate_token(user)
+        return {'body': query_response, 'token':new_token}
+    else:
+        return {'a':'b'},401
 
 @app.route('/updateSkillLevel',methods = ["POST"])
 def update_skill_level():
@@ -375,11 +399,12 @@ def update_skill_level():
     # token = request_data["token"]
     user = token_verify(token)
     if user:
+        organization = user.get_organization()
         skill = request_data['skill']
         skill_level = request_data['skill_level']
         id = request_data['id']
 
-        execute_SQL("UPDATE {} SET skill_level = %s WHERE id = %s AND skill = %s",[sql.Identifier('skills')],execute_args = [skill_level,id,skill])
+        execute_SQL("UPDATE {} SET skill_level = %s WHERE id = %s AND skill = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [skill_level,id,skill])
         new_token = generate_token(user)
         return {'body':"Skill level updated successfully",'token':new_token}
     else:
@@ -387,15 +412,28 @@ def update_skill_level():
 
 @app.route('/loadSkillInfo',methods = ["GET"])
 def load_skill_info():
-    return load_selected_item_details(request.args.get('skill'),"required_skills_for_shift",'skill')
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        return load_selected_item_details(request.args.get('skill'),"required_skills_for_shift",'skill',user)
+    else:
+        return {'a':'b'},401
 
 @app.route('/loadShiftInfo', methods = ["GET"])
 def load_shift_info():
-    return load_selected_item_details(request.args.get('shift'),"shifts","shiftname")
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        return load_selected_item_details(request.args.get('shift'),"shifts","shiftname",user)
+    else:
+        return {'a':'b'},401
 
-def load_selected_item_details(selected_item,table,name_column):
+def load_selected_item_details(selected_item,table,name_column,user):
+    organization = user.get_organization()
+    table = {}.format(organization) + table
     item_info = execute_SQL("SELECT * FROM {} WHERE {} = %s",(sql.Identifier(table),sql.Identifier(name_column)),execute_args = [selected_item])
-    return jsonify(item_info)
+    new_token = generate_token(user)
+    return {'body':item_info,'token':new_token}
 
 
 @app.route('/loadRequiredSkills', methods = ["GET"])
@@ -406,7 +444,8 @@ def load_required_skills():
     user = token_verify(token)
     
     if user:
-        return_array = load_drop_down_info(["skill","importance","role"],"required_skills_for_shift")
+        organization = user.get_organization()
+        return_array = load_drop_down_info(["skill","importance","role"],"{}_required_skills_for_shift".format(organization))
         new_token = generate_token(user)
         return {"token":new_token,"returnArray":return_array}
     else:
@@ -419,7 +458,8 @@ def load_shifts():
     # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        return_array = load_drop_down_info(["shiftname","importance","maxhours"],"shifts")
+        organization = user.get_organization()
+        return_array = load_drop_down_info(["shiftname","importance","maxhours"],"{}_shifts".format(organization))
         new_token = generate_token(user)
         return {"token":new_token,"returnArray":return_array}
     else:
@@ -438,7 +478,8 @@ def update_skill():
     # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        return_statement = use_info(request_dict,which_function="update",table="required_skills_for_shift")
+        organization = user.get_organization()
+        return_statement = use_info(request_dict,which_function="update",table="{}_required_skills_for_shift".format(organization))
         new_token = generate_token(user)
         return {'body':return_statement,'token':new_token}
     else:
@@ -452,11 +493,11 @@ def add_skill():
     user = token_verify(token)
     if user:
         organization = user.get_organization()
-        status, skill = use_info(request_dict,which_function="insert",table="required_skills_for_shift")
+        status, skill = use_info(request_dict,which_function="insert",table="{}_required_skills_for_shift".format(organization))
         if status == "Skill Added Successfully":
             emp_ids = execute_SQL("SELECT id FROM {}",[sql.Identifier('{}_employees'.format(organization))])
             for id in emp_ids:
-                add_default_emp_skill_level(skill,id)
+                add_default_emp_skill_level(skill,id,organization)
             return_statement = "Skill Added Successfully"
         else:
             return_statement = "Skill Not Added"
@@ -508,7 +549,8 @@ def add_shift():
     # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        return_statement = use_info(request_dict,which_function="insert",table="shifts")
+        organization = user.get_organization()
+        return_statement = use_info(request_dict,which_function="insert",table="{}_shifts".format(organization))
         new_token = generate_token(user)
         return {'body':return_statement,'token':new_token}
     else:
@@ -521,7 +563,8 @@ def update_shift():
     # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        return_statement = use_info(request_dict,which_function="update",table="shifts")
+        organization = user.get_organization()
+        return_statement = use_info(request_dict,which_function="update",table="{}_shifts".format(organization))
         new_token = generate_token(user)
         return {'body':return_statement,'token':new_token}
     else:

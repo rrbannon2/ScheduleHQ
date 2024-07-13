@@ -42,7 +42,13 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # cur.execute("CREATE TABLE admin_users(user_id SERIAL,email varchar(255) PRIMARY KEY,salt int ,salted_password varchar(255), organization varchar(255) UNIQUE)")
 
 
-# cur.execute("ALTER TABLE employees RENAME to test_employees")
+# cur.execute("ALTER TABLE availability RENAME to test_availability")
+# cur.execute("ALTER TABLE business_info RENAME to test_business_info")
+# cur.execute("ALTER TABLE extremes RENAME to test_extremes")
+# cur.execute("ALTER TABLE required_skills_for_shift RENAME to test_required_skills_for_shift")
+# cur.execute("ALTER TABLE shifts RENAME to test_shifts")
+# cur.execute("ALTER TABLE skills RENAME to test_skills")
+
 # cur.execute("DROP TABLE variables")
 conn.commit()
 cur.close()
