@@ -34,7 +34,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
         }
         else {
 
-            if (where == '/login' || where == '/writeSchedule' || where == '/updateBusinessInfo') {
+            if (where == '/login' || where == '/updateBusinessInfo') {
                 fetch(where, {
                     // fetch(where,{
                     method: whichMethod,

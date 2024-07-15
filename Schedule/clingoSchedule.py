@@ -3,8 +3,37 @@ import clingo
 import psycopg2
 from psycopg2 import sql
 
+def get_db_connection():
+    conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
+    return conn
 
-def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule_i = 1, weeks_scheduled = 0):
+def execute_SQL(sql_statement,identifiers = False,execute_args=False):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if identifiers:
+        for i in identifiers:
+            if type(i) != sql.Identifier:
+                print("SQL request contains invalid values in identifiers")
+                return "SQL request contains invalid values in identifiers"
+        sql_statement = sql.SQL(sql_statement).format(*identifiers)
+    else:
+        sql_statement = sql.SQL(sql_statement)
+
+    if execute_args:
+        cursor.execute(sql_statement,execute_args)
+    else:
+        cursor.execute(sql_statement)
+    try:
+        fetched = cursor.fetchall()
+    except:
+        fetched = "Failed to fetch data"
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return fetched
+
+def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to_schedule_i = 1, weeks_scheduled = 0):
     days_in_week = 7
     weeks_to_schedule = weeks_to_schedule_i
     # schedule_blocks
@@ -71,17 +100,13 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         return weekend_rotation_rule
         
     def load_employees(connection):
-        cur = connection.cursor()
-        cur.execute(sql.SQL("SELECT * FROM employees JOIN extremes USING (id)"))
-        
-        for emp in cur.fetchall():
+        query_response = execute_SQL("SELECT * FROM {} JOIN {} USING (id)",[sql.Identifier('{}_employees'.format(user_org)),sql.Identifier('{}_extremes'.format(user_org))])
+        for emp in query_response:
             # print(emp)
             Employee(*emp)
 
     def load_req_skills(connection,weeks_scheduled, weeks_to_schedule,clingo_code):
-        cur = connection.cursor()
-        cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('required_skills_for_shift')))
-        skill_info = cur.fetchall()
+        skill_info = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_required_skills_for_shift'.format(user_org))])
         #TODO: extract for loop except function call, make it a function to be used for load_shifts as well.
         for skill in skill_info:
             start_times = [i * 2 for i in skill[1][:7]]
@@ -93,9 +118,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         return clingo_code
     
     def load_skill_levels(connection,emp_skill_levels_dict):
-        cur = connection.cursor()
-        cur.execute(sql.SQL("SELECT * FROM {} ").format(sql.Identifier('skills')))
-        skill_lvl_info = cur.fetchall()
+        skill_lvl_info = execute_SQL("SELECT * FROM {} ",[sql.Identifier('{}_skills'.format(user_org))])
 
         for row in skill_lvl_info:
             skill_name = row[0].lower().replace(" ","_")
@@ -107,9 +130,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         set_skill_levels(emp_skill_levels_dict)
         
     def load_shifts(connection,clingo_code):
-        cur = connection.cursor()
-        cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('shifts')))
-        shift_info = cur.fetchall()
+        shift_info = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_shifts'.format(user_org))])
         for shift in shift_info:
             start_times = [i * 2 for i in shift[1][:7]]
             end_times = [i * 2 for i in shift[1][7:]]
@@ -131,18 +152,16 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         return schedule_blocks
 
     def load_business_info(connection):
-        cur = connection.cursor()
-        cur.execute(sql.SQL("SELECT * FROM {} ").format(sql.Identifier('business_info')))
-        business_info = [i for i in cur.fetchall()[0]]
+        query_response = execute_SQL("SELECT * FROM {} ",[sql.Identifier('{}_business_info'.format(user_org))])
+        business_info = [i for i in query_response[0]]
         
         business_info[1] = extract_and_format_schedule_blocks(business_info[1])
         
         return business_info
         
     def load_availability(connection):
-        cur = connection.cursor()
-        cur.execute(sql.SQL("SELECT * FROM {} ").format(sql.Identifier('availability')))
-        emp_availabilities = [i for i in cur.fetchall()]
+        query_response = execute_SQL("SELECT * FROM {} ",[sql.Identifier('{}_availability'.format(user_org))])
+        emp_availabilities = [i for i in query_response]
         for emp in emp_availabilities:
             info = [i for i in emp]
             start_times = [i * 2 for i in info[1][:7]]
@@ -262,7 +281,8 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
     business_info = load_business_info(conn)
     business_name, schedule_blocks, store_minimum_employees, store_minimum_supervisors,otExemptRole, max_total_weekly_hours, total_weekly_hours_weight = business_info
 
-    max_total_weekly_hours *= 2
+    max_total_weekly_hours *= 3
+    print(max_total_weekly_hours)
     # max_total_weekly_hours = 438
 
 
@@ -355,7 +375,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
 
     %Below rule does not prevent being scheduled Wk 0 Day 0 off, Wk 0 Day 6 off, Wk1 Day5 off, Wk 1 Day 6 off.
     :~ assign(_,D,W,EID), not assign(_,D2,W,EID), assign(_,D3,W,EID),days_count(EID,W,X), X = 5, employee(EID,_,_), D2 = D + 1, D3 = D2 + 1, Weight = 70.[Weight]
-    :- assign(35,Day,W,EID), assign(8,Day2,W,EID), Day2 = Day + 1.
+    :- assign(43,Day,W,EID), assign(8,Day2,W,EID), Day2 = Day + 1.
 
     :~ assign(TOD,Day,W,EID), shift_preference(TOD,Day,W,EID,X), Weight = 0 - X.[Weight]
     :- assign(TOD,Day,W,EID), shift_preference(TOD,Day,W,EID,-20).
@@ -371,6 +391,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
 
 
     """
+    print(clingo_code)
 
     def format_time(time):
         am_pm = "am"
@@ -395,6 +416,7 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         for emp in Employee.employees.values():
             emp_names.append(emp.clingo_id)
         schedule_dict = {wk:{name:{} for name in emp_names} for wk in range(weeks_to_schedule)}
+        weekly_hours_dict = {wk:{name:None for name in emp_names} for wk in range(weeks_to_schedule)}
         for wk in range(weeks_to_schedule):
             for emp in Employee.employees.values():
                 for i in range(7):
@@ -402,9 +424,9 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
         
 
         solution = str(model)
-        solution2 = solution.replace(' ','. ')
-        with open('Schedule/clingoSolution.txt','w') as file:
-            file.write(solution2)
+        # solution2 = solution.replace(' ','. ')
+        # with open('Schedule/clingoSolution.txt','w') as file:
+        #     file.write(solution2)
         
         solution = solution.replace('(',',')
         solution = solution.replace(')','')
@@ -417,51 +439,41 @@ def run_clingo(time_limit,week_ending_date, clingon_code = '', weeks_to_schedule
                     schedule_dict[int(block[3])][block[-1]][int(block[2])%7].append(int(block[1]))
                 except:
                     continue
-            elif 'hours' in block or 'total_weekly_hrs' in block:
-                print(block)
+            elif 'hours' in block:
+                block = block.split(',')
+                if len(block) == 4:
+                    weekly_hours_dict[int(block[2])[block[1]]] = int(block[-1])
+                    print(block)
                 continue
             else:
                 continue
             
             
-        with open('Schedule/scheduleFile.txt','w') as file2:
-            schedule = []
+        # with open('Schedule/scheduleFile.txt','w') as file2:
+        #     schedule = []
 
-            for wk in schedule_dict.keys():
-                schedule.append("*-! " + str(week_ending_date) + " !-*;")
-                for emp in schedule_dict[wk].keys():
-                    for day in schedule_dict[wk][emp].keys():
-                        emp_obj = Employee.employees[int(emp)]
-                        formatted_emp = emp_obj.first_name.capitalize() + " " + emp_obj.last_name.capitalize()
-                        if day == 0:
-                            if schedule_dict[wk][emp][day]:
-                                shift_start = format_time(str((min(schedule_dict[wk][emp][day])/2)))
-                                shift_end = format_time(str((max(schedule_dict[wk][emp][day])/2)+.5))
-                                schedule_block = '{}({}-{},'.format(formatted_emp,shift_start,shift_end)
-                                
-                            else:
-                                schedule_block = formatted_emp + '(' + 'Off,'
-                                
-                        elif day == 6:
-                            if schedule_dict[wk][emp][day]:
-                                shift_start = format_time(str((min(schedule_dict[wk][emp][day])/2)))
-                                shift_end = format_time(str((max(schedule_dict[wk][emp][day])/2)+.5))
-                                schedule_block += '{}-{},'.format(shift_start,shift_end)
-                                schedule.append(schedule_block + ';')
-                            else:
-                                schedule_block += 'Off,'
-                                schedule.append(schedule_block + ';')
-                        else:
-                            if schedule_dict[wk][emp][day]:
-                                shift_start = format_time(str((min(schedule_dict[wk][emp][day])/2)))
-                                shift_end = format_time(str((max(schedule_dict[wk][emp][day])/2)+.5))
-                                schedule_block += '{}-{},'.format(shift_start,shift_end)
-                                
-                            else:
-                                schedule_block += 'Off,'
+        for wk in schedule_dict.keys():
+            # schedule.append("*-! " + str(week_ending_date) + " !-*;")
+            for emp in schedule_dict[wk].keys():
+                emp_obj = Employee.employees[int(emp)]
+                first_name,last_name = emp_obj.first_name.capitalize(),emp_obj.last_name.capitalize()
+                # formatted_emp = emp_obj.first_name.capitalize() + " " + emp_obj.last_name.capitalize()
+                for day in schedule_dict[wk][emp].keys():
+                    if schedule_dict[wk][emp][day]:
+                        shift_start = format_time(str((min(schedule_dict[wk][emp][day])/2)))
+                        shift_end = format_time(str((max(schedule_dict[wk][emp][day])/2)+.5))
+                        schedule_dict[wk][emp][day] = '{}-{}'.format(shift_start,shift_end)
+                    else:
+                        schedule_dict[wk][emp][day] = 'Off'
+            execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_schedule_29_2024'.format(user_org))],
+                        execute_args = [int(emp),first_name,last_name,schedule_dict[wk][emp][0],schedule_dict[wk][emp][1],
+                                        schedule_dict[wk][emp][2],schedule_dict[wk][emp][3],schedule_dict[wk][emp][4],schedule_dict[wk][emp][5],
+                                        schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp]])                               
+                
+                        
 
             
-            file2.writelines(schedule)
+            # file2.writelines(schedule)
         return solution
             
 

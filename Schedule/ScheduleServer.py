@@ -299,32 +299,32 @@ def delete_user():
 
 @app.route('/writeSchedule', methods = ["POST"])
 def write():
-    # token = request.args.get("token")
-    # user = token_verify(token)
-    # if user:
-    #     response = request.get_json()
-    #     clingoSchedule.run_clingo(response["seconds"],response["date"])
-    #     with open('Schedule/scheduleFile.txt', 'r') as file0:
-    #         solution = file0.read()
-    #         solution = solution.replace('(',',')
-    #         solution = solution.split(';')
-        # new_token = generate_token(user)
-    #     if len(solution) > 0:    
-    #         return {'body':"Schedule Written Successfully",'token':new_token}
-    #     else:
-    #         return {'body':"No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists.","token":new_token}
-    # else:
-    #     return {'a':'b'},401
-    response = request.get_json()
-    clingoSchedule.run_clingo(response["seconds"],response["date"])
-    with open('Schedule/scheduleFile.txt', 'r') as file0:
-        solution = file0.read()
-        solution = solution.replace('(',',')
-        solution = solution.split(';')
-    if len(solution) > 0:
-        return {'body':"Schedule Written Successfully"}
+    token = request.args.get("token")
+    user = token_verify(token)
+    if user:
+        user_org = user.get_organization()
+        response = request.get_json()
+        clingoSchedule.run_clingo(user_org,response["seconds"],response["date"])
+        solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_schedule_29_2024'.format(user_org))])
+        new_token = generate_token(user)
+        if len(solution) > 0:    
+            return {'body':"Schedule Written Successfully",'token':new_token}
+        else:
+            return {'body':"No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists.","token":new_token}
     else:
-        return {'body':"No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists."}
+        print("Token Problems?")
+        return {'a':'b'},401
+    
+        # clingoSchedule.run_clingo(response["seconds"],response["date"])
+    # with open('Schedule/scheduleFile.txt', 'r') as file0:
+    #     solution = file0.read()
+    #     solution = solution.replace('(',',')
+    #     solution = solution.split(';')
+    # solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('test_schedule_29_2024')])
+    # if len(solution) > 0:
+        # return {'body':"Schedule Written Successfully"}
+    # else:
+        # return {'body':"No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists."}
 
 
 @app.route('/getSchedule',methods= ["GET"])
@@ -334,12 +334,18 @@ def get_schedule():
     # token = request_dict["token"]
     user = token_verify(token)
     if user:
-        with open('Schedule/scheduleFile.txt','r') as file0:
-            solution = file0.read()
-            solution = solution.replace('(',',')
-            solution = solution.split(';')
+        user_org = user.get_organization()
+        solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_schedule_29_2024'.format(user_org))])
+        print(solution)
+        # with open('Schedule/scheduleFile.txt','r') as file0:
+        #     solution = file0.read()
+        #     solution = solution.replace('(',',')
+        #     solution = solution.split(';')
         new_token = generate_token(user)
-        return {'body':solution,'token':new_token}
+        if len(solution) > 0:
+            return {'body':solution,'token':new_token}
+        else:
+            return {'body':["testing "], 'token':new_token}
     else:
         return {'a':'b'},401
         

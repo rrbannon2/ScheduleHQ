@@ -16,7 +16,7 @@ const GenerateSchedulePage = () => {
                     </Col>
                     <Col className='d-flex justify-content-end'>
                         <Button id='addNew' onClick={() => SubmitData()}>
-                            <Link id='linkAddNew' to="/home">Generate Schedule Now</Link>
+                            Generate Schedule Now
                         </Button>
                     </Col>
                 </Row>
