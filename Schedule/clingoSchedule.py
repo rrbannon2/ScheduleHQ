@@ -48,7 +48,7 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
     weekend_rotation = True
     store_manager_name = "1"
     otExemptRole = 2
-    num_models = 1
+    num_models = 0
     
     
     conn = psycopg2.connect(host='localhost',database='roybannon',user = 'roybannon')
@@ -281,7 +281,7 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
     business_info = load_business_info(conn)
     business_name, schedule_blocks, store_minimum_employees, store_minimum_supervisors,otExemptRole, max_total_weekly_hours, total_weekly_hours_weight = business_info
 
-    max_total_weekly_hours *= 3
+    max_total_weekly_hours *= 2
     print(max_total_weekly_hours)
     # max_total_weekly_hours = 438
 
@@ -417,6 +417,7 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
             emp_names.append(emp.clingo_id)
         schedule_dict = {wk:{name:{} for name in emp_names} for wk in range(weeks_to_schedule)}
         weekly_hours_dict = {wk:{name:None for name in emp_names} for wk in range(weeks_to_schedule)}
+        print(weekly_hours_dict)
         for wk in range(weeks_to_schedule):
             for emp in Employee.employees.values():
                 for i in range(7):
@@ -442,15 +443,12 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
             elif 'hours' in block:
                 block = block.split(',')
                 if len(block) == 4:
-                    weekly_hours_dict[int(block[2])[block[1]]] = int(block[-1])
-                    print(block)
+                    weekly_hours_dict[int(block[2])][block[1]] = int(block[-1]) 
                 continue
             else:
+
                 continue
             
-            
-        # with open('Schedule/scheduleFile.txt','w') as file2:
-        #     schedule = []
 
         for wk in schedule_dict.keys():
             # schedule.append("*-! " + str(week_ending_date) + " !-*;")
@@ -465,7 +463,8 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
                         schedule_dict[wk][emp][day] = '{}-{}'.format(shift_start,shift_end)
                     else:
                         schedule_dict[wk][emp][day] = 'Off'
-            execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_schedule_29_2024'.format(user_org))],
+            
+                execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_schedule_29_2024'.format(user_org))],
                         execute_args = [int(emp),first_name,last_name,schedule_dict[wk][emp][0],schedule_dict[wk][emp][1],
                                         schedule_dict[wk][emp][2],schedule_dict[wk][emp][3],schedule_dict[wk][emp][4],schedule_dict[wk][emp][5],
                                         schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp]])                               

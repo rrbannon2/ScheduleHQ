@@ -29,14 +29,14 @@ const DisplaySchedulePage = () => {
         fetchData();
 
     }, []);
-
+    console.log(fetchedInfo);
     return (
         fetchedInfo && 
         <div className='tableContainer'>
             <div className='containerTitle'>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='align-items-center'>
-                        Schedule For Week Ending {fetchedInfo[0].split(" ")[1]}
+                        Schedule For Week Ending {fetchedInfo[0]}
                     </Col>
                     <Col className='d-flex justify-content-end'>
                         <Button id='addNew'>
@@ -61,19 +61,20 @@ const DisplaySchedulePage = () => {
                     </thead>
                     <tbody>
                         {fetchedInfo.map((value) => {
-                            if (value.substring(0, 3) !== "*-!") {
-                                var splitVal = value.split(",");
+                            console.log(value)
+                            if (value !== "*-!") {
+                                var splitVal = value;
                             
                                 return (
                                     <tr key={splitVal[0]}>
-                                        <td>{splitVal[0]}</td>
-                                        <td>{splitVal[1]}</td>
-                                        <td>{splitVal[2]}</td>
+                                        <td>{splitVal[1] + " " + splitVal[2]}</td>
                                         <td>{splitVal[3]}</td>
                                         <td>{splitVal[4]}</td>
                                         <td>{splitVal[5]}</td>
                                         <td>{splitVal[6]}</td>
                                         <td>{splitVal[7]}</td>
+                                        <td>{splitVal[8]}</td>
+                                        <td>{splitVal[9]}</td>
                                     </tr>
                                 );
                             }
