@@ -36,7 +36,7 @@ const DisplaySchedulePage = () => {
             <div className='containerTitle'>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='align-items-center'>
-                        Schedule For Week Ending {fetchedInfo[0]}
+                        Schedule For Week Ending {fetchedInfo[0][11]}
                     </Col>
                     <Col className='d-flex justify-content-end'>
                         <Button id='addNew'>
@@ -75,6 +75,7 @@ const DisplaySchedulePage = () => {
                                         <td>{splitVal[7]}</td>
                                         <td>{splitVal[8]}</td>
                                         <td>{splitVal[9]}</td>
+                                        <td>{splitVal[10]}</td>
                                     </tr>
                                 );
                             }

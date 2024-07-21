@@ -337,10 +337,6 @@ def get_schedule():
         user_org = user.get_organization()
         solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_schedule_29_2024'.format(user_org))])
         print(solution)
-        # with open('Schedule/scheduleFile.txt','r') as file0:
-        #     solution = file0.read()
-        #     solution = solution.replace('(',',')
-        #     solution = solution.split(';')
         new_token = generate_token(user)
         if len(solution) > 0:
             return {'body':solution,'token':new_token}
