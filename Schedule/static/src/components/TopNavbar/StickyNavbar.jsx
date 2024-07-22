@@ -23,9 +23,6 @@ const StickyNavbar = () => {
               <Link to="/shiftstable">Shifts </Link>
             </Nav.Link>
             <Nav.Link>
-              <Link to="/generateschedule">Write Schedule</Link>
-            </Nav.Link>
-            <Nav.Link>
               <Link to="/">Log In</Link>
             </Nav.Link>
             <Nav.Link>

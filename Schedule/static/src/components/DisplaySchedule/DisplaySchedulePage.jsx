@@ -2,19 +2,19 @@ import React,{useState, useEffect} from 'react';
 import { Table, Row, Col, Button } from 'react-bootstrap';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
+import GenerateScheduleModal from '../GenerateSchedule/GenerateScheduleModal';
 import { Link,useLocation,Navigate, useNavigate } from 'react-router-dom';
 
 
 
 
 const DisplaySchedulePage = () => {
-    
+    const [showGenSchedModal, setShowGenSchedModal] = useState(false)
     const [fetchedInfo, setFetchedInfo] = useState(null);
-
     useEffect(() => {
-        const handleBeforeUnload = (event) => {
-            event.preventDefault();
-          };
+        // const handleBeforeUnload = (event) => {
+        //     event.preventDefault();
+        //   };
         const fetchData = async () => {
             try {
                 const data = await FetchComponent(null, "GET", "/getSchedule",null);
@@ -39,8 +39,9 @@ const DisplaySchedulePage = () => {
                         Schedule For Week Ending {fetchedInfo[0][11]}
                     </Col>
                     <Col className='d-flex justify-content-end'>
-                        <Button id='addNew'>
-                            <Link id='linkAddNew' to="/generateschedule">Generate New Schedule</Link>    
+                        <Button id='addNew' onClick={() => setShowGenSchedModal(true)}>
+                                {/* <Link id='linkAddNew' to="/generateschedule">Generate New Schedule</Link>     */}
+                                Generate New Schedule
                         </Button>
                     </Col>
                 </Row>
@@ -83,7 +84,8 @@ const DisplaySchedulePage = () => {
                         })}     
                     </tbody>
                 </Table>
-            </div>
+                </div>
+                showGenSchedModal && <GenerateScheduleModal show={showGenSchedModal} handleClose={() => setShowGenSchedModal(false)} />
         </div>
     );
 };

@@ -15,7 +15,7 @@ import UpdateBusinessInfo from './components/BusinessInfo/UpdateBusinessInfo';
 import BaseDropDownMenu from './components/BaseDropDownMenu/BaseDropDownMenu';
 import LoginPage from './components/LoginPage/LoginPage';
 import DisplaySchedulePage from './components/DisplaySchedule/DisplaySchedulePage';
-import GenerateSchedulePage from './components/GenerateSchedule/GenerateSchedulePage';
+// import GenerateSchedulePage from './components/GenerateSchedule/GenerateSchedulePage';
 import ShiftsTable from './components/ShiftsTable/ShiftsTable';
 import SkillsTable from './components/SkillsTable/SkillsTable';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -39,7 +39,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/home" element={<DisplaySchedulePage />} />
-          <Route path="/generateschedule" element={<GenerateSchedulePage />} />
+          {/* <Route path="/generateschedule" element={<GenerateScheduleModal />} /> */}
           <Route path="/employeetable" element={<EmployeeTable />} />
           <Route path="/addemptable" element={<AddEmployeeTable />} />
           {/* <Route path="/baseemptable" element={<BaseEmployeeDataTable />} /> */}

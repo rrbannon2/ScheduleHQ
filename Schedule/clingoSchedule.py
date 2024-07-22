@@ -477,16 +477,16 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
                     else:
                         schedule_dict[wk][emp][day] = 'Off'
                 if (int(emp),) in emps_in_schedule_db:
-                    print(execute_SQL("UPDATE {} SET (id,first_name,last_name,sunday,monday,tuesday,wednesday,thursday,friday,saturday,total_hours,week_ending_date) = (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) WHERE id = %s",
+                    execute_SQL("UPDATE {} SET (id,first_name,last_name,sunday,monday,tuesday,wednesday,thursday,friday,saturday,total_hours,week_ending_date) = (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) WHERE id = %s",
                                 [sql.Identifier('{}_schedule_29_2024'.format(user_org))],execute_args = [int(emp),first_name,last_name,
                                             schedule_dict[wk][emp][0],schedule_dict[wk][emp][1],schedule_dict[wk][emp][2],schedule_dict[wk][emp][3],
-                                            schedule_dict[wk][emp][4],schedule_dict[wk][emp][5],schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp],str(week_ending_date),int(emp)]),"UPDATING")
+                                            schedule_dict[wk][emp][4],schedule_dict[wk][emp][5],schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp],str(week_ending_date),int(emp)])
                 else:
                     try:
-                        print(execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_schedule_29_2024'.format(user_org))],
+                        execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_schedule_29_2024'.format(user_org))],
                                 execute_args = [int(emp),first_name,last_name,schedule_dict[wk][emp][0],schedule_dict[wk][emp][1],
                                                 schedule_dict[wk][emp][2],schedule_dict[wk][emp][3],schedule_dict[wk][emp][4],schedule_dict[wk][emp][5],
-                                                schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp],str(week_ending_date)]),"INSERTING")  
+                                                schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp],str(week_ending_date)])
                     except:
                         print("Inserting employee {} into schedule failed".format(emp))                
                         
