@@ -1,22 +1,36 @@
-import React from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import React,{useState, useEffect} from 'react';
+import { Button, Modal, Container, Col, Row, Table } from 'react-bootstrap';
+import FetchComponent  from '../FetchComponent/FetchComponent';
 
 
-export const EmployeeSkillModal = ({show, handleClose, handleSubmit}) => {
+export const EmployeeSkillModal = ({ show, skillLevelInfo, handleClose }) => {
+    
+    console.log(skillLevelInfo);
+    
     return (
         <Modal show={show} onClose={handleClose} >
             <Modal.Header closeButton onClick={handleClose}>
-                <Modal.Title>Delete Employee</Modal.Title>
+                <Modal.Title>Update Skill Levels</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-            <p>Are you sure you want to delete this employee?</p>
-            <p>This action <b>cannot be undone</b> and will delete all information associated with the employee.</p>
+                <Container>
+                    {skillLevelInfo.map((value) => {
+                        var splitVal = value;
+                        return (
+                            <Row key={splitVal[0]}>
+                                <Col>{splitVal[0]}</Col>
+                                <Col><input placeholder = {splitVal[1]}/></Col>
+                                <Col><Button id={splitVal[0]+"SubmitBtn"}>Update Only This Skill Level</Button></Col>
+                            </Row>
+                        );
+                    })}     
+        </Container>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>
                     Cancel
                 </Button>
-                <Button id="updateSkillLevelBtn" onClick={handleSubmit}>
+                <Button id="updateSkillLevelBtn" onClick={handleClose}>
                     Update Skills
                 </Button>
                 {/* Additional buttons or actions can be placed here */}

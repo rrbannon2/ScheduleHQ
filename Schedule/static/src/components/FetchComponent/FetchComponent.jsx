@@ -25,6 +25,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                     if (data['token']) {
                         tokenVal = data['token'];
                     };
+                    console.log(data['body']);
                     
                 })
                 .catch(error => {

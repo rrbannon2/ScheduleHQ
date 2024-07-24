@@ -390,6 +390,7 @@ def load_skill_levels():
         employee = request.args.get('employee')
         query_response = execute_SQL("SELECT skill,skill_level FROM {} WHERE id = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [employee])
         new_token = generate_token(user)
+        print("Query response",query_response)
         return {'body': query_response, 'token':new_token}
     else:
         return {'a':'b'},401

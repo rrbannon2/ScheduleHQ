@@ -3,7 +3,7 @@ import { Table, Row, Col, Button } from 'react-bootstrap';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
 import GenerateScheduleModal from '../GenerateSchedule/GenerateScheduleModal';
-import { Link,useLocation,Navigate, useNavigate } from 'react-router-dom';
+
 
 
 
@@ -46,7 +46,7 @@ const DisplaySchedulePage = () => {
                     </Col>
                 </Row>
   
-                <Table striped hover>
+                <Table striped hover responsive>
                     <thead>
                         
                         <tr>
@@ -62,30 +62,26 @@ const DisplaySchedulePage = () => {
                     </thead>
                     <tbody>
                         {fetchedInfo.map((value) => {
-                            console.log(value)
-                            if (value !== "*-!") {
-                                var splitVal = value;
-                            
-                                return (
-                                    <tr key={splitVal[0]}>
-                                        <td>{splitVal[1] + " " + splitVal[2]}</td>
-                                        <td>{splitVal[3]}</td>
-                                        <td>{splitVal[4]}</td>
-                                        <td>{splitVal[5]}</td>
-                                        <td>{splitVal[6]}</td>
-                                        <td>{splitVal[7]}</td>
-                                        <td>{splitVal[8]}</td>
-                                        <td>{splitVal[9]}</td>
-                                        <td>{splitVal[10]}</td>
-                                    </tr>
-                                );
-                            }
-                            else {return null};
+                            var splitVal = value;
+                        
+                            return (
+                                <tr key={splitVal[0]}>
+                                    <td>{splitVal[1] + " " + splitVal[2]}</td>
+                                    <td>{splitVal[3]}</td>
+                                    <td>{splitVal[4]}</td>
+                                    <td>{splitVal[5]}</td>
+                                    <td>{splitVal[6]}</td>
+                                    <td>{splitVal[7]}</td>
+                                    <td>{splitVal[8]}</td>
+                                    <td>{splitVal[9]}</td>
+                                    <td>{splitVal[10]}</td>
+                                </tr>
+                            );
                         })}     
                     </tbody>
                 </Table>
                 </div>
-                showGenSchedModal && <GenerateScheduleModal show={showGenSchedModal} handleClose={() => setShowGenSchedModal(false)} />
+                {showGenSchedModal && <GenerateScheduleModal show={showGenSchedModal} handleClose={() => setShowGenSchedModal(false)} />}
         </div>
     );
 };
