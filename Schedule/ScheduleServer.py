@@ -468,7 +468,7 @@ def load_shifts():
         organization = user.get_organization()
         return_array = load_drop_down_info(["shiftname","importance","maxhours"],"{}_shifts".format(organization))
         new_token = generate_token(user)
-        return {"token":new_token,"returnArray":return_array}
+        return {"token":new_token,"body":return_array}
     else:
         return {'a':'b'},401
 

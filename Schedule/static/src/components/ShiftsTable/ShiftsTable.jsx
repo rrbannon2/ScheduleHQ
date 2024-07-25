@@ -15,7 +15,7 @@ const ShiftsTable = () => {
         const fetchData = async () => {
             try {
                 const data = await FetchComponent(null, "GET", "/loadShifts",null);
-                setFetchedInfo(data["returnArray"]);
+                setFetchedInfo(data["body"]);
             } catch (error) {
                 alert("Please return to the log in page");
                 console.error("Error fetching data", error);
@@ -43,7 +43,7 @@ const ShiftsTable = () => {
                         </Button>
                     </Col>
                 </Row>
-                <Table striped hover>
+                <Table striped hover responsive>
                     <thead>
                         <tr>
                             

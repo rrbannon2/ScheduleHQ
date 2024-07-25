@@ -40,7 +40,7 @@ const SkillsTable = () => {
                         </Button>
                     </Col>
                 </Row>
-                <Table striped hover>
+                <Table striped hover responsive>
                     <thead>
                         <tr>
                             

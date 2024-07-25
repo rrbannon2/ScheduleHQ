@@ -24,7 +24,7 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                         {addEmployee ? <h4>Add New Employee</h4> : <h4>Edit Employee</h4>}
                     </Col>
                 </Row>
-                <Table striped hover>
+                <Table striped hover responsive>
                     <thead>
                         <tr>
                             <th>Employee ID</th>
@@ -74,7 +74,7 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                         <h4>Enter Employee Availability Below</h4>
                     </Col>
                 </Row>
-                <Table striped hover>
+                <Table striped hover responsive>
                     <thead>
                         <tr>
                             <th> </th>

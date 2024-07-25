@@ -58,6 +58,7 @@ const DisplaySchedulePage = () => {
                                 <th>Thursday</th>
                                 <th>Friday</th>
                                 <th>Saturday</th>
+                                <th>Hours</th>
                         </tr>
                     </thead>
                     <tbody>

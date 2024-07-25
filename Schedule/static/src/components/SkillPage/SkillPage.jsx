@@ -19,7 +19,7 @@ const SkillPage = ({ addNew, existingInfo }) => {
                         {addNew ? <h4>Add New Skill</h4> : <h4>Edit Skill</h4>}
                     </Col>
                 </Row>
-                <Table striped hover>
+                <Table striped hover responsive>
                     <thead>
                         <tr>
                             <th>Skill Name</th>
@@ -41,7 +41,7 @@ const SkillPage = ({ addNew, existingInfo }) => {
                         <h4> When is this skill used/important? </h4>
                     </Col>
                 </Row>
-                <Table striped hover>
+                <Table striped hover responsive>
                     <thead>
                         <tr>
                             <th> </th>
