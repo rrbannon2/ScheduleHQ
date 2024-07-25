@@ -9,33 +9,12 @@ import { EmployeeSkillModal } from '../EmployeeSkillModal/EmployeeSkillModal';
 const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showEmpSkillModal, setShowEmpSkillModal] = useState(false);
-    const [fetchedInfo, setFetchedInfo] = useState(null);
+
     const DeleteEmployee = (empToDelete) => {
         FetchComponent(empToDelete, "POST", "/deleteEmployee",null); 
         setShowDeleteModal(false);
     };
     
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                console.log(employeeInfo[0]);
-                const data = await FetchComponent({ "dataID": employeeInfo[0] }, "GET", "/loadSkillLevels", "employee");
-                setFetchedInfo(data["body"]);
-                console.log(fetchedInfo);
-            } catch (error) {
-                console.error("Error fetching data", error);
-                
-            }
-            return "Success"
-        };
-
-        fetchData();
-        
-    }, []);
-
-    console.log(fetchedInfo);
-    
-
 
     return (
         <div className='tableContainer'>
@@ -165,9 +144,11 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
             {showDeleteModal &&
                 <DeleteEmployeeModal show={showDeleteModal} handleClose={() => setShowDeleteModal(false)} handleDelete={() => DeleteEmployee(employeeInfo[0])} />
             }
+            {console.log(employeeInfo[0])}
             {showEmpSkillModal && 
-                <EmployeeSkillModal show={showEmpSkillModal} skillLevelInfo={fetchedInfo} handleClose={() => setShowEmpSkillModal(false)} />
-            }
+                <EmployeeSkillModal show={showEmpSkillModal} empID={employeeInfo[0]} handleClose={() => setShowEmpSkillModal(false)} />
+            } 
+            
 
         </div>
         

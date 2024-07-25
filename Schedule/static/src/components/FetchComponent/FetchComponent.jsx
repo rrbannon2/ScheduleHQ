@@ -3,6 +3,7 @@ var tokenVal = null;
 
 export default function FetchComponent(inputData, whichMethod, where, searchParamName) {
     return new Promise((resolve, reject) => {
+        
         if (whichMethod === "GET") {
             var searchURL = searchParamName ? "?" + new URLSearchParams(searchParamName + "=" + inputData["dataID"]+"&"+"token=" + tokenVal) : "?" + new URLSearchParams("token=" + tokenVal);
         
@@ -25,7 +26,6 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                     if (data['token']) {
                         tokenVal = data['token'];
                     };
-                    console.log(data['body']);
                     
                 })
                 .catch(error => {
@@ -34,7 +34,6 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 });
         }
         else {
-
             if (where == '/login' || where == '/updateBusinessInfo') {
                 fetch(where, {
                     // fetch(where,{
@@ -55,7 +54,6 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                     .then(data => {
                             
                         resolve(data);
-                        // console.log(data);
                         if (data['token']) {
                             tokenVal = data['token'];
                         };
@@ -69,7 +67,6 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 // alert(where);
                 // inputData["token"]
                 fetch(where +"?" + searchURL2, {
-                    // fetch(where,{
                     method: whichMethod,
                     headers: {
                         'Content-Type': 'application/json',

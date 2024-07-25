@@ -395,6 +395,7 @@ def load_skill_levels():
     else:
         return {'a':'b'},401
 
+#TODO: update all skill levels in a loop rather than updating only one. Will prevent token issues.
 @app.route('/updateSkillLevel',methods = ["POST"])
 def update_skill_level():
     token = request.args.get("token")
@@ -402,14 +403,17 @@ def update_skill_level():
     # token = request_data["token"]
     user = token_verify(token)
     if user:
+        print(request_data)
         organization = user.get_organization()
-        skill = request_data['skill']
-        skill_level = request_data['skill_level']
         id = request_data['id']
-
-        execute_SQL("UPDATE {} SET skill_level = %s WHERE id = %s AND skill = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [skill_level,id,skill])
+        skills = request_data["skills"]
+        for skill_key in skills.keys():
+            skill = skill_key
+            skill_level = skills[skill_key]
+            execute_SQL("UPDATE {} SET skill_level = %s WHERE id = %s AND skill = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [skill_level,id,skill])
+        
         new_token = generate_token(user)
-        return {'body':"Skill level updated successfully",'token':new_token}
+        return {'body':"Skill levels updated successfully",'token':new_token}
     else:
         return {'a':'b'},401
 
