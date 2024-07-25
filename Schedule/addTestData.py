@@ -50,10 +50,10 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # cur.execute("ALTER TABLE skills RENAME to test_skills")
 
 
-cur.execute("DROP TABLE test_schedule_29_2024")
-cur.execute("CREATE TABLE test_schedule_29_2024(id int PRIMARY KEY,first_name varchar(255), last_name varchar(255),sunday varchar(255), monday varchar(255), tuesday varchar(255), wednesday varchar(255), thursday varchar(255), friday varchar(255), saturday varchar(255),total_hours varchar(64),week_ending_date varchar(255))")
-
-
+# cur.execute("DROP TABLE July25Test3_schedule_29_2024")
+# cur.execute(sql.SQL("CREATE TABLE {}(id int PRIMARY KEY,first_name varchar(255), last_name varchar(255),sunday varchar(255), monday varchar(255), tuesday varchar(255), wednesday varchar(255), thursday varchar(255), friday varchar(255), saturday varchar(255),total_hours varchar(64),week_ending_date varchar(255))").format(sql.Identifier("{}".format('July25Test3_schedule_29_2024'))))
+# cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('{}'.format("July25Test3_schedule_29_2024"))))
+# print(cur.fetchall())
 conn.commit()
 cur.close()
 conn.close()

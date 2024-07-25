@@ -121,7 +121,6 @@ const PrepData = (addNew) => {
    
 
     for (let basicCell of basicInfoCells) {
-        console.log(basicCell)
         var cell = document.getElementById(basicCell).value;
         if (cell !== '') {
             basicJsonDict[basicCell] = cell;

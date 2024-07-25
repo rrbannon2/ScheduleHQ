@@ -128,9 +128,10 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                             {addEmployee ? "Add Employee" : "Update Employee"}
                         </Button>
                     </Col>
-                    <Col className='d-flex justify-content-end'>
-                        <Button id='openEmpSkillsModal' onClick={() => setShowEmpSkillModal(true)}>View or Edit Employee Skills</Button>
-                    </Col>
+                    {addEmployee ? null :
+                        <Col className='d-flex justify-content-end'>
+                            <Button id='openEmpSkillsModal' onClick={() => setShowEmpSkillModal(true)}>View or Edit Employee Skills</Button>
+                        </Col>}
                 </Row>
                 {addEmployee ? null :
                     <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
@@ -141,11 +142,11 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                     </Col>
                 </Row>}
             </div>
-            {showDeleteModal &&
+            {addEmployee ? null : showDeleteModal &&
                 <DeleteEmployeeModal show={showDeleteModal} handleClose={() => setShowDeleteModal(false)} handleDelete={() => DeleteEmployee(employeeInfo[0])} />
             }
-            {console.log(employeeInfo[0])}
-            {showEmpSkillModal && 
+            
+            {addEmployee ? null : showEmpSkillModal && 
                 <EmployeeSkillModal show={showEmpSkillModal} empID={employeeInfo[0]} handleClose={() => setShowEmpSkillModal(false)} />
             } 
             

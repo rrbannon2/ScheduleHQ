@@ -5,7 +5,7 @@ import { Link, useHref } from 'react-router-dom';
 import FetchComponent from '../FetchComponent/FetchComponent';
 
 const SkillsTable = () => {
-    const [fetchedInfo, setFetchedInfo] = useState([]);
+    const [fetchedInfo, setFetchedInfo] = useState(null);
     
 
     useEffect(() => {

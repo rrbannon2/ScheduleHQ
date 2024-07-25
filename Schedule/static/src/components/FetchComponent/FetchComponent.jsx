@@ -23,6 +23,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 })
                 .then(data => {
                     resolve(data);
+                    console.log(data);
                     if (data['token']) {
                         tokenVal = data['token'];
                     };

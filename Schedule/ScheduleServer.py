@@ -1,12 +1,11 @@
-from flask import Flask, request, jsonify, render_template, session
+from flask import Flask, request, jsonify, session, make_response
 import clingoSchedule
 import psycopg2
 from psycopg2 import sql
-import flask_login as fl_lgin
 import secrets
 import hashlib
 from userClass import User
-from flask_jwt import JWT, jwt_required, current_identity
+
 
 
 app = Flask(__name__)
@@ -69,7 +68,7 @@ def add_user():
     print(execute_SQL("SELECT * FROM {}",[sql.Identifier('admin_users')]))
     execute_SQL("CREATE TABLE {} (id int PRIMARY KEY, first_name varchar(255), last_name varchar(255), role int, wage int)",[sql.Identifier('{}_employees'.format(user_org))])
     execute_SQL("CREATE TABLE {} (id int PRIMARY KEY, shift_pref integer ARRAY[28] DEFAULT %s)",[sql.Identifier('{}_availability'.format(user_org))],execute_args=[zero_val_array])
-    execute_SQL("CREATE TABLE {} (skill varchar(255), id int, skill_level int, CONSTRAINT PK_Skill PRIMARY KEY (skill,id))",[sql.Identifier('{}_skills'.format(user_org))])
+    execute_SQL("CREATE TABLE {} (skill varchar(255), id int, skill_level int, CONSTRAINT {} PRIMARY KEY (skill,id))",[sql.Identifier('{}_skills'.format(user_org)),sql.Identifier('{}_skillsPK'.format(user_org))])
     execute_SQL("CREATE TABLE {} (skill varchar(255), schedule_blocks integer ARRAY[14], importance int, role int)",[sql.Identifier('{}_required_skills_for_shift'.format(user_org))])
     execute_SQL("CREATE TABLE {} (id int PRIMARY KEY, min_shift int DEFAULT 0, max_shift int DEFAULT 24, min_weekly int DEFAULT 0, max_weekly int DEFAULT 120, min_days int DEFAULT 0, max_days int DEFAULT 7)",[sql.Identifier('{}_extremes'.format(user_org))])
     execute_SQL("CREATE TABLE {} (business_name varchar(255), hours_of_op integer ARRAY[28], min_employees int, min_managers int, exempt_role int,max_total_hours int, max_hours_importance int)",[sql.Identifier('{}_business_info'.format(user_org))])
@@ -79,20 +78,19 @@ def add_user():
 
 def authenticate(email,password):
     query_response = execute_SQL("SELECT user_id, salt, salted_password, organization FROM {} WHERE email = %s",[sql.Identifier("admin_users")],execute_args=[email]) 
-    user_id, salt, user_password,organization = query_response[0][:4]
-    user_id = str(user_id)
-    organization = str(organization)
-    print(query_response)
-    salted_attempt_password = password + str(salt)
-    if str(hashlib.sha512(salted_attempt_password.encode('utf-8')).hexdigest()) == user_password:
-        User({"user_id" : user_id,"email" : email,"organization":organization})
-        return load_user(user_id)
+    if query_response:
+        user_id, salt, user_password,organization = query_response[0][:4]
+        user_id = str(user_id)
+        organization = str(organization)
+        print(query_response)
+        salted_attempt_password = password + str(salt)
+        if str(hashlib.sha512(salted_attempt_password.encode('utf-8')).hexdigest()) == user_password:
+            User({"user_id" : user_id,"email" : email,"organization":organization})
+            return load_user(user_id)
+        else:
+            return None
     else:
         return None
-
-def identity(payload):
-    user_id = payload['identity']
-    return load_user(user_id)
 
 def token_verify(token_val):
     users_dict = User.users
@@ -100,33 +98,33 @@ def token_verify(token_val):
     token_val = str(token_val)
     if token_val in tokens_dict:
         user_id = tokens_dict[token_val]
-        tokens_dict.pop(token_val,None)
+        # tokens_dict.pop(token_val,None)
         # print(users_dict[user_id].tokens)
         if token_val in users_dict[user_id].tokens:
-            users_dict[user_id].tokens.pop()
+            # users_dict[user_id].tokens.pop()
             return users_dict[user_id]
     return False
 
 def generate_token(user):
     token = secrets.token_hex()
     user.tokens.insert(0,token)
-    tokens_dict.pop(user.tokens[-1],None)
+    # tokens_dict.pop(user.tokens[-1],None)
     tokens_dict[token] = user.user_id
     # print(tokens_dict)
 
     return token
 
 
-def token_required(request_func):
-    # print(request.get_json)
-    token = request.args.get("token")
-    user = token_verify(token)
-    if user:
-        body = request_func()
-        new_token = generate_token(user)
-        return {"token":new_token,"body":body}
-    else:
-        return {'a':'b'},401
+# def token_required(request_func):
+#     # print(request.get_json)
+#     token = request.args.get("token")
+#     user = token_verify(token)
+#     if user:
+#         body = request_func()
+#         new_token = generate_token(user)
+#         return {"token":new_token,"body":body}
+#     else:
+#         return {'a':'b'},401
     
 # app.config['before_request'] = token_required
 
@@ -138,7 +136,9 @@ def login():
     user = authenticate(email,attempt_password)
     if user:
         token = generate_token(user)
-        return {"response":"Login Successful","token":token}
+        cookie_response = make_response({"response":"Login Successful","token":token})
+        cookie_response.set_cookie("token",token,300,samesite='Strict')
+        return cookie_response
     else:
         return {"response": "Email or Password incorrect, please try again.","token":None}
 
@@ -177,7 +177,9 @@ def add_employee():
 @app.route('/loadEmployeeInfo',methods=["GET"])
 # @fl_lgin.login_required
 def load_employee_info():
-    token = request.args.get("token")
+    # token = request.args.get("token")
+    token = request.cookies.get("token")
+    print(request)
     # request_dict = request.get_json()
     # token = request_dict["token"]
     user = token_verify(token)
@@ -437,8 +439,9 @@ def load_shift_info():
 
 def load_selected_item_details(selected_item,table,name_column,user):
     organization = user.get_organization()
-    table = {}.format(organization) + table
+    table = organization + '_' + table
     item_info = execute_SQL("SELECT * FROM {} WHERE {} = %s",(sql.Identifier(table),sql.Identifier(name_column)),execute_args = [selected_item])
+    print(item_info)
     new_token = generate_token(user)
     return {'body':item_info,'token':new_token}
 
@@ -446,8 +449,6 @@ def load_selected_item_details(selected_item,table,name_column,user):
 @app.route('/loadRequiredSkills', methods = ["GET"])
 def load_required_skills():
     token = request.args.get("token")
-    # request_dict = request.get_json()
-    # token = request_dict["token"]
     user = token_verify(token)
     
     if user:
@@ -515,7 +516,7 @@ def add_skill():
         
 
 def use_info(info,which_function = None,table = None):
-    if table == "required_skills_for_shift":
+    if "required_skills_for_shift" in table:
         time_vals = list(info.values())[3:]
         time_vals = [int(i) for i in time_vals]
         
@@ -525,7 +526,7 @@ def use_info(info,which_function = None,table = None):
         role_or_max_hrs = 'role'
         name_column = "skill"
         return_statement = "Skill Operation Successful",name
-    elif table == "shifts":
+    elif "shifts" in table:
         time_vals = list(info.values())[3:]
         time_vals = [int(i) for i in time_vals]
         

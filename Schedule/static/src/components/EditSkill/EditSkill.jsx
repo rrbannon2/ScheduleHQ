@@ -10,8 +10,10 @@ const EditSkillPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log("Testing in Edit Skill Page");
                 const data = await FetchComponent(dataID, "GET", "/loadSkillInfo","skill");
-                setFetchedInfo(data[0]);
+                setFetchedInfo(data['body'][0]);
+                console.log(data['body'][0]);
             } catch (error) {
                 console.error("Error fetching skill data", error);
                 // Handle the error accordingly
