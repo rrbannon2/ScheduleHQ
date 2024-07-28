@@ -6,7 +6,7 @@ import secrets
 import hashlib
 from userClass import User
 
-
+#TODO: Remove references to "schedule_29_2024", replace with a generated table
 
 app = Flask(__name__)
 zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
@@ -98,22 +98,26 @@ def token_verify(token_val):
     token_val = str(token_val)
     if token_val in tokens_dict:
         user_id = tokens_dict[token_val]
-        # tokens_dict.pop(token_val,None)
+        tokens_dict.pop(token_val,None)
         # print(users_dict[user_id].tokens)
         if token_val in users_dict[user_id].tokens:
-            # users_dict[user_id].tokens.pop()
+            users_dict[user_id].tokens.pop()
             return users_dict[user_id]
     return False
 
 def generate_token(user):
     token = secrets.token_hex()
     user.tokens.insert(0,token)
-    # tokens_dict.pop(user.tokens[-1],None)
+    tokens_dict.pop(user.tokens[-1],None)
     tokens_dict[token] = user.user_id
-    # print(tokens_dict)
+    print(tokens_dict)
 
     return token
 
+def create_cookie_response(token, response_value, response_name = 'body', cookie_lifespan = 300):
+    cookie_response = make_response({response_name:response_value,"token":token})
+    cookie_response.set_cookie("token",token,cookie_lifespan,samesite='Strict')
+    return cookie_response
 
 # def token_required(request_func):
 #     # print(request.get_json)
@@ -136,8 +140,7 @@ def login():
     user = authenticate(email,attempt_password)
     if user:
         token = generate_token(user)
-        cookie_response = make_response({"response":"Login Successful","token":token})
-        cookie_response.set_cookie("token",token,300,samesite='Strict')
+        cookie_response = create_cookie_response(token,"Login Successful","response")
         return cookie_response
     else:
         return {"response": "Email or Password incorrect, please try again.","token":None}
@@ -152,7 +155,6 @@ def add_default_emp_skill_level(skill,emp, organization):
 def add_employee():
     token = request.args.get("token")
     request_dict = request.get_json()
-    # token = request_dict.pop("token",None)
     user = token_verify(token)
     if user:
         emp_info = list(request_dict.values())
@@ -170,34 +172,31 @@ def add_employee():
         for name in skill_names:
             execute_SQL("INSERT INTO {} VALUES(%s,%s,%s)",[sql.Identifier('{}_skills'.format(organization))],execute_args = [name,id,0])
         new_token = generate_token(user)
-        return {'body':"Employee Added Successfully",'token':new_token}
+        cookie_response = create_cookie_response(new_token,"Employee Added Successfully")
+        return cookie_response
     else:
         return {'a':'b'},401
 
 @app.route('/loadEmployeeInfo',methods=["GET"])
-# @fl_lgin.login_required
 def load_employee_info():
     # token = request.args.get("token")
     token = request.cookies.get("token")
     print(request)
-    # request_dict = request.get_json()
-    # token = request_dict["token"]
     user = token_verify(token)
     if user:
         organization = user.get_organization()
         employee = request.args.get('employee')
         query_response = execute_SQL("SELECT * FROM {} JOIN {} USING (id) JOIN {} USING (id) WHERE id = %s",(sql.Identifier('{}_employees'.format(organization)),sql.Identifier('{}_extremes'.format(organization)),sql.Identifier('{}_availability'.format(organization))),execute_args = [employee])
         new_token = generate_token(user)
-        return {'body':query_response,'token':new_token}
+        cookie_response = create_cookie_response(new_token,query_response)
+        return cookie_response
     else:
         return {'a':'b'},401
 
 @app.route('/loadEmployeeListData',methods = ["GET"])
 # @fl_lgin.login_required
 def load_employee_names():
-    token = request.args.get("token")
-    # request_dict = request.get_json()
-    # token = request_dict["token"]
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         organization = user.get_organization()
@@ -209,7 +208,8 @@ def load_employee_names():
         print(query_response)
         return_array = [{"firstName":emp[0], "lastName":emp[1], "id":emp[2], "role":emp[3]} for emp in query_response]
         new_token = generate_token(user)
-        return {'body':return_array,'token':new_token}
+        cookie_response = create_cookie_response(new_token,return_array)
+        return cookie_response
     else:
         return {'a':'b'},401
 
@@ -217,7 +217,7 @@ def load_employee_names():
 @app.route('/updateEmployee',methods = ["POST"])
 # @fl_lgin.fresh_login_required
 def update_employee():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     request_dict = request.get_json()
     # token = request_dict["token"]
     user = token_verify(token)
@@ -317,21 +317,10 @@ def write():
         print("Token Problems?")
         return {'a':'b'},401
     
-        # clingoSchedule.run_clingo(response["seconds"],response["date"])
-    # with open('Schedule/scheduleFile.txt', 'r') as file0:
-    #     solution = file0.read()
-    #     solution = solution.replace('(',',')
-    #     solution = solution.split(';')
-    # solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('test_schedule_29_2024')])
-    # if len(solution) > 0:
-        # return {'body':"Schedule Written Successfully"}
-    # else:
-        # return {'body':"No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists."}
-
 
 @app.route('/getSchedule',methods= ["GET"])
 def get_schedule():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     # request_dict = request.get_json()
     # token = request_dict["token"]
     user = token_verify(token)
@@ -339,11 +328,14 @@ def get_schedule():
         user_org = user.get_organization()
         solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_schedule_29_2024'.format(user_org))])
         print(solution)
-        new_token = generate_token(user)
+        
         if len(solution) > 0:
-            return {'body':solution,'token':new_token}
+            response_val = solution
         else:
-            return {'body':["testing "], 'token':new_token}
+            response_val = ["no schedule to load"]
+        new_token = generate_token(user)
+        cookie_response = create_cookie_response(new_token,response_val)
+        return cookie_response
     else:
         return {'a':'b'},401
         
