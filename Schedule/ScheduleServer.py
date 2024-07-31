@@ -121,7 +121,7 @@ def create_cookie_response(token, response_value, response_name = 'body', cookie
 
 # def token_required(request_func):
 #     # print(request.get_json)
-#     token = request.args.get("token")
+#     token = request.cookies.get("token")
 #     user = token_verify(token)
 #     if user:
 #         body = request_func()
@@ -153,7 +153,7 @@ def add_default_emp_skill_level(skill,emp, organization):
 
 @app.route('/addEmployee',methods = ["POST"])
 def add_employee():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     request_dict = request.get_json()
     user = token_verify(token)
     if user:
@@ -179,9 +179,7 @@ def add_employee():
 
 @app.route('/loadEmployeeInfo',methods=["GET"])
 def load_employee_info():
-    # token = request.args.get("token")
     token = request.cookies.get("token")
-    print(request)
     user = token_verify(token)
     if user:
         organization = user.get_organization()
@@ -194,7 +192,6 @@ def load_employee_info():
         return {'a':'b'},401
 
 @app.route('/loadEmployeeListData',methods = ["GET"])
-# @fl_lgin.login_required
 def load_employee_names():
     token = request.cookies.get("token")
     user = token_verify(token)
@@ -204,8 +201,7 @@ def load_employee_names():
             query_response = execute_SQL("SELECT first_name, last_name, id, role FROM {}",[sql.Identifier('{}_employees'.format(organization))])
         except:
             new_token = generate_token(user)
-            return {'body':["No existing employees found"],'token':new_token}
-        print(query_response)
+            return create_cookie_response(new_token,"No existing employees found")
         return_array = [{"firstName":emp[0], "lastName":emp[1], "id":emp[2], "role":emp[3]} for emp in query_response]
         new_token = generate_token(user)
         cookie_response = create_cookie_response(new_token,return_array)
@@ -215,11 +211,9 @@ def load_employee_names():
 
 
 @app.route('/updateEmployee',methods = ["POST"])
-# @fl_lgin.fresh_login_required
 def update_employee():
     token = request.cookies.get("token")
     request_dict = request.get_json()
-    # token = request_dict["token"]
     user = token_verify(token)
     if user:
         organization = user.get_organization()
@@ -236,14 +230,15 @@ def update_employee():
         execute_SQL("UPDATE {} SET(min_shift,max_shift,min_weekly,max_weekly,min_days,max_days) = (%s, %s, %s, %s, %s, %s) WHERE id = %s",[sql.Identifier('{}_extremes'.format(organization))],execute_args = [*extremes_table_data,emp_id])
         execute_SQL("UPDATE {} SET shift_pref = %s WHERE id = %s",[sql.Identifier('{}_availability'.format(organization))],execute_args = [avail_info,emp_id])
         new_token = generate_token(user)
-        return {'body':"Updated Employee Information Saved Successfully.",'token':new_token}
+        cookie_response = create_cookie_response(new_token,"Updated Employee Information Saved Successfully.")
+        return cookie_response
     else:
         return {'a':'b'},401
         
 
 @app.route('/deleteEmployee',methods = ["POST"])
 def delete_employee():     
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     emp_id = request.get_json()
     user = token_verify(token)
     if user:
@@ -253,13 +248,14 @@ def delete_employee():
         execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('{}_availability'.format(organization))],execute_args = [emp_id])
         execute_SQL("DELETE FROM {} WHERE id = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [emp_id])
         new_token = generate_token(user)
-        return {'body':"Employee Deleted Successfully",'token':new_token}
+        cookie_response = create_cookie_response(new_token,"Employee Deleted Successfully")
+        return cookie_response
     else:
         return {'a':'b'},401
 
 @app.route('/deleteSkill',methods=["POST"])
 def delete_skill():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         organization = user.get_organization()
@@ -267,41 +263,43 @@ def delete_skill():
         execute_SQL("DELETE FROM {} WHERE skill = %s",[sql.Identifier('{}_required_skills_for_shift'.format(organization))],execute_args = [skill_name])
         execute_SQL("DELETE FROM {} WHERE skill = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [skill_name])
         new_token = generate_token(user)
-        return {'body': "Skill Deleted Successfully", 'token':new_token}
+        cookie_response = create_cookie_response(new_token,"Skill Deleted Successfully")
+        return cookie_response
     else:
         return {'a':'b'},401
 
 @app.route('/deleteShift',methods = ["POST"])
 def delete_shift():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         organization = user.get_organization()
         shift_name = request.get_json()
         execute_SQL("DELETE FROM {} WHERE shiftName = %s",[sql.Identifier('{}_shifts'.format(organization))],execute_args = [shift_name])
         new_token = generate_token(user)
-        return {'body': "Shift Deleted Successfully", 'token':new_token}
+        cookie_response = create_cookie_response(new_token,"Shift Deleted Successfully")
+        return cookie_response
     else:
         return {'a':'b'},401
 
 @app.route('/deleteUser',methods = ["POST"])
 def delete_user():
-    token = request.args.get("token")
-    emp_id = request.get_json()
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
-        organization = user.get_organization()
+        # organization = user.get_organization()
         user_name = request.get_json()
         execute_SQL("DELETE FROM {} WHERE email = %s",[sql.Identifier('users')],execute_args = [user_name])
         new_token = generate_token(user)
-        return {'body': "User Deleted Successfully", 'token':new_token}
+        cookie_response = create_cookie_response(new_token,"User Deleted Successfully")
+        return cookie_response
     else:
         return {'a':'b'},401
 
 
 @app.route('/writeSchedule', methods = ["POST"])
 def write():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         user_org = user.get_organization()
@@ -309,12 +307,14 @@ def write():
         clingoSchedule.run_clingo(user_org,response["seconds"],response["date"])
         solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_schedule_29_2024'.format(user_org))])
         new_token = generate_token(user)
+        
         if len(solution) > 0:    
-            return {'body':"Schedule Written Successfully",'token':new_token}
+            response_val = "Schedule Written Successfully"
         else:
-            return {'body':"No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists.","token":new_token}
+            response_val = "No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists."
+        cookie_response = create_cookie_response(new_token,response_val)
+        return cookie_response
     else:
-        print("Token Problems?")
         return {'a':'b'},401
     
 
@@ -342,7 +342,7 @@ def get_schedule():
 
 @app.route('/updateBusinessInfo',methods = ["POST"])
 def update_business_info():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         organization = user.get_organization()
@@ -357,27 +357,29 @@ def update_business_info():
         else:
             execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_business_info'.format(organization))],execute_args = [business_name,hours_of_op,*business_info_ints[:5]])
         new_token = generate_token(user)
-        return {'body': "Business Information Updated Successfully", 'token':new_token}
+        cookie_response = create_cookie_response(new_token,"Business Information Updated Successfully")
+        return cookie_response
     else:
         return {'a':'b'},401
     
 
 @app.route('/loadBusinessInfo',methods = ["GET"])
 def load_business_info():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         organization = user.get_organization()
         business_info = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_business_info'.format(organization))])
         new_token = generate_token(user)
-        return {'body': business_info, 'token':new_token}
+        cookie_response = create_cookie_response(new_token,business_info)
+        return cookie_response
     else:
         return {'a':'b'},401
 
 
 @app.route('/loadSkillLevels',methods = ["GET"])
 def load_skill_levels():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         organization = user.get_organization()
@@ -385,14 +387,15 @@ def load_skill_levels():
         query_response = execute_SQL("SELECT skill,skill_level FROM {} WHERE id = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [employee])
         new_token = generate_token(user)
         print("Query response",query_response)
-        return {'body': query_response, 'token':new_token}
+        cookie_response = create_cookie_response(new_token,query_response)
+        return cookie_response
     else:
         return {'a':'b'},401
 
 #TODO: update all skill levels in a loop rather than updating only one. Will prevent token issues.
 @app.route('/updateSkillLevel',methods = ["POST"])
 def update_skill_level():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     request_data = request.get_json()
     # token = request_data["token"]
     user = token_verify(token)
@@ -407,13 +410,14 @@ def update_skill_level():
             execute_SQL("UPDATE {} SET skill_level = %s WHERE id = %s AND skill = %s",[sql.Identifier('{}_skills'.format(organization))],execute_args = [skill_level,id,skill])
         
         new_token = generate_token(user)
-        return {'body':"Skill levels updated successfully",'token':new_token}
+        cookie_response = create_cookie_response(new_token,"Skill levels updated successfully")
+        return cookie_response
     else:
         return {'a':'b'},401
 
 @app.route('/loadSkillInfo',methods = ["GET"])
 def load_skill_info():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         return load_selected_item_details(request.args.get('skill'),"required_skills_for_shift",'skill',user)
@@ -422,7 +426,7 @@ def load_skill_info():
 
 @app.route('/loadShiftInfo', methods = ["GET"])
 def load_shift_info():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         return load_selected_item_details(request.args.get('shift'),"shifts","shiftname",user)
@@ -433,35 +437,34 @@ def load_selected_item_details(selected_item,table,name_column,user):
     organization = user.get_organization()
     table = organization + '_' + table
     item_info = execute_SQL("SELECT * FROM {} WHERE {} = %s",(sql.Identifier(table),sql.Identifier(name_column)),execute_args = [selected_item])
-    print(item_info)
     new_token = generate_token(user)
-    return {'body':item_info,'token':new_token}
+    cookie_response = create_cookie_response(new_token,item_info)
+    return cookie_response
 
 
 @app.route('/loadRequiredSkills', methods = ["GET"])
 def load_required_skills():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     user = token_verify(token)
-    
     if user:
         organization = user.get_organization()
         return_array = load_drop_down_info(["skill","importance","role"],"{}_required_skills_for_shift".format(organization))
         new_token = generate_token(user)
-        return {"token":new_token,"returnArray":return_array}
+        cookie_response = create_cookie_response(new_token,return_array,response_name="returnArray")
+        return cookie_response
     else:
         return {'a':'b'},401
 
 @app.route('/loadShifts', methods = ["GET"])
 def load_shifts():
-    token = request.args.get("token")
-    # request_dict = request.get_json()
-    # token = request_dict["token"]
+    token = request.cookies.get("token")
     user = token_verify(token)
     if user:
         organization = user.get_organization()
         return_array = load_drop_down_info(["shiftname","importance","maxhours"],"{}_shifts".format(organization))
         new_token = generate_token(user)
-        return {"token":new_token,"body":return_array}
+        cookie_response = create_cookie_response(new_token,return_array)
+        return cookie_response
     else:
         return {'a':'b'},401
 
@@ -473,23 +476,22 @@ def load_drop_down_info(columns_to_select,table):
 
 @app.route('/updateSkill',methods = ["POST"])
 def update_skill():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     request_dict = request.get_json()
-    # token = request_dict["token"]
     user = token_verify(token)
     if user:
         organization = user.get_organization()
         return_statement = use_info(request_dict,which_function="update",table="{}_required_skills_for_shift".format(organization))
         new_token = generate_token(user)
-        return {'body':return_statement,'token':new_token}
+        cookie_response = create_cookie_response(new_token,return_statement)
+        return cookie_response
     else:
         return {'a':'b'},401
     
 @app.route('/addSkill', methods = ["POST"])
 def add_skill():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     request_dict = request.get_json()
-    # token = request_dict["token"]
     user = token_verify(token)
     if user:
         organization = user.get_organization()
@@ -502,7 +504,8 @@ def add_skill():
         else:
             return_statement = "Skill Not Added"
         new_token = generate_token(user)
-        return {'body':return_statement,'token':new_token}
+        cookie_response = create_cookie_response(new_token,return_statement)
+        return cookie_response
     else:
         return {'a':'b'},401
         
@@ -544,29 +547,29 @@ def use_info(info,which_function = None,table = None):
 
 @app.route('/addShift',methods = ["POST"])
 def add_shift():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     request_dict = request.get_json()
-    # token = request_dict["token"]
     user = token_verify(token)
     if user:
         organization = user.get_organization()
         return_statement = use_info(request_dict,which_function="insert",table="{}_shifts".format(organization))
         new_token = generate_token(user)
-        return {'body':return_statement,'token':new_token}
+        cookie_response = create_cookie_response(new_token,return_statement)
+        return cookie_response
     else:
         return {'a':'b'},401
         
 @app.route('/updateShift',methods = ["POST"])
 def update_shift():
-    token = request.args.get("token")
+    token = request.cookies.get("token")
     request_dict = request.get_json()
-    # token = request_dict["token"]
     user = token_verify(token)
     if user:
         organization = user.get_organization()
         return_statement = use_info(request_dict,which_function="update",table="{}_shifts".format(organization))
         new_token = generate_token(user)
-        return {'body':return_statement,'token':new_token}
+        cookie_response = create_cookie_response(new_token,return_statement)
+        return cookie_response
     else:
         return {'a':'b'},401
     
