@@ -1,9 +1,13 @@
 .tableContainer {
-    margin: 50px 50px 0 100px;
+    position: relative;
+    margin-left:10%;
+    margin-right:10%;
+    width:auto;
     height: 90vh;
+    
 }
 .containerTitle {
-    padding: 20px 0;
+    /* padding: 20px 0; */
     border: 2px solid #fff;
     border-radius: 25px;
     height: 85vh;

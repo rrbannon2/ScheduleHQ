@@ -9,7 +9,7 @@ const UpdateBusinessInfo = () => {
         const fetchData = async () => {
             try {
                 const data = await FetchComponent(null, "GET", "/loadBusinessInfo",false);
-                setFetchedInfo(data[0]);
+                setFetchedInfo(data["body"]);
             } catch (error) {
                 console.error("Error fetching shift data", error);
                 // Handle the error accordingly

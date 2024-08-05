@@ -23,7 +23,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 })
                 .then(data => {
                     resolve(data);
-                    console.log(data);
+                    // console.log(data);
                     if (data['token']) {
                         tokenVal = data['token'];
                     };
@@ -67,7 +67,8 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 var searchURL2 = new URLSearchParams("token=" + tokenVal);
                 // alert(where);
                 // inputData["token"]
-                fetch(where +"?" + searchURL2, {
+
+                fetch(where + "?" + searchURL2, {
                     method: whichMethod,
                     headers: {
                         'Content-Type': 'application/json',

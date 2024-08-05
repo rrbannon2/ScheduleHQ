@@ -3,8 +3,7 @@ import { Table, Row, Col, Button } from 'react-bootstrap';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
 import GenerateScheduleModal from '../GenerateSchedule/GenerateScheduleModal';
-
-
+import ScheduleExists from '../ScheduleExists/ScheduleExists';
 
 
 
@@ -17,7 +16,7 @@ const DisplaySchedulePage = () => {
         //   };
         const fetchData = async () => {
             try {
-                const data = await FetchComponent(null, "GET", "/getSchedule",null);
+                const data = await FetchComponent({"wEndDate":null}, "GET", "/getSchedule",null);
                 setFetchedInfo(data["body"]);
             } catch (error) {
                 console.error("Error fetching data", error);
@@ -36,7 +35,7 @@ const DisplaySchedulePage = () => {
             <div className='containerTitle'>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='align-items-center'>
-                        Schedule For Week Ending {fetchedInfo[0][11]}
+                        Schedule For Week Ending {fetchedInfo["response"]==="False" ? fetchedInfo["fetchedDate"] : fetchedInfo["response"][0][11]}
                     </Col>
                     <Col className='d-flex justify-content-end'>
                         <Button id='addNew' onClick={() => setShowGenSchedModal(true)}>
@@ -45,45 +44,11 @@ const DisplaySchedulePage = () => {
                         </Button>
                     </Col>
                 </Row>
-  
-                <Table striped hover responsive>
-                    <thead>
-                        
-                        <tr>
-                                <th></th>
-                                <th>Sunday</th>
-                                <th>Monday</th>
-                                <th>Tuesday</th>
-                                <th>Wednesday</th>
-                                <th>Thursday</th>
-                                <th>Friday</th>
-                                <th>Saturday</th>
-                                <th>Hours</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {fetchedInfo.map((value) => {
-                            var splitVal = value;
-                        
-                            return (
-                                <tr key={splitVal[0]}>
-                                    <td>{splitVal[1] + " " + splitVal[2]}</td>
-                                    <td>{splitVal[3]}</td>
-                                    <td>{splitVal[4]}</td>
-                                    <td>{splitVal[5]}</td>
-                                    <td>{splitVal[6]}</td>
-                                    <td>{splitVal[7]}</td>
-                                    <td>{splitVal[8]}</td>
-                                    <td>{splitVal[9]}</td>
-                                    <td>{splitVal[10]}</td>
-                                </tr>
-                            );
-                        })}     
-                    </tbody>
-                </Table>
-                </div>
+                {fetchedInfo["response"] === "False" ?  <h6> There is no existing schedule for this week. If you wish to create one, select the Generate Schedule button. Otherwise, select a different week from the drop-down menu.</h6> : <ScheduleExists fetchedInfo={fetchedInfo["response"]} />}
                 {showGenSchedModal && <GenerateScheduleModal show={showGenSchedModal} handleClose={() => setShowGenSchedModal(false)} />}
+            </div>
         </div>
+        
     );
 };
 

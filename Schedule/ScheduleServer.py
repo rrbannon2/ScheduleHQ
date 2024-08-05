@@ -5,6 +5,7 @@ from psycopg2 import sql
 import secrets
 import hashlib
 from userClass import User
+import datetime
 
 #TODO: Remove references to "schedule_29_2024", replace with a generated table
 
@@ -304,14 +305,18 @@ def write():
     if user:
         user_org = user.get_organization()
         response = request.get_json()
+        print(response["date"])
+        try:
+            execute_SQL("CREATE TABLE {} (id int PRIMARY KEY,first_name varchar(255), last_name varchar(255),sunday varchar(255), monday varchar(255), tuesday varchar(255), wednesday varchar(255), thursday varchar(255), friday varchar(255), saturday varchar(255),total_hours varchar(64),week_ending_date varchar(255))",[sql.Identifier("{}_{}".format(user_org,response["date"]))])
+        except Exception as error:
+            print(error)
+            execute_SQL("DROP TABLE {}",[sql.Identifier('{}_{}'.format(user_org,response["date"]))])
+            execute_SQL("CREATE TABLE {} (id int PRIMARY KEY,first_name varchar(255), last_name varchar(255),sunday varchar(255), monday varchar(255), tuesday varchar(255), wednesday varchar(255), thursday varchar(255), friday varchar(255), saturday varchar(255),total_hours varchar(64),week_ending_date varchar(255))",[sql.Identifier("{}_{}".format(user_org,response["date"]))])
+            
+
         clingoSchedule.run_clingo(user_org,response["seconds"],response["date"])
-        solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_schedule_29_2024'.format(user_org))])
         new_token = generate_token(user)
-        
-        if len(solution) > 0:    
-            response_val = "Schedule Written Successfully"
-        else:
-            response_val = "No schedule generated. Please ensure it is possible to meet the requirements of the business or increase the time limit. Contact Support if issue persists."
+        response_val = "Schedule is being generated"
         cookie_response = create_cookie_response(new_token,response_val)
         return cookie_response
     else:
@@ -326,13 +331,25 @@ def get_schedule():
     user = token_verify(token)
     if user:
         user_org = user.get_organization()
-        solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_schedule_29_2024'.format(user_org))])
-        print(solution)
-        
-        if len(solution) > 0:
-            response_val = solution
-        else:
-            response_val = ["no schedule to load"]
+        try:
+            date = request.args.get("wEndDate")
+        except Exception as error:
+            print(error)
+            
+        if not date:
+            today = datetime.date.today()
+            date = (today + datetime.timedelta((5-today.weekday()) % 7))
+            date = date.strftime("%m/%d/%Y")
+
+        try:
+            solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_{}'.format(user_org,date))])
+            if len(solution) > 0:
+                response_val = {"response":solution}
+            else:
+                response_val = {"response":"False","fetchedDate":date}
+        except Exception as error:
+            print(error)
+            response_val = {"response":"False","fetchedDate":date}
         new_token = generate_token(user)
         cookie_response = create_cookie_response(new_token,response_val)
         return cookie_response
@@ -392,7 +409,7 @@ def load_skill_levels():
     else:
         return {'a':'b'},401
 
-#TODO: update all skill levels in a loop rather than updating only one. Will prevent token issues.
+
 @app.route('/updateSkillLevel',methods = ["POST"])
 def update_skill_level():
     token = request.cookies.get("token")
