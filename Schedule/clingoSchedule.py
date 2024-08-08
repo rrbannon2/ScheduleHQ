@@ -467,12 +467,11 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
             
 
         for wk in schedule_dict.keys():
-            emps_in_schedule_db = execute_SQL("SELECT id FROM {}",[sql.Identifier('{}_{}'.format(user_org,week_ending_date))])
+            # emps_in_schedule_db = execute_SQL("SELECT id FROM {}",[sql.Identifier('{}_{}'.format(user_org,week_ending_date))])
 
             for emp in schedule_dict[wk].keys():
                 emp_obj = Employee.employees[int(emp)]
                 first_name,last_name = emp_obj.first_name.capitalize(),emp_obj.last_name.capitalize()
-                # formatted_emp = emp_obj.first_name.capitalize() + " " + emp_obj.last_name.capitalize()
                 for day in schedule_dict[wk][emp].keys():
                     if schedule_dict[wk][emp][day]:
                         shift_start = format_time(str((min(schedule_dict[wk][emp][day])/2)))
@@ -480,19 +479,13 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
                         schedule_dict[wk][emp][day] = '{}-{}'.format(shift_start,shift_end)
                     else:
                         schedule_dict[wk][emp][day] = 'Off'
-                if (int(emp)) in emps_in_schedule_db:
-                    execute_SQL("UPDATE {} SET (id,first_name,last_name,sunday,monday,tuesday,wednesday,thursday,friday,saturday,total_hours,week_ending_date) = (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) WHERE id = %s",
-                                [sql.Identifier('{}_{}'.format(user_org,week_ending_date))],execute_args = [int(emp),first_name,last_name,
-                                            schedule_dict[wk][emp][0],schedule_dict[wk][emp][1],schedule_dict[wk][emp][2],schedule_dict[wk][emp][3],
-                                            schedule_dict[wk][emp][4],schedule_dict[wk][emp][5],schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp],str(week_ending_date),int(emp)])
-                else:
-                    try:
-                        execute_SQL("INSERT INTO {} VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[sql.Identifier('{}_{}'.format(user_org,week_ending_date))],
-                                execute_args = [int(emp),first_name,last_name,schedule_dict[wk][emp][0],schedule_dict[wk][emp][1],
-                                                schedule_dict[wk][emp][2],schedule_dict[wk][emp][3],schedule_dict[wk][emp][4],schedule_dict[wk][emp][5],
-                                                schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp],str(week_ending_date)])
-                    except:
-                        print("Inserting employee {} into schedule failed".format(emp))                
+                try:
+                    execute_SQL("INSERT INTO {} (id,first_name,last_name,sunday,monday,tuesday,wednesday,thursday,friday,saturday,total_hours,week_ending_date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (id) DO UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, sunday = EXCLUDED.sunday, monday = EXCLUDED.monday, tuesday = EXCLUDED.tuesday, wednesday = EXCLUDED.wednesday, thursday = EXCLUDED.thursday, friday = EXCLUDED.friday, saturday = EXCLUDED.saturday, total_hours = EXCLUDED.total_hours,week_ending_date = EXCLUDED.week_ending_date",[sql.Identifier('{}_{}'.format(user_org,week_ending_date))],
+                            execute_args = [int(emp),first_name,last_name,schedule_dict[wk][emp][0],schedule_dict[wk][emp][1],
+                                            schedule_dict[wk][emp][2],schedule_dict[wk][emp][3],schedule_dict[wk][emp][4],schedule_dict[wk][emp][5],
+                                            schedule_dict[wk][emp][6],weekly_hours_dict[wk][emp],str(week_ending_date)])
+                except:
+                    print("Inserting employee {} into schedule failed".format(emp))                
         
         return solution
             

@@ -54,6 +54,19 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # cur.execute(sql.SQL("CREATE TABLE {}(id int PRIMARY KEY,first_name varchar(255), last_name varchar(255),sunday varchar(255), monday varchar(255), tuesday varchar(255), wednesday varchar(255), thursday varchar(255), friday varchar(255), saturday varchar(255),total_hours varchar(64),week_ending_date varchar(255))").format(sql.Identifier("{}".format('July25Test3_schedule_29_2024'))))
 # cur.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier('{}'.format("July25Test3_schedule_29_2024"))))
 # print(cur.fetchall())
+# cur.execute("""SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('"test_08/24/2024"', 'id')) AS "Current Value", MAX("id") AS "Max Value" FROM "test_08/24/2024";""")
+# cur.execute("""SELECT SETVAL((SELECT PG_GET_SERIAL_SEQUENCE('"test_08/24/2024"','id')), (SELECT (MAX("id") + 1) FROM "test_08/24/2024"),FALSE)""")
+# print(cur.fetchall())
+# cur.execute(sql.SQL("DROP TABLE {}").format(sql.Identifier("")))
+
+
+
+
+table_to_drop = 'admin_users_user_id_seq'
+
+# cur.execute("""SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('"test_08/24/2024"', 'id')) AS "Current Value", MAX("id") AS "Max Value" FROM "test_08/24/2024";""")
+# cur.execute("""SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('"admin_users"', 'user_id')) AS "Current Value", MAX("user_id") AS "Max Value" FROM "admin_users";""")
+print(cur.fetchall())
 conn.commit()
 cur.close()
 conn.close()
