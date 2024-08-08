@@ -41,6 +41,17 @@
     border-color: #ff1100;
 }
 
+.plainLink {
+    color: #E4E6F7 !important;
+    font-size: 18px !important;
+    text-decoration: none;
+}
+
+.nav-link a {
+    color: #E4E6F7 !important;
+    font-size: 18px !important;
+    text-decoration: none;
+}
 /* 
 #4C5DDD
 #1720F5

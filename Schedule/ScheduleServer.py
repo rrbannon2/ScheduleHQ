@@ -333,23 +333,33 @@ def get_schedule():
         user_org = user.get_organization()
         try:
             date = request.args.get("wEndDate")
+            print(date)
         except Exception as error:
             print(error)
-            
+        dates_list = []
         if not date:
+
             today = datetime.date.today()
             date = (today + datetime.timedelta((5-today.weekday()) % 7))
-            date = date.strftime("%m/%d/%Y")
 
+            for i in range(-2,4):
+                dates_list.append((date + datetime.timedelta(7*i)).strftime("%m/%d/%Y"))
+            date = date.strftime("%m/%d/%Y")
+        else:
+            date = datetime.datetime.strptime(date,'%m/%d/%Y')
+            if date.weekday() == 5:
+                for i in range(-2,4):
+                    dates_list.append((date + datetime.timedelta(7*i)).strftime("%m/%d/%Y"))
+                date = date.strftime("%m/%d/%Y")
         try:
             solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_{}'.format(user_org,date))])
             if len(solution) > 0:
-                response_val = {"response":solution}
+                response_val = {"response":solution,"fetchedDate":date,"datesInfo":dates_list}
             else:
-                response_val = {"response":"False","fetchedDate":date}
+                response_val = {"response":"False","fetchedDate":date,"datesInfo":dates_list}
         except Exception as error:
             print(error)
-            response_val = {"response":"False","fetchedDate":date}
+            response_val = {"response":"False","fetchedDate":date,"datesInfo":dates_list}
         new_token = generate_token(user)
         cookie_response = create_cookie_response(new_token,response_val)
         return cookie_response

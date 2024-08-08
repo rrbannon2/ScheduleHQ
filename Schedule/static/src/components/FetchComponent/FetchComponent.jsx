@@ -35,7 +35,7 @@ export default function FetchComponent(inputData, whichMethod, where, searchPara
                 });
         }
         else {
-            if (where == '/login' || where == '/updateBusinessInfo') {
+            if (where == '/login') {
                 fetch(where, {
                     // fetch(where,{
                     method: whichMethod,
