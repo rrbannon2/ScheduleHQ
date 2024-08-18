@@ -55,19 +55,17 @@ const DisplaySchedulePage = () => {
         fetchedInfo && 
         <div className='tableContainer'>
             <div className='containerTitle'>
-                <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
-                    <Col className='align-items-center'>
-                        Schedule For Week Ending {fetchedInfo["fetchedDate"]}
-                    </Col>
-                    <Col className='align-items-center'>
+                <Row className='d-flex align-items-center pb-2 px-2 square border-bottom justify-content-center'>
+                    <div className='d-flex flex-column flex-md-row' style={{ width: 'fit-content' }}>
+                        <Col className='me-md-3 mb-2 mb-md-0' xs="auto">
                             <WeeksDropDown datesInfo={fetchedInfo["datesInfo"]} />        
-                    </Col>
-                    <Col className='d-flex justify-content-end'>
-                        <Button id='addNew' onClick={() => setShowGenSchedModal(true)}>
-                                {/* <Link id='linkAddNew' to="/generateschedule">Generate New Schedule</Link>     */}
+                        </Col>
+                        <Col className='ms-md-3 text-center text-md-end mx-auto' xs="auto">
+                            <Button id='addNew' onClick={() => setShowGenSchedModal(true)}>
                                 Generate New Schedule
-                        </Button>
-                    </Col>
+                            </Button>
+                        </Col>
+                    </div>
                 </Row>
                 {fetchedInfo["response"] === "False" ?  <h6> There is no existing schedule for this week. If you wish to create one, select the Generate Schedule button. Otherwise, select a different week from the drop-down menu.</h6> : <ScheduleExists fetchedInfo={fetchedInfo["response"]} />}
                 {showGenSchedModal && <GenerateScheduleModal show={showGenSchedModal} handleClose={() => setShowGenSchedModal(false)} />}

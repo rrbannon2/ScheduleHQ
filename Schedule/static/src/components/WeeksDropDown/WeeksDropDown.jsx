@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dropdown } from 'react-bootstrap';
+import { Dropdown, NavItem,Row } from 'react-bootstrap';
 import FetchComponent from '../FetchComponent/FetchComponent';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 import { Link } from 'react-router-dom';
@@ -33,16 +33,18 @@ export const WeeksDropDown = ({ datesInfo }) => {
 
 
     return (
+        <div style={{ "display": "flex","flex-direction": "row","justify-content": "center" , "align-items": "center"}} >
+        <Link style={{ "text-decoration": "none","paddingRight":"5px"}} to="/home" state={datesInfo[2] + "-1"}>&lt; </Link>
         <Dropdown>
             
-        <Dropdown.Toggle  id="dropdown-basic">
-            Week Ending {datesInfo[2]}
+        <Dropdown.Toggle  id="dropdown-weeks">
+            Schedule For Week Ending {datesInfo[2]}
         </Dropdown.Toggle>
         <Dropdown.Menu>
         {datesInfo.map((value) => {
                 return (
                     <Dropdown.Item key={value}>
-                        <Link to="/home" state={value}>
+                        <Link style={{ "text-decoration": "none" }} to="/home" state={value}>
                             Week Ending {value}
                         </Link>
 
@@ -50,6 +52,9 @@ export const WeeksDropDown = ({ datesInfo }) => {
                 );
             })}
         </Dropdown.Menu>
-        </Dropdown>
+            </Dropdown>
+            <Link style={{ "text-decoration": "none","paddingLeft":"5px","paddingRight":"20px" }} to ="/home" state={datesInfo[2]+" 1"}> &gt;</Link>
+        </div>
+
     );
 };

@@ -15,7 +15,7 @@
 }
 
 .table.table.table-striped > thead > tr > th {
-    background-color: #ADB3EF;
+    background-color: #4675f6;
     color:#fff;
 }
 
@@ -51,6 +51,10 @@
     color: #E4E6F7 !important;
     font-size: 18px !important;
     text-decoration: none;
+}
+
+.Dropdown {
+    color: #4141f9;
 }
 /* 
 #4C5DDD

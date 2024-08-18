@@ -346,11 +346,37 @@ def get_schedule():
                 dates_list.append((date + datetime.timedelta(7*i)).strftime("%m/%d/%Y"))
             date = date.strftime("%m/%d/%Y")
         else:
-            date = datetime.datetime.strptime(date,'%m/%d/%Y')
-            if date.weekday() == 5:
-                for i in range(-2,4):
-                    dates_list.append((date + datetime.timedelta(7*i)).strftime("%m/%d/%Y"))
-                date = date.strftime("%m/%d/%Y")
+            print(date)
+            if "-1" in date:
+                date = date[:-2]
+                date = datetime.datetime.strptime(date,'%m/%d/%Y')
+                date = date - datetime.timedelta(7)
+                if date.weekday() == 5:
+                    for i in range(-2,4):
+                        dates_list.append((date + datetime.timedelta(7*i)).strftime("%m/%d/%Y"))
+                    date = date.strftime("%m/%d/%Y")
+                else:
+                    date = "Selected date is not a Saturday, please choose a different date"
+
+            elif " 1" in date:
+                print("Plus One Week")
+                date = date[:-2]
+                date = datetime.datetime.strptime(date,'%m/%d/%Y')
+                date = date + datetime.timedelta(7)
+                if date.weekday() == 5:
+                    for i in range(-2,4):
+                        dates_list.append((date + datetime.timedelta(7*i)).strftime("%m/%d/%Y"))
+                    date = date.strftime("%m/%d/%Y")
+                else:
+                    date = "Selected date is not a Saturday, please choose a different date"
+            else:
+                date = datetime.datetime.strptime(date,'%m/%d/%Y')
+                if date.weekday() == 5:
+                    for i in range(-2,4):
+                        dates_list.append((date + datetime.timedelta(7*i)).strftime("%m/%d/%Y"))
+                    date = date.strftime("%m/%d/%Y")
+                else:
+                    date = "Selected date is not a Saturday, please choose a different date"
         try:
             solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_{}'.format(user_org,date))])
             if len(solution) > 0:
