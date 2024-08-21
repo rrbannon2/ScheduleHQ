@@ -8,7 +8,7 @@ cur = conn.cursor()
 
 def load_table_data(table_file_name,table_name):
     with open(table_file_name,'r') as table_file:
-        if 'employees' in table_name or 'extremes' in table_name or 'skills' in table_name :
+        if 'employees' in table_name or 'extremes' in table_name or 'test_skills' in table_name :
             for line in table_file.readlines():
                 line = line.replace("'","").replace('(','').replace(')','').replace('\n','').split(", ")
                 update_table_data(table_name, line)
@@ -43,7 +43,9 @@ def load_table_data(table_file_name,table_name):
         
 
 def update_table_data(table_name,line):
+    print(line)
     values_string = '(' + ','.join(['%s' for i in line]) + ')'
+    print(values_string)
     cur.execute(sql.SQL("INSERT INTO {} VALUES" + values_string).format(sql.Identifier('{}'.format(table_name))),line)
     
 def delete_existing_table(table_name):
