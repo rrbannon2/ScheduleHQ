@@ -39,7 +39,7 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 # cur.execute("CREATE TABLE shifts(shiftName varchar(255), schedule_blocks integer ARRAY[14], importance int, maxHours int)")
 # cur.execute("CREATE TABLE saved_schedule()")
 # cur.execute("DROP TABLE admin_users")
-# cur.execute("CREATE TABLE admin_users(user_id SERIAL,email varchar(255) PRIMARY KEY,salt int ,salted_password varchar(255), organization varchar(255) UNIQUE)")
+cur.execute("CREATE TABLE admin_users(user_id SERIAL,email varchar(255) PRIMARY KEY,salt int ,salted_password varchar(255), organization varchar(255) UNIQUE)")
 
 
 # cur.execute("ALTER TABLE availability RENAME to test_availability")
@@ -62,11 +62,12 @@ zero_val_array = '{0,0,0,0,0,0,0,0,0,0,0,0,0,0}'
 
 
 
-table_to_drop = 'admin_users_user_id_seq'
+# table_to_drop = 'admin_users_user_id_seq'
 
 # cur.execute("""SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('"test_08/24/2024"', 'id')) AS "Current Value", MAX("id") AS "Max Value" FROM "test_08/24/2024";""")
 # cur.execute("""SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('"admin_users"', 'user_id')) AS "Current Value", MAX("user_id") AS "Max Value" FROM "admin_users";""")
-print(cur.fetchall())
+# print(cur.fetchall())
+
 conn.commit()
 cur.close()
 conn.close()
