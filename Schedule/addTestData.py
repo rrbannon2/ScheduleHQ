@@ -67,7 +67,7 @@ cur.execute("CREATE TABLE admin_users(user_id SERIAL,email varchar(255) PRIMARY 
 # cur.execute("""SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('"test_08/24/2024"', 'id')) AS "Current Value", MAX("id") AS "Max Value" FROM "test_08/24/2024";""")
 # cur.execute("""SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('"admin_users"', 'user_id')) AS "Current Value", MAX("user_id") AS "Max Value" FROM "admin_users";""")
 # print(cur.fetchall())
-
+# Test Commit 0
 conn.commit()
 cur.close()
 conn.close()
