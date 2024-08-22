@@ -3,14 +3,14 @@
     margin-left:10%;
     margin-right:10%;
     width:auto;
-    height: 90vh;
+    height: auto;
     
 }
 .containerTitle {
     /* padding: 20px 0; */
     border: 2px solid #fff;
     border-radius: 25px;
-    height: 85vh;
+    height: auto;
     background-color: #fff;
 }
 

@@ -4,7 +4,7 @@ import './BaseEmployeeDataTable.css';
 import FetchComponent from '../FetchComponent/FetchComponent';
 import { DeleteEmployeeModal } from '../DeleteModal/DeleteModal';
 import { EmployeeSkillModal } from '../EmployeeSkillModal/EmployeeSkillModal';
-
+import { Link } from 'react-router-dom';
 
 const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -22,6 +22,11 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
                     <Col className='align-items-center'>
                         {addEmployee ? <h4>Add New Employee</h4> : <h4>Edit Employee</h4>}
+                    </Col>
+                    <Col className='d-flex justify-content-end'>
+                        <Button id='addEmployee' onClick={() =>PrepEmployeeData(addEmployee)}>
+                            {addEmployee ? "Add Employee" : "Update Employee"}
+                        </Button>
                     </Col>
                 </Row>
                 <Table striped hover responsive>
@@ -73,6 +78,13 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                     <Col className='align-items-center'>
                         <h4>Enter Employee Availability Below</h4>
                     </Col>
+                    <Col className='d-flex justify-content-end'>
+                        <Button id='preferences' onClick={() =>PrepEmployeeData(addEmployee)}>
+                            <Link style={{ "text-decoration": "none", "color":"#FFF" }} to='/shiftpreference' state={employeeInfo[0]}>
+                            {addEmployee ? "Add Shift Preferences" : "Update Shift Preferences"}
+                            </Link>
+                        </Button>
+                    </Col>
                 </Row>
                 <Table striped hover responsive>
                     <thead>
@@ -123,11 +135,7 @@ const BaseEmployeeDataTable = ({ addEmployee, employeeInfo }) => {
                     </tbody>
                 </Table>
                 <Row className='d-flex align-items-center pb-3 px-5 square border-bottom'>
-                    <Col className='d-flex justify-content-end'>
-                        <Button id='addEmployee' onClick={() =>PrepEmployeeData(addEmployee)}>
-                            {addEmployee ? "Add Employee" : "Update Employee"}
-                        </Button>
-                    </Col>
+                    
                     {addEmployee ? null :
                         <Col className='d-flex justify-content-end'>
                             <Button id='openEmpSkillsModal' onClick={() => setShowEmpSkillModal(true)}>View or Edit Employee Skills</Button>
