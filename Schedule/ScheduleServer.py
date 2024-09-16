@@ -320,7 +320,7 @@ def write():
         threading.Thread(target=run_clingo_in_bg,args=(user_org,response['seconds'],response['date'])).start()
         new_token = generate_token(user)
         response_val = "Schedule is being generated"
-        cookie_response = create_cookie_response(new_token,response_val)
+        cookie_response = create_cookie_response(new_token,response_val,cookie_lifespan=int(response['seconds'])+60)
         return cookie_response
     else:
         return {'a':'b'},401
@@ -383,7 +383,9 @@ def get_schedule():
         try:
             solution = execute_SQL("SELECT * FROM {}",[sql.Identifier('{}_{}'.format(user_org,date))])
             if len(solution) > 0:
-                response_val = {"response":solution,"fetchedDate":date,"datesInfo":dates_list}
+                with open('Schedule/clingoSolution.txt','r') as file:
+                    weekly_hrs = file.readline()
+                    response_val = {"response":[solution,weekly_hrs],"fetchedDate":date,"datesInfo":dates_list}
             else:
                 response_val = {"response":"False","fetchedDate":date,"datesInfo":dates_list}
         except Exception as error:

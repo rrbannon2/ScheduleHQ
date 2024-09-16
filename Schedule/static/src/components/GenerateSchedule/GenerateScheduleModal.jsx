@@ -4,7 +4,7 @@ import { Link,useNavigate } from 'react-router-dom';
 import FetchComponent from '../FetchComponent/FetchComponent';
 import '../BaseEmployeeDataTable/BaseEmployeeDataTable.css';
 
-const GenerateScheduleModal = ({show,handleClose}) => {
+const GenerateScheduleModal = ({date,show,handleClose}) => {
 
     return (
         <Modal show={show} onClose={handleClose}>
@@ -17,7 +17,7 @@ const GenerateScheduleModal = ({show,handleClose}) => {
                 <Form>
                     <Form.Group controlId="date">
                         <Form.Label>Week Ending Date:</Form.Label>
-                        <Form.Control type="fullDate" placeholder="MM/DD/YYYY" autoFocus />                        
+                        <Form.Control type="fullDate" defaultValue={date} autoFocus />                        
                     </Form.Group>
                     <Form.Group controlId="seconds">
                         <Form.Label>How long are you willing to wait for your schedule to be optimized? (In seconds)</Form.Label>
@@ -27,7 +27,7 @@ const GenerateScheduleModal = ({show,handleClose}) => {
             </Modal.Body>
             <Modal.Footer>
                 <Button onClick={() => SubmitData(handleClose)}>Generate Schedule Now</Button>
-                <Button onClick={handleClose}>Cancel</Button>
+                <Button style={{"background-color":"#707070","borderColor":"#606060"}} onClick={handleClose}>Cancel</Button>
             </Modal.Footer>
         </Modal>
     );

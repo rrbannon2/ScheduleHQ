@@ -50,7 +50,7 @@ const DisplaySchedulePage = () => {
         fetchData();
 
     }, [useLocation().state]);
-    console.log(fetchedInfo);
+    // console.log(fetchedInfo);
     return (
         fetchedInfo && 
         <div className='tableContainer'>
@@ -68,7 +68,7 @@ const DisplaySchedulePage = () => {
                     </div>
                 </Row>
                 {fetchedInfo["response"] === "False" ?  <h6> There is no existing schedule for this week. If you wish to create one, select the Generate Schedule button. Otherwise, select a different week from the drop-down menu.</h6> : <ScheduleExists fetchedInfo={fetchedInfo["response"]} />}
-                {showGenSchedModal && <GenerateScheduleModal show={showGenSchedModal} handleClose={() => setShowGenSchedModal(false)} />}
+                {showGenSchedModal && <GenerateScheduleModal date={fetchedInfo["datesInfo"][2]} show={showGenSchedModal} handleClose={() => setShowGenSchedModal(false)} />}
             </div>
         </div>
         

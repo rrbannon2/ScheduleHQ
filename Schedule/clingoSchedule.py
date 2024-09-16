@@ -299,7 +299,7 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
 
     max_total_weekly_hours *= 2
     print(max_total_weekly_hours)
-    # max_total_weekly_hours = 438
+    max_total_weekly_hours = 406
 
 
     load_employees(conn)
@@ -325,7 +325,7 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
         clingo_code += '1{total_weekly_hrs('+ str_i + ',X)} :- X = #count{TOD,D,EID : week' + str_i + '(assign(TOD,D,' + str_i + ',EID)), not meal_break(TOD,D,' + str_i + ',EID)}.'
         clingo_code += '1{days_count(EID,'+ str_i + ',X)} :- X = #count{D : assign(TOD,D,'+ str_i + ',EID)}, employee(EID,_,_).  '
         clingo_code += ':~ total_weekly_hrs('+ str_i + ',Y),Y > {}, Value = Y - {}, Weight = Value * {}.[Weight] '.format(max_total_weekly_hours,
-                                                                        max_total_weekly_hours,total_weekly_hours_weight)
+                                                                        max_total_weekly_hours,250)
         # clingo_code += ':- total_weekly_hrs('+ str_i + ',Y), Y > {}.'.format(425)
         
 
@@ -378,9 +378,18 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
 
     meal_breaks_not_allowed_close_to_shift_start = ':- meal_break(TOD2,D,W,EID), not assign(TOD,D,W,EID), TOD2 = TOD + 3.'
     meal_breaks_not_allowed_close_to_shift_end = ':- meal_break(TOD,D,W,EID), not assign(TOD2,D,W,EID), TOD2 = TOD + 3.'
+    
     clingo_code += meal_breaks_not_allowed_close_to_shift_start
     clingo_code += meal_breaks_not_allowed_close_to_shift_end
-
+    clingo_code += ':-meal_break(TOD2,D,W,EID), not assign(TOD,D,W,EID), TOD2 = TOD + 1.'
+    clingo_code += ':-meal_break(TOD2,D,W,EID), not assign(TOD,D,W,EID), TOD2 = TOD + 2.'
+    clingo_code += ':-meal_break(TOD,D,W,EID), not assign(TOD2,D,W,EID), TOD2 = TOD + 1.'
+    clingo_code += ':-meal_break(TOD,D,W,EID), not assign(TOD2,D,W,EID), TOD2 = TOD + 2.'
+    clingo_code += ':- assign(44,Day,W,EID), assign(16,Day2,W,EID), Day2 = Day + 1.'
+    clingo_code += ':- assign(44,Day,W,EID), assign(17,Day2,W,EID), Day2 = Day + 1.'
+    clingo_code += ':- assign(44,Day,W,EID), assign(18,Day2,W,EID), Day2 = Day + 1.'
+    clingo_code += ':- assign(43,Day,W,EID), assign(16,Day2,W,EID), Day2 = Day + 1.'
+    clingo_code += ':- assign(43,Day,W,EID), assign(17,Day2,W,EID), Day2 = Day + 1.'
     if overtime_allowed == False:
         clingo_code += ':- hours_count(EID,W,X), X>80, not EID = {}.'.format(store_manager_name)
     else:
@@ -389,9 +398,12 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
     clingo_code+="""
     {assign(0,D,W,EID) : employee(EID,1,_)} = 1 :- time(0,D,W).
 
-    %Below rule does not prevent being scheduled Wk 0 Day 0 off, Wk 0 Day 6 off, Wk1 Day5 off, Wk 1 Day 6 off.
-    :~ assign(_,D,W,EID), not assign(_,D2,W,EID), assign(_,D3,W,EID),days_count(EID,W,X), X = 5, employee(EID,_,_), D2 = D + 1, D3 = D2 + 1, Weight = 70.[Weight]
-    :- assign(43,Day,W,EID), assign(8,Day2,W,EID), Day2 = Day + 1.
+ 
+    :~ assign(_,D,W,EID), not assign(_,D2,W,EID), assign(_,D3,W,EID),days_count(EID,W,X), X = 5, employee(EID,_,_), D2 = D + 1, D3 = D2 + 1, Weight = 30.[Weight]
+
+    
+
+
 
     :~ assign(TOD,Day,W,EID), shift_preference(TOD,Day,W,EID,X), Weight = 0 - X.[Weight]
     :- assign(TOD,Day,W,EID), shift_preference(TOD,Day,W,EID,-20).
@@ -448,22 +460,28 @@ def run_clingo(user_org,time_limit,week_ending_date, clingon_code = '', weeks_to
         solution = solution.replace('(',',')
         solution = solution.replace(')','')
         solution = solution.split(' ')
+        with open('Schedule/clingoSolution.txt','w') as file:
 
-        for block in solution:
-            if 'assign' in block:
-                block = block.split(',')
-                try:
-                    schedule_dict[int(block[3])][block[-1]][int(block[2])%7].append(int(block[1]))
-                except:
+            for block in solution:
+                if 'assign' in block:
+                    block = block.split(',')
+                    try:
+                        schedule_dict[int(block[3])][block[-1]][int(block[2])%7].append(int(block[1]))
+                    except:
+                        continue
+                elif 'total_weekly' in block:
+                    try:
+                        file.write(block)
+                    except:
+
+                        continue
+                elif 'hours' in block:
+                    block = block.split(',')
+                    if len(block) == 4:
+                        weekly_hours_dict[int(block[2])][block[1]] = int(block[-1])/2 
                     continue
-            elif 'hours' in block:
-                block = block.split(',')
-                if len(block) == 4:
-                    weekly_hours_dict[int(block[2])][block[1]] = int(block[-1])/2 
-                continue
-            else:
-
-                continue
+                else:
+                    continue
             
 
         for wk in schedule_dict.keys():

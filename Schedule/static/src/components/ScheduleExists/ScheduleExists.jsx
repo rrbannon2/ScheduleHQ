@@ -20,7 +20,7 @@ const ScheduleExists = ({ fetchedInfo }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {fetchedInfo.map((value) => {
+                        {fetchedInfo[0].map((value) => {
                             var splitVal = value;
                         
                             return (
